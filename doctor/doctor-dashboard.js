@@ -24,11 +24,34 @@ themeSwitch.addEventListener('change', function() {
     }
 });
 
-// Sidebar menu active state with enhanced animations
+// Sidebar menu navigation
 const sidebarMenuItems = document.querySelectorAll('.sidebar-menu li');
 
 sidebarMenuItems.forEach(item => {
     item.addEventListener('click', function() {
+        // Get the target page from data-page attribute
+        const targetPage = this.getAttribute('data-page');
+
+        if (targetPage) {
+            // Navigate to the corresponding page
+            switch (targetPage) {
+                case 'dashboard':
+                    window.location.href = 'doctor.html';
+                    break;
+                case 'availability':
+                    window.location.href = 'doctor-availability.html';
+                    break;
+                case 'history':
+                    window.location.href = 'doctor-history.html';
+                    break;
+                case 'settings':
+                    window.location.href = 'doctor-settings.html';
+                    break;
+                default:
+                    console.warn('Unknown page:', targetPage);
+            }
+        }
+
         // Remove active class from all items with animation
         sidebarMenuItems.forEach(i => {
             i.classList.remove('active');
@@ -143,16 +166,45 @@ function setupNavigation() {
     });
 }
 
+// Set active sidebar item based on current page
+function setActiveSidebarItem() {
+    const currentPath = window.location.pathname;
+    let activePage = 'dashboard'; // default
+
+    if (currentPath.includes('doctor-availability.html')) {
+        activePage = 'availability';
+    } else if (currentPath.includes('doctor-history.html')) {
+        activePage = 'history';
+    } else if (currentPath.includes('doctor-settings.html')) {
+        activePage = 'settings';
+    }
+
+    // Remove active class from all items
+    sidebarMenuItems.forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Add active class to current page item
+    const activeItem = document.querySelector(`.sidebar-menu li[data-page="${activePage}"]`);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+}
+
 // Add staggered animation to sidebar elements on load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Doctor dashboard DOMContentLoaded');
 
-    // Only run dashboard-specific code on the main dashboard page
-    if (!window.location.pathname.includes('doctor-availability.html')) {
-        loadAvatar();
-        updateSidebar(); // Ensure sidebar is updated
+    // Set active sidebar item
+    setActiveSidebarItem();
 
-        // Handle availability buttons
+    // Run common code on all doctor pages
+    loadAvatar();
+    updateSidebar(); // Ensure sidebar is updated
+
+    // Only run dashboard-specific code on the main dashboard page
+    if (window.location.pathname.includes('doctor.html') && !window.location.pathname.includes('doctor-availability.html') && !window.location.pathname.includes('doctor-history.html') && !window.location.pathname.includes('doctor-settings.html')) {
+        // Handle availability buttons on main dashboard
         const scheduleButtons = document.querySelectorAll('.btn-primary');
         scheduleButtons.forEach(button => {
             if (button.textContent.includes('View Patient Records') || button.textContent.includes('Manage Schedule')) {
@@ -162,36 +214,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
-
-    // Animate footer elements
-    const footerElements = document.querySelectorAll('.sidebar-footer > *');
-    footerElements.forEach((element, index) => {
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            element.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }, 800 + index * 100);
-    });
-
-    // Initialize charts
-    initializeCharts();
-
-    // Load avatar from localStorage
-    loadAvatar();
-    updateSidebar(); // Ensure sidebar is updated
-
-    // Handle availability buttons
-    const scheduleButtons = document.querySelectorAll('.btn-primary');
-    scheduleButtons.forEach(button => {
-        if (button.textContent.includes('View Patient Records') || button.textContent.includes('Manage Schedule')) {
-            button.addEventListener('click', function() {
-                window.location.href = 'doctor-availability.html';
-            });
-        }
-    });
 });
 
 // Avatar management

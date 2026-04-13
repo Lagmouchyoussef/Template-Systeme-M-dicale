@@ -1,39 +1,55 @@
 // Availability Page JavaScript
 
+// Only load on availability pages
+if (!window.location.href.includes('doctor-availability.html') && !window.location.href.includes('debug-availability.html')) {
+    console.log('Availability script skipped - not on availability page');
+} else {
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Only run on availability page
+    if (!window.location.pathname.includes('doctor-availability.html')) {
+        return;
+    }
+
     try {
         console.log('Availability page loading...');
 
-        // Load saved availability
-        loadAvailability();
+        // Load saved availability (with error handling)
+        if (typeof loadAvailability === 'function') {
+            loadAvailability();
+        }
 
         // Handle save availability button
         const saveButton = document.getElementById('save-availability-btn');
-        if (saveButton) {
+        if (saveButton && typeof saveAvailability === 'function') {
             saveButton.addEventListener('click', saveAvailability);
-            console.log('Save button listener attached');
-        } else {
-            console.warn('Save button not found');
         }
 
         // Handle view schedule button
         const viewButton = document.getElementById('view-schedule-btn');
-        if (viewButton) {
+        if (viewButton && typeof showScheduleView === 'function') {
             viewButton.addEventListener('click', showScheduleView);
-            console.log('View schedule button listener attached');
-        } else {
-            console.warn('View schedule button not found');
         }
 
-        // Initialize invitation functionality
-        initializeInvitationSystem();
+        // Initialize invitation functionality (only if function exists)
+        // Delay initialization to ensure all functions are loaded
+        setTimeout(() => {
+            if (typeof initializeInvitationSystem === 'function') {
+                initializeInvitationSystem();
+            }
+        }, 100);
 
         console.log('Availability page loaded successfully');
     } catch (error) {
         console.error('Error loading availability page:', error);
-        alert('An error occurred while loading the page. Please refresh and try again.');
+        // Don't show alert for minor errors, just log them
+        if (error.message && !error.message.includes('undefined')) {
+            alert('Page loaded with some errors. Check console for details.');
+        }
     }
 });
+
+} // End of page check condition
 
 function saveAvailability() {
     // Check if required elements exist
@@ -78,38 +94,61 @@ function saveAvailability() {
 }
 
 function loadAvailability() {
-    const saved = localStorage.getItem('doctorAvailability');
-    if (saved) {
-        const availability = JSON.parse(saved);
+    try {
+        const saved = localStorage.getItem('doctorAvailability');
+        if (saved) {
+            const availability = JSON.parse(saved);
 
-        // Check the appropriate days
-        availability.days.forEach(day => {
-            const checkbox = document.querySelector(`.day-card input[value="${day}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
+            // Check if availability has required properties
+            if (!availability.days || !availability.startTime || !availability.endTime) {
+                console.warn('Invalid availability data in localStorage');
+                return;
+            }
 
-        // Set the times
-        document.getElementById('start-time').value = availability.startTime;
-        document.getElementById('end-time').value = availability.endTime;
+            // Check the appropriate days
+            availability.days.forEach(day => {
+                const checkbox = document.querySelector(`.day-card input[value="${day}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
 
-        displayCurrentAvailability(availability);
+            // Set the times
+            const startTimeEl = document.getElementById('start-time');
+            const endTimeEl = document.getElementById('end-time');
+            if (startTimeEl) startTimeEl.value = availability.startTime;
+            if (endTimeEl) endTimeEl.value = availability.endTime;
+
+            displayCurrentAvailability(availability);
+        }
+    } catch (error) {
+        console.error('Error loading availability:', error);
+        // Clear corrupted data
+        localStorage.removeItem('doctorAvailability');
     }
 }
 
 function displayCurrentAvailability(availability) {
     const displayDiv = document.querySelector('.availability-display');
 
-    const availabilityHtml = `
-        <div class="current-schedule">
-            <h4>Your Weekly Availability</h4>
-            <div class="schedule-details">
-                <p><strong>Days:</strong> ${availability.days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}</p>
-                <p><strong>Time:</strong> ${availability.startTime} - ${availability.endTime}</p>
-            </div>
-        </div>
-    `;
+    if (!displayDiv) {
+        console.warn('Availability display element not found');
+        return;
+    }
 
-    displayDiv.innerHTML = availabilityHtml;
+    try {
+        const availabilityHtml = `
+            <div class="current-schedule">
+                <h4>Your Weekly Availability</h4>
+                <div class="schedule-details">
+                    <p><strong>Days:</strong> ${availability.days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}</p>
+                    <p><strong>Time:</strong> ${availability.startTime} - ${availability.endTime}</p>
+                </div>
+            </div>
+        `;
+
+        displayDiv.innerHTML = availabilityHtml;
+    } catch (error) {
+        console.error('Error displaying availability:', error);
+    }
 }
 
 function showScheduleView() {
@@ -146,13 +185,17 @@ function showScheduleView() {
         </div>
     `;
 
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    } catch (error) {
+        console.error('Error showing schedule view:', error);
+        alert('An error occurred while displaying the schedule. Please try again.');
+    }
 }
 
 function generateScheduleHtml(availability) {
@@ -211,47 +254,57 @@ function generateScheduleHtml(availability) {
     return scheduleHtml;
 }
 
-// Make functions globally available
-window.editAvailability = function() {
-    // Close modal and scroll to availability section
-    const modal = document.querySelector('.modal');
-    if (modal) modal.remove();
-    const availabilitySection = document.querySelector('.availability-section');
-    if (availabilitySection) {
-        availabilitySection.scrollIntoView({ behavior: 'smooth' });
+// Create a namespace for availability functions to avoid conflicts
+window.AvailabilityManager = {
+    editAvailability: function() {
+        try {
+            // Close modal and scroll to availability section
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            const availabilitySection = document.querySelector('.availability-section');
+            if (availabilitySection) {
+                availabilitySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (error) {
+            console.error('Error in editAvailability:', error);
+        }
+    },
+
+    exportSchedule: function() {
+        try {
+            // Simple export functionality
+            const saved = localStorage.getItem('doctorAvailability');
+            if (!saved) {
+                alert('No availability data to export.');
+                return;
+            }
+
+            const availability = JSON.parse(saved);
+            const exportData = {
+                schedule: availability,
+                exportedAt: new Date().toISOString(),
+                doctor: 'Current Doctor' // In real app, get from user data
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = 'doctor_schedule.json';
+            link.click();
+
+            alert('Schedule exported successfully!');
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('Error exporting schedule. Please try again.');
+        }
     }
 };
 
-window.exportSchedule = function() {
-    // Simple export functionality
-    const saved = localStorage.getItem('doctorAvailability');
-    if (!saved) {
-        alert('No availability data to export.');
-        return;
-    }
-
-    try {
-        const availability = JSON.parse(saved);
-        const exportData = {
-            schedule: availability,
-            exportedAt: new Date().toISOString(),
-            doctor: 'Current Doctor' // In real app, get from user data
-        };
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
-
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(dataBlob);
-        link.download = 'doctor_schedule.json';
-        link.click();
-
-        alert('Schedule exported successfully!');
-    } catch (error) {
-        console.error('Export error:', error);
-        alert('Error exporting schedule. Please try again.');
-    }
-};
+// For backward compatibility, also attach to window
+window.editAvailability = window.AvailabilityManager.editAvailability;
+window.exportSchedule = window.AvailabilityManager.exportSchedule;
 
 // Invitation System Functions
 function initializeInvitationSystem() {
