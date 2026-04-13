@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="patient-dashboard.css">
-    <title>MediSync - Patient Dashboard</title>
+    <link rel="stylesheet" href="doctor-dashboard.css">
+    <title>MediSync - Doctor Dashboard</title>
 </head>
 <body>
     <div class="dashboard">
@@ -21,9 +21,9 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </li>
-                <li class="ripple tooltip nav-item" data-tooltip="Manage Appointments" data-page="appointments">
+                <li class="ripple tooltip nav-item" data-tooltip="Set Availability" data-page="availability">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Appointments</span>
+                    <span>Availability</span>
                 </li>
                 <li class="ripple tooltip nav-item" data-tooltip="Appointment History" data-page="history">
                     <i class="fas fa-history"></i>
@@ -35,14 +35,14 @@
                 </li>
             </ul>
 
-            <!-- Patient Profile Section -->
+            <!-- Doctor Profile Section -->
             <div class="patient-profile">
                 <div class="avatar-img">
                     <span></span>
                 </div>
                 <div class="patient-info">
                     <h4></h4>
-                    <p>Patient</p>
+                    <p>Doctor</p>
                 </div>
             </div>
 
@@ -65,7 +65,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <h1>Patient Dashboard</h1>
+                <h1>Doctor Dashboard</h1>
                 <div class="header-actions">
                     <div class="notifications">
                         <i class="fas fa-bell"></i>
@@ -77,119 +77,95 @@
                 <!-- Welcome Section -->
                 <section class="welcome-card">
                     <h2>Welcome to MediSync</h2>
-                    <p>Manage your healthcare appointments and medical records.</p>
-                    <button class="btn-primary">Schedule New Appointment</button>
-                </section>
-
-                <!-- Appointment Invitations -->
-                <section class="invitations-section">
-                    <h2><i class="fas fa-envelope"></i> Appointment Invitations</h2>
-                    <div class="invitations-container">
-                        <div class="no-invitations-message">
-                            <i class="fas fa-inbox"></i>
-                            <h3>No pending invitations</h3>
-                            <p>You'll receive appointment invitations from doctors here</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Email Notifications -->
-                <section class="emails-section">
-                    <h2><i class="fas fa-mailbox"></i> Recent Emails</h2>
-                    <div class="emails-container">
-                        <div class="no-emails-message">
-                            <i class="fas fa-envelope-open"></i>
-                            <h3>No recent emails</h3>
-                            <p>Email notifications will appear here</p>
-                        </div>
-                    </div>
+                    <p>Manage your patients and appointments effectively.</p>
+                    <button class="btn-primary">View Patient Records</button>
                 </section>
 
                 <!-- Quick Stats -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon appointments">
-                            <i class="fas fa-calendar-check"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
                             <h3>0</h3>
-                            <p>Total Appointments</p>
+                            <p>Total Patients</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon doctors">
-                            <i class="fas fa-user-md"></i>
+                            <i class="fas fa-calendar-day"></i>
                         </div>
                         <div class="stat-info">
                             <h3>0</h3>
-                            <p>Doctors Visited</p>
+                            <p>Today's Appointments</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon prescriptions">
-                            <i class="fas fa-prescription"></i>
+                            <i class="fas fa-stethoscope"></i>
                         </div>
                         <div class="stat-info">
                             <h3>0</h3>
-                            <p>Active Prescriptions</p>
+                            <p>Completed Consultations</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon health">
-                            <i class="fas fa-heartbeat"></i>
+                            <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-info">
                             <h3>0%</h3>
-                            <p>Health Score</p>
+                            <p>Average Patient Satisfaction</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Health Charts Section -->
                 <section class="charts-section">
-                    <h2>Health Analytics</h2>
+                    <h2>Patient Analytics</h2>
                     <div class="charts-grid">
-                        <!-- Blood Pressure Chart -->
+                        <!-- Patient Health Overview -->
                         <div class="chart-card">
                             <div class="chart-header">
-                                <h3><i class="fas fa-heartbeat"></i> Blood Pressure Trend</h3>
+                                <h3><i class="fas fa-heartbeat"></i> Patient Health Overview</h3>
                                 <span class="chart-period">Last 6 months</span>
                             </div>
                             <div class="chart-container">
-                                <canvas id="bloodPressureChart"></canvas>
+                                <canvas id="patientHealthChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- Weight Chart -->
+                        <!-- Appointment Trends -->
                         <div class="chart-card">
                             <div class="chart-header">
-                                <h3><i class="fas fa-weight"></i> Weight Tracking</h3>
+                                <h3><i class="fas fa-calendar-alt"></i> Appointment Trends</h3>
                                 <span class="chart-period">Last 6 months</span>
                             </div>
                             <div class="chart-container">
-                                <canvas id="weightChart"></canvas>
+                                <canvas id="appointmentTrendsChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- Appointments by Month -->
+                        <!-- Specialty Distribution -->
                         <div class="chart-card">
                             <div class="chart-header">
-                                <h3><i class="fas fa-calendar-alt"></i> Appointments Overview</h3>
+                                <h3><i class="fas fa-chart-pie"></i> Patients by Specialty</h3>
                                 <span class="chart-period">This year</span>
                             </div>
                             <div class="chart-container">
-                                <canvas id="appointmentsChart"></canvas>
+                                <canvas id="specialtyChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- Health Metrics Dashboard -->
+                        <!-- Doctor Performance Metrics -->
                         <div class="chart-card">
                             <div class="chart-header">
-                                <h3><i class="fas fa-chart-pie"></i> Health Metrics</h3>
+                                <h3><i class="fas fa-star"></i> Performance Metrics</h3>
                                 <span class="chart-period">Current status</span>
                             </div>
                             <div class="chart-container">
-                                <canvas id="healthMetricsChart"></canvas>
+                                <canvas id="performanceChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -197,11 +173,11 @@
 
                 <!-- Appointments Statistics -->
                 <section class="stats-section">
-                    <h2>Appointment Statistics</h2>
+                    <h2>Practice Statistics</h2>
                     <div class="stats-overview">
                         <div class="stat-box">
                             <div class="stat-value">0</div>
-                            <div class="stat-label">Total Appointments</div>
+                            <div class="stat-label">Total Patients</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
@@ -209,7 +185,7 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-value">0</div>
-                            <div class="stat-label">Completed</div>
+                            <div class="stat-label">Active Patients</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
@@ -217,7 +193,7 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-value">0</div>
-                            <div class="stat-label">Upcoming</div>
+                            <div class="stat-label">Today's Appointments</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
@@ -225,7 +201,7 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-value">0</div>
-                            <div class="stat-label">Cancelled</div>
+                            <div class="stat-label">Pending Reviews</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
@@ -235,7 +211,7 @@
 
                     <!-- Specialty Breakdown -->
                     <div class="specialty-breakdown">
-                        <h3>Appointments by Specialty</h3>
+                        <h3>Patients by Specialty</h3>
                         <div class="specialty-grid">
                             <div class="specialty-item">
                                 <div class="specialty-icon cardiology">
@@ -243,7 +219,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Cardiology</span>
-                                    <span class="specialty-count">0 appointments</span>
+                                    <span class="specialty-count">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage">0%</div>
                             </div>
@@ -253,7 +229,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Dentistry</span>
-                                    <span class="specialty-count">0 appointments</span>
+                                    <span class="specialty-count">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage">0%</div>
                             </div>
@@ -263,7 +239,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Neurology</span>
-                                    <span class="specialty-count">0 appointments</span>
+                                    <span class="specialty-count">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage">0%</div>
                             </div>
@@ -273,7 +249,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Ophthalmology</span>
-                                    <span class="specialty-count">0 appointments</span>
+                                    <span class="specialty-count">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage">0%</div>
                             </div>
@@ -283,7 +259,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">General Medicine</span>
-                                    <span class="specialty-count">0 appointments</span>
+                                    <span class="specialty-count">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage">0%</div>
                             </div>
@@ -293,12 +269,12 @@
 
                 <!-- Upcoming Appointments -->
                 <section class="appointments-section">
-                    <h2>Upcoming Appointments</h2>
+                    <h2>Today's Appointments</h2>
                     <div class="no-data-message">
                         <i class="fas fa-calendar-plus"></i>
-                        <h3>No upcoming appointments</h3>
-                        <p>Schedule your first appointment to get started</p>
-                        <button class="btn-primary">Schedule Appointment</button>
+                        <h3>No appointments today</h3>
+                        <p>Your schedule will appear here when appointments are booked</p>
+                        <button class="btn-primary">Manage Schedule</button>
                     </div>
                 </section>
 
@@ -308,13 +284,13 @@
                     <div class="no-data-message">
                         <i class="fas fa-history"></i>
                         <h3>No recent activity</h3>
-                        <p>Your medical activity will appear here once you start using the system</p>
+                        <p>Your medical activities will appear here once you start consultations</p>
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
-    <script src="patient-dashboard.js"></script>
+    <script src="doctor-dashboard.js"></script>
 </body>
 </html>

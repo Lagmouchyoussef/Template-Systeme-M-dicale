@@ -366,6 +366,24 @@ class SettingsManager {
         if (strengthText) strengthText.textContent = 'Password strength';
     }
 
+    handlePasswordChange() {
+        // Simulate password change
+        alertModal.show('Password changed successfully!', 'Success', 'success');
+        this.closePasswordModal();
+    }
+
+    closePasswordModal() {
+        const modal = document.getElementById('password-modal');
+        const passwordForm = document.getElementById('password-form');
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthText = document.getElementById('strength-text');
+
+        if (modal) modal.style.display = 'none';
+        if (passwordForm) passwordForm.reset();
+        if (strengthBar) strengthBar.style.width = '0%';
+        if (strengthText) strengthText.textContent = 'Password strength';
+    }
+
     async saveAllSettings() {
         const saveBtn = document.getElementById('save-all-btn');
         const originalText = saveBtn.innerHTML;
@@ -1273,29 +1291,6 @@ Version: ${data.version}
         });
 
         modal.style.display = 'block';
-    }
-
-    openPasswordModal() {
-        const modal = document.getElementById('password-modal');
-        if (modal) modal.style.display = 'block';
-    }
-
-    closePasswordModal() {
-        const modal = document.getElementById('password-modal');
-        const passwordForm = document.getElementById('password-form');
-        const strengthBar = document.getElementById('strength-bar');
-        const strengthText = document.getElementById('strength-text');
-
-        if (modal) modal.style.display = 'none';
-        if (passwordForm) passwordForm.reset();
-        if (strengthBar) strengthBar.style.width = '0%';
-        if (strengthText) strengthText.textContent = 'Password strength';
-    }
-
-    handlePasswordChange() {
-        // Simulate password change
-        alertModal.show('Password changed successfully!', 'Success', 'success');
-        this.closePasswordModal();
     }
 }
 
