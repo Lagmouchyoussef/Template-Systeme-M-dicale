@@ -158,14 +158,14 @@ function addToDirectory(account) {
   }
 }
 
-// Handle form submissions
+// ── Inscription (Sign Up) ───────────────────────────────────────────────────
 document.querySelector('.sign-up form').addEventListener('submit', (e) => {
   e.preventDefault();
-  const firstName = document.querySelector('input[placeholder="First Name"]').value.trim();
-  const lastName = document.querySelector('input[placeholder="Last Name"]').value.trim();
-  const email = document.querySelector('input[placeholder="Email"]').value.trim().toLowerCase();
-  const password = document.querySelector('input[placeholder="Password"]').value;
-  const role = document.querySelector('input[name="role"]:checked')?.value;
+  const firstName = document.getElementById('signup-firstname').value.trim();
+  const lastName  = document.getElementById('signup-lastname').value.trim();
+  const email     = document.getElementById('signup-email').value.trim().toLowerCase();
+  const password  = document.getElementById('signup-password').value;
+  const role      = document.querySelector('input[name="role"]:checked')?.value;
 
   if (!firstName || !lastName || !email || !password || !role) {
     showStyledMessage('Please fill in all fields.', 'warning');
@@ -195,10 +195,11 @@ document.querySelector('.sign-up form').addEventListener('submit', (e) => {
   }, 600);
 });
 
+// ── Connexion (Sign In) ──────────────────────────────────────────────────────
 document.querySelector('.sign-in form').addEventListener('submit', (e) => {
   e.preventDefault();
-  const email = document.querySelector('.sign-in input[placeholder="Email"]').value.trim().toLowerCase();
-  const password = document.querySelector('.sign-in input[placeholder="Password"]').value;
+  const email    = document.getElementById('signin-email').value.trim().toLowerCase();
+  const password = document.getElementById('signin-password').value;
 
   if (!email || !password) {
     showStyledMessage('Please enter email and password.', 'warning');

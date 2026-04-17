@@ -13,69 +13,103 @@
   </head>
 
   <body>
-    <div class="container active" id="container">
+    <!-- Conteneur principal (Sign In affiché par défaut, pas de classe 'active') -->
+
+    <div class="container" id="container">
+
+      <!-- ── Formulaire Sign Up ─────────────────────── -->
       <div class="form-container sign-up">
-        <form>
+        <form id="signup-form">
           <img src="Logo_Medisync.png" alt="MediSync Logo" class="logo-responsive">
           <h1>Create Account</h1>
+
+          <!-- Icônes sociales (une seule occurrence) -->
           <div class="social-icons">
-            <a href="#" class="icon"
-              ><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google"></a>
-            <a href="#" class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAV1BMVEVHcEwHZv/O1v8HaP8Haf8IZ/8IaP8IZv8IZ/8IaP/r7/8IZ/8IZ/8AW/////+fsf8HZv////8AYP8AWf8AZP+Vqf/V3P8IZ/9wlP9jiv+tvP+Lpf82c/8XNRKaAAAAEHRSTlMAM/2GGN1h9exC+8LBwcGFy8UXywAAAPNJREFUKJFlk+kSgyAMhDnUQe2BQQtU3/85yxEi0P3l+E1gkyyMFXG5KmvVKjnrNSlNUlODhlE3GoebzVZ3sjMx+reDiYLwiXSgOrCHWJaPcIHafDLdB27L+sbSMfkk5rca6uiZejBLC1XoncxcSM7T7+kPZ7K78TIAmWnJHgTPyD7mbna9r4Sjh4phk7sxqVLEIeCxFiG1mISGLB67+xrmUqvQENRwMcWQ/D9WmNIKxwk4/01uvXMXGuJlfGFZR66iGahq8H99TtXKejjWy+4gLhtj0sG5CVgD74DlaNawjmYKNRxlAF2o03N4v0JOxLN6Dj8GhSiE70/PKAAAAABJRU5ErkJggg==" alt="Facebook"></a>
-            <a href="#" class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDUlEQVR4AWP4////gOLB44D6nTcsGIo33QHi/zTGd0B2YTiAPpYjHIHNAf/piQk6wGPW8f/rLz8HYRCbXg5AWI4GQGJ0cwDY12gAJDbcHUA4CkZAIqQUK7Ts/m/SfxBMs5RupswBaACr+P47b/5zlG/5DyzZ/r/+8hNF7vuvP//nn3r0X6JhJ+0ccPrR+/+H7735jw9cf/n5v0D1Nuo5gBxQve06zR0AjoL7b7/+//zjN4bc+ScfaOeA33///k9Yfg4mDw7u/Xdeo6uhnQP6D93FMNxlxjF0ZbRzgMXEQ9iyI90cALIMJoccDXRzAK6CZog6YNQBow6gIx54Bwx4x2RAu2bAysoEZu9o7xgAQrvkxt3WZi0AAAAASUVORK5CYII=" alt="GitHub"></a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google">
+            </a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAV1BMVEVHcEwHZv/O1v8HaP8Haf8IZ/8IaP8IZv8IZ/8IaP/r7/8IZ/8IZ/8AW/////+fsf8HZv////8AYP8AWf8AZP+Vqf/V3P8IZ/9wlP9jiv+tvP+Lpf82c/8XNRKaAAAAEHRSTlMAM/2GGN1h9exC+8LBwcGFy8UXywAAAPNJREFUKJFlk+kSgyAMhDnUQe2BQQtU3/85yxEi0P3l+E1gkyyMFXG5KmvVKjnrNSlNUlODhlE3GoebzVZ3sjMx+reDiYLwiXSgOrCHWJaPcIHafDLdB27L+sbSMfkk5rca6uiZejBLC1XoncxcSM7T7+kPZ7K78TIAmWnJHgTPyD7mbna9r4Sjh4phk7sxqVLEIeCxFiG1mISGLB67+xrmUqvQENRwMcWQ/D9WmNIKxwk4/01uvXMXGuJlfGFZR66iGahq8H99TtXKejjWy+4gLhtj0sG5CVgD74DlaNawjmYKNRxlAF2o03N4v0JOxLN6Dj8GhSiE70/PKAAAAABJRU5ErkJggg==" alt="Facebook">
+            </a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDUlEQVR4AWP4////gOLB44D6nTcsGIo33QHi/zTGd0B2YTiAPpYjHIHNAf/piQk6wGPW8f/rLz8HYRCbXg5AWI4GQGJ0cwDY12gAJDbcHUA4CkZAIqQUK7Ts/m/SfxBMs5RupswBaACr+P47b/5zlG/5DyzZ/r/+8hNF7vuvP//nn3r0X6JhJ+0ccPrR+/+H7735jw9cf/n5v0D1Nuo5gBxQve06zR0AjoL7b7/+//zjN4bc+ScfaOeA33///k9Yfg4mDw7u/Xdeo6uhnQP6D93FMNxlxjF0ZbRzgMXEQ9iyI90cALIMJoccDXRzAK6CZog6YNQBow6gIx54Bwx4x2RAu2bAysoEZu9o7xgAQrvkxt3WZi0AAAAASUVORK5CYII=" alt="GitHub">
+            </a>
           </div>
+
           <span>or use your email for registration</span>
+
+          <!-- Prénom / Nom côte à côte -->
           <div class="name-fields">
-            <input type="text" placeholder="First Name" />
-            <input type="text" placeholder="Last Name" />
+            <input type="text" id="signup-firstname" placeholder="First Name" required />
+            <input type="text" id="signup-lastname" placeholder="Last Name" required />
           </div>
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+
+          <input type="email"    id="signup-email"    placeholder="Email"    required />
+          <input type="password" id="signup-password" placeholder="Password" required />
+
+          <!-- Sélecteur de rôle (unique) -->
           <div class="role-selection">
-            <input type="radio" id="patient" name="role" value="patient">
-            <label for="patient"><i class="fas fa-user"></i> Patient</label>
-            <input type="radio" id="medecin" name="role" value="medecin">
-            <label for="medecin"><i class="fas fa-user-md"></i> Doctor</label>
+            <input type="radio" id="role-patient"  name="role" value="patient">
+            <label for="role-patient"><i class="fas fa-user"></i> Patient</label>
+            <input type="radio" id="role-medecin"  name="role" value="medecin">
+            <label for="role-medecin"><i class="fas fa-user-md"></i> Doctor</label>
           </div>
+
           <button type="submit" class="btn-signup">Sign Up</button>
         </form>
       </div>
+
+      <!-- ── Formulaire Sign In ─────────────────────── -->
       <div class="form-container sign-in">
-        <form>
+        <form id="signin-form">
           <img src="Logo_Medisync.png" alt="MediSync Logo" class="logo-responsive">
           <h1>Sign In</h1>
+
+          <!-- Icônes sociales (unique) -->
           <div class="social-icons">
-            <a href="#" class="icon"
-              ><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google"></a>
-            <a href="#" class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAV1BMVEVHcEwHZv/O1v8HaP8Haf8IZ/8IaP8IZv8IZ/8IaP/r7/8IZ/8IZ/8AW/////+fsf8HZv////8AYP8AWf8AZP+Vqf/V3P8IZ/9wlP9jiv+tvP+Lpf82c/8XNRKaAAAAEHRSTlMAM/2GGN1h9exC+8LBwcGFy8UXywAAAPNJREFUKJFlk+kSgyAMhDnUQe2BQQtU3/85yxEi0P3l+E1gkyyMFXG5KmvVKjnrNSlNUlODhlE3GoebzVZ3sjMx+reDiYLwiXSgOrCHWJaPcIHafDLdB27L+sbSMfkk5rca6uiZejBLC1XoncxcSM7T7+kPZ7K78TIAmWnJHgTPyD7mbna9r4Sjh4phk7sxqVLEIeCxFiG1mISGLB67+xrmUqvQENRwMcWQ/D9WmNIKxwk4/01uvXMXGuJlfGFZR66iGahq8H99TtXKejjWy+4gLhtj0sG5CVgD74DlaNawjmYKNRxlAF2o03N4v0JOxLN6Dj8GhSiE70/PKAAAAABJRU5ErkJggg==" alt="Facebook"></a>
-            <a href="#" class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDUlEQVR4AWP4////gOLB44D6nTcsGIo33QHi/zTGd0B2YTiAPpYjHIHNAf/piQk6wGPW8f/rLz8HYRCbXg5AWI4GQGJ0cwDY12gAJDbcHUA4CkZAIqQUK7Ts/m/SfxBMs5RupswBaACr+P47b/5zlG/5DyzZ/r/+8hNF7vuvP//nn3r0X6JhJ+0ccPrR+/+H7735jw9cf/n5v0D1Nuo5gBxQve06zR0AjoL7b7/+//zjN4bc+ScfaOeA33///k9Yfg4mDw7u/Xdeo6uhnQP6D93FMNxlxjF0ZbRzgMXEQ9iyI90cALIMJoccDXRzAK6CZog6YNQBow6gIx54Bwx4x2RAu2bAysoEZu9o7xgAQrvkxt3WZi0AAAAASUVORK5CYII=" alt="GitHub"></a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google">
+            </a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAV1BMVEVHcEwHZv/O1v8HaP8Haf8IZ/8IaP8IZv8IZ/8IaP/r7/8IZ/8IZ/8AW/////+fsf8HZv////8AYP8AWf8AZP+Vqf/V3P8IZ/9wlP9jiv+tvP+Lpf82c/8XNRKaAAAAEHRSTlMAM/2GGN1h9exC+8LBwcGFy8UXywAAAPNJREFUKJFlk+kSgyAMhDnUQe2BQQtU3/85yxEi0P3l+E1gkyyMFXG5KmvVKjnrNSlNUlODhlE3GoebzVZ3sjMx+reDiYLwiXSgOrCHWJaPcIHafDLdB27L+sbSMfkk5rca6uiZejBLC1XoncxcSM7T7+kPZ7K78TIAmWnJHgTPyD7mbna9r4Sjh4phk7sxqVLEIeCxFiG1mISGLB67+xrmUqvQENRwMcWQ/D9WmNIKxwk4/01uvXMXGuJlfGFZR66iGahq8H99TtXKejjWy+4gLhtj0sG5CVgD74DlaNawjmYKNRxlAF2o03N4v0JOxLN6Dj8GhSiE70/PKAAAAABJRU5ErkJggg==" alt="Facebook">
+            </a>
+            <a href="#" class="icon">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABDUlEQVR4AWP4////gOLB44D6nTcsGIo33QHi/zTGd0B2YTiAPpYjHIHNAf/piQk6wGPW8f/rLz8HYRCbXg5AWI4GQGJ0cwDY12gAJDbcHUA4CkZAIqQUK7Ts/m/SfxBMs5RupswBaACr+P47b/5zlG/5DyzZ/r/+8hNF7vuvP//nn3r0X6JhJ+0ccPrR+/+H7735jw9cf/n5v0D1Nuo5gBxQve06zR0AjoL7b7/+//zjN4bc+ScfaOeA33///k9Yfg4mDw7u/Xdeo6uhnQP6D93FMNxlxjF0ZbRzgMXEQ9iyI90cALIMJoccDXRzAK6CZog6YNQBow6gIx54Bwx4x2RAu2bAysoEZu9o7xgAQrvkxt3WZi0AAAAASUVORK5CYII=" alt="GitHub">
+            </a>
           </div>
+
           <span>or use your email and password</span>
-          <input type="email" placeholder="Email" />
-          <input type="password" placeholder="Password" />
+
+          <input type="email"    id="signin-email"    placeholder="Email"    required />
+          <input type="password" id="signin-password" placeholder="Password" required />
+
+          <!-- Mot de passe oublié (unique) -->
           <button type="button" onclick="showResetModal()">Forget Your Password?</button>
           <button type="submit">Sign In</button>
         </form>
       </div>
+
+      <!-- ── Panneau de bascule animé ───────────────── -->
       <div class="toggle-container">
         <div class="toggle">
+          <!-- Panneau gauche : visible quand on est en mode Sign Up (container.active) -->
           <div class="toggle-panel toggle-left">
             <h1>Access MediSync</h1>
             <p>Sign in to your healthcare professional account to manage patient care and medical records</p>
             <button class="hidden" id="login">Sign In</button>
           </div>
+          <!-- Panneau droit : visible par défaut (mode Sign In) -->
           <div class="toggle-panel toggle-right">
             <h1>Join MediSync</h1>
-            <p>
-              Create your professional healthcare account to access comprehensive medical management tools and patient care features
-            </p>
+            <p>Create your professional healthcare account to access comprehensive medical management tools and patient care features</p>
             <button class="hidden" id="register">Sign Up</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Reset Password Modal -->
+    </div><!-- /container -->
+
+    <!-- ── Modal Réinitialisation du mot de passe ──── -->
     <div id="reset-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeResetModal()">&times;</span>
@@ -89,129 +123,32 @@
       </div>
     </div>
 
+    <!-- Vidéo de fond -->
     <video autoplay muted loop id="background-video">
       <source src="Backgrond.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
+
+    <!-- Script principal (contient showStyledMessage, gestion formulaires, etc.) -->
     <script src="script.js"></script>
+
+    <!-- Scripts propres à cette page uniquement -->
     <script>
+      // ── Modal Reset Password ──────────────────────
       function showResetModal() {
         document.getElementById('reset-modal').style.display = 'block';
       }
-
       function closeResetModal() {
         document.getElementById('reset-modal').style.display = 'none';
       }
 
-      // Global function to show styled messages instead of alerts/console.log
-      function showStyledMessage(message, type = 'info', duration = 5000) {
-          // Create message container if it doesn't exist
-          let messageContainer = document.getElementById('styled-message-container');
-          if (!messageContainer) {
-              messageContainer = document.createElement('div');
-              messageContainer.id = 'styled-message-container';
-              messageContainer.style.cssText = `
-                  position: fixed;
-                  top: 20px;
-                  right: 20px;
-                  z-index: 10000;
-                  max-width: 400px;
-                  pointer-events: none;
-              `;
-              document.body.appendChild(messageContainer);
-          }
+      // Fermer le modal en cliquant en dehors
+      window.addEventListener('click', function(event) {
+        const modal = document.getElementById('reset-modal');
+        if (event.target === modal) modal.style.display = 'none';
+      });
 
-          // Create message card
-          const messageCard = document.createElement('div');
-          messageCard.style.cssText = `
-              background: var(--card-bg, #ffffff);
-              border: 1px solid var(--border-color, #e0e0e0);
-              border-radius: 12px;
-              padding: 16px 20px;
-              margin-bottom: 12px;
-              box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-              pointer-events: auto;
-              transform: translateX(100%);
-              opacity: 0;
-              transition: all 0.3s ease;
-              position: relative;
-              overflow: hidden;
-          `;
-
-          // Set colors based on type
-          const colors = {
-              success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
-              error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
-              warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
-              info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
-              debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
-          };
-
-          const colorScheme = colors[type] || colors.info;
-
-          messageCard.style.background = colorScheme.bg;
-          messageCard.style.borderColor = colorScheme.border;
-          messageCard.style.color = colorScheme.text;
-
-          // Create icon based on type
-          const icons = {
-              success: 'check-circle',
-              error: 'exclamation-triangle',
-              warning: 'exclamation-circle',
-              info: 'info-circle',
-              debug: 'bug'
-          };
-
-          const iconName = icons[type] || 'info-circle';
-
-          messageCard.innerHTML = `
-              <div style="display: flex; align-items: flex-start; gap: 12px;">
-                  <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
-                  <div style="flex: 1; font-size: 14px; line-height: 1.4;">
-                      ${message}
-                  </div>
-                  <button onclick="this.parentElement.parentElement.remove()" style="
-                      background: none;
-                      border: none;
-                      color: ${colorScheme.text};
-                      cursor: pointer;
-                      font-size: 16px;
-                      padding: 0;
-                      margin-left: 8px;
-                      opacity: 0.7;
-                      flex-shrink: 0;
-                  ">&times;</button>
-              </div>
-          `;
-
-          // Add to container
-          messageContainer.appendChild(messageCard);
-
-          // Animate in
-          setTimeout(() => {
-              messageCard.style.transform = 'translateX(0)';
-              messageCard.style.opacity = '1';
-          }, 10);
-
-          // Auto remove after duration
-          if (duration > 0) {
-              setTimeout(() => {
-                  if (messageCard.parentElement) {
-                      messageCard.style.transform = 'translateX(100%)';
-                      messageCard.style.opacity = '0';
-                      setTimeout(() => {
-                          if (messageCard.parentElement) {
-                              messageCard.remove();
-                          }
-                      }, 300);
-                  }
-              }, duration);
-          }
-
-
-      }
-
-
+      // ── Soumission du formulaire Reset ───────────
       document.getElementById('reset-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const email = document.getElementById('reset-email').value;
@@ -222,14 +159,7 @@
           showStyledMessage('Please enter your email.', 'warning');
         }
       });
-
-      // Close modal when clicking outside
-      window.onclick = function(event) {
-        const modal = document.getElementById('reset-modal');
-        if (event.target == modal) {
-          modal.style.display = 'none';
-        }
-      }
     </script>
+
   </body>
 </html>

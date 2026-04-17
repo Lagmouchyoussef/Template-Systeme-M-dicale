@@ -863,61 +863,149 @@ body {
     margin-bottom: 30px;
 }
 
+/* ═══════════════════════════════════════════
+   Premium Stat Cards — Modern Dashboard Style
+   ═══════════════════════════════════════════ */
+
 .stat-card {
-    background-color: var(--card-bg);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+    background: var(--card-bg);
+    padding: 28px 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
     display: flex;
     align-items: center;
-    transition: background-color 0.3s ease;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    cursor: default;
 }
 
+/* Coloured top accent line */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 20px 20px 0 0;
+    background: var(--card-accent, #2da0a8);
+}
+
+/* Subtle glow blob */
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--card-accent, #2da0a8);
+    opacity: 0.05;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.13);
+}
+
+.stat-card:hover::after {
+    opacity: 0.1;
+}
+
+/* Icon */
 .stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    margin-right: 20px;
-    font-size: 20px;
-    transition: transform 0.2s ease;
+    font-size: 24px;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
-.stat-icon:hover {
-    transform: scale(1.05);
+.stat-card:hover .stat-icon {
+    transform: scale(1.08) rotate(-3deg);
 }
 
-/* Specific colors for each statistic type */
-.stat-icon.appointments {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-}
-
-.stat-icon.doctors {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-}
-
-.stat-icon.prescriptions {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-}
-
-.stat-icon.health {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
+/* Text */
+.stat-info {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-info h3 {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    line-height: 1;
+    letter-spacing: -1px;
 }
 
 .stat-info p {
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
+
+/* ── Card accent colours ─────────────────────── */
+.stat-icon.appointments {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+}
+.stat-card:has(.appointments) {
+    --card-accent: #3b82f6;
+}
+
+.stat-icon.doctors {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+.stat-card:has(.doctors) {
+    --card-accent: #10b981;
+}
+
+.stat-icon.prescriptions {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.35);
+}
+.stat-card:has(.prescriptions) {
+    --card-accent: #f43f5e;
+}
+
+.stat-icon.health {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+.stat-card:has(.health) {
+    --card-accent: #f59e0b;
+}
+
+/* Dark mode */
+[data-theme="dark"] .stat-card {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255,255,255,0.06);
+}
+[data-theme="dark"] .stat-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
 
 /* Appointments Section */
 .appointments-section,

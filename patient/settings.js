@@ -1352,15 +1352,27 @@ Version: ${data.version}
         };
 
         const checkInput = () => {
-            confirmBtn.disabled = input.value !== 'DELETE';
+            const isValid = input.value.toUpperCase() === 'DELETE';
+            confirmBtn.disabled = !isValid;
+            input.classList.toggle('valid', isValid);
         };
 
         input.addEventListener('input', checkInput);
 
         confirmBtn.addEventListener('click', async () => {
-            if (input.value === 'DELETE') {
-                cleanup();
-                await alertModal.show('Account deletion initiated. This would normally send a confirmation email.', 'Account Deletion', 'warning');
+            if (input.value.toUpperCase() === 'DELETE') {
+                // Hide the delete modal first
+                modal.style.display = 'none';
+                // Show confirmation message and wait for user to click OK
+                await alertModal.show(
+                    'Your account has been deleted. You will now be redirected to the login page.',
+                    '✅ Account Deleted',
+                    'warning'
+                );
+                // Clear ALL session and user data
+                localStorage.clear();
+                // Redirect to login
+                window.location.href = '/login/index.html';
             }
         });
 

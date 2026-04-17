@@ -18,15 +18,17 @@ body{
 }
 
 .container{
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.92);
     border-radius: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(45, 160, 168, 0.2);
     position: relative;
     overflow: hidden;
     width: 768px;
     max-width: 100%;
     min-height: 480px;
+    z-index: 1;
 }
+
 
 .container p{
     font-size: 14px;
@@ -77,7 +79,7 @@ body{
 }
 
 .container form{
-    background-color: #fff;
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -110,10 +112,13 @@ body{
     z-index: 2;
 }
 
+/* Sign-in glisse à droite (hors vue) quand on passe en mode Sign Up */
 .container.active .sign-in{
     transform: translateX(100%);
+    opacity: 0;
 }
 
+/* Sign-up : caché par opacity:0, même position que sign-in */
 .sign-up{
     left: 0;
     width: 50%;
@@ -121,6 +126,7 @@ body{
     z-index: 1;
 }
 
+/* Sign-up : se place à droite AU-DESSUS de sign-in via z-index:5 */
 .container.active .sign-up{
     transform: translateX(100%);
     opacity: 1;

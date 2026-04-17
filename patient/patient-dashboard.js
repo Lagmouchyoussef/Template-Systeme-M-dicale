@@ -112,7 +112,7 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        window.location.href = '/login/index.html';
+        window.location.replace('/login');
     }
 })();
 
@@ -200,7 +200,7 @@ if (logoutBtn) {
         localStorage.removeItem('email');
         localStorage.removeItem('userId');
         localStorage.removeItem('userAvatar');
-        window.location.href = '/login/index.html';
+        window.location.replace('/login');
     });
 }
 
