@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="../shared.css">
     <link rel="stylesheet" href="patient-dashboard.css">
     <link rel="stylesheet" href="settings.css">
     <title>MediSync - Settings</title>
@@ -70,6 +69,20 @@
                     <h1>Account Settings</h1>
                 </div>
                 <div class="header-actions">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <div class="notification-badge" style="display: none;">0</div>
+                        <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                            <div class="notifications-header">
+                                <h4>Notifications</h4>
+                                <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                            </div>
+                            <div class="notifications-list" id="notifications-list"></div>
+                            <div class="notifications-footer">
+                                <button class="view-all" id="view-all-notifications">View all notifications</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -763,5 +776,6 @@
             reader.readAsDataURL(file);
         }
     </script>
+    <script src="../notifications.js"></script>
 </body>
 </html>

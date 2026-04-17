@@ -70,6 +70,19 @@
                 <div class="header-actions">
                     <div class="notifications">
                         <i class="fas fa-bell"></i>
+                        <div class="notification-badge" style="display: none;">0</div>
+
+                        <!-- Notifications Dropdown -->
+                        <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                            <div class="notifications-header">
+                                <h4>Notifications</h4>
+                                <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                            </div>
+                            <div class="notifications-list" id="notifications-list"></div>
+                            <div class="notifications-footer">
+                                <button class="view-all" id="view-all-notifications">View all notifications</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -80,30 +93,6 @@
                     <h2>Welcome to MediSync</h2>
                     <p>Manage your healthcare appointments and medical records.</p>
                     <button class="btn-primary">Schedule New Appointment</button>
-                </section>
-
-                <!-- Appointment Invitations -->
-                <section class="invitations-section">
-                    <h2><i class="fas fa-envelope"></i> Appointment Invitations</h2>
-                    <div class="invitations-container">
-                        <div class="no-invitations-message">
-                            <i class="fas fa-inbox"></i>
-                            <h3>No pending invitations</h3>
-                            <p>You'll receive appointment invitations from doctors here</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Email Notifications -->
-                <section class="emails-section">
-                    <h2><i class="fas fa-mailbox"></i> Recent Emails</h2>
-                    <div class="emails-container">
-                        <div class="no-emails-message">
-                            <i class="fas fa-envelope-open"></i>
-                            <h3>No recent emails</h3>
-                            <p>Email notifications will appear here</p>
-                        </div>
-                    </div>
                 </section>
 
                 <!-- Quick Stats -->
@@ -316,6 +305,20 @@
         </main>
     </div>
 
+    <!-- Notifications Modal -->
+    <div id="notifications-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>All Notifications</h3>
+                <span class="modal-close" id="notifications-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="notifications-list" id="modal-notifications-list"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="patient-dashboard.js"></script>
+    <script src="../notifications.js"></script>
 </body>
 </html>
