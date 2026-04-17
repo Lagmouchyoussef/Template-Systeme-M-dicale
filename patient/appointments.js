@@ -2,7 +2,7 @@
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        window.location.href = '/login/index.html';
+        window.location.replace('/login');
     }
 })();
 

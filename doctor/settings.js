@@ -2,7 +2,7 @@
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'medecin') {
-        window.location.href = '/login/index.html';
+        window.location.replace('/login');
     }
 })();
 
@@ -1387,7 +1387,7 @@ Version: ${data.version}
                 // Clear ALL session and user data
                 localStorage.clear();
                 // Redirect to login
-                window.location.href = '/login/index.html';
+                window.location.href = '/login';
             }
         });
 

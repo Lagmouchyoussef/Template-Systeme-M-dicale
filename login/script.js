@@ -119,44 +119,9 @@ loginBtn.addEventListener("click", () => {
   container.classList.remove("active");
 });
 
-const ACCOUNTS_KEY = 'medisync_accounts';
+// Les fonctions getAccounts, saveAccounts, applySession et addToDirectory 
+// ont été déplacées vers le fichier de synchronisation central (sync.js)
 
-function getAccounts() {
-  return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
-}
-
-function saveAccounts(accounts) {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
-
-function applySession(account) {
-  const fullName = `${account.firstName} ${account.lastName}`.trim();
-  localStorage.setItem('email', account.email);
-  localStorage.setItem('firstName', account.firstName);
-  localStorage.setItem('lastName', account.lastName);
-  localStorage.setItem('userName', fullName);
-  localStorage.setItem('userRole', account.role);
-  localStorage.setItem('userId', account.userId);
-}
-
-function addToDirectory(account) {
-  const name = `${account.firstName} ${account.lastName}`.trim();
-  if (account.role === 'patient') {
-    const key = 'registeredPatients';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    if (!list.some((p) => p.email === account.email)) {
-      list.push({ id: account.userId, name, email: account.email, phone: account.phone || '' });
-      localStorage.setItem(key, JSON.stringify(list));
-    }
-  } else if (account.role === 'medecin') {
-    const key = 'registeredDoctors';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    if (!list.some((d) => d.email === account.email)) {
-      list.push({ id: account.userId, name, email: account.email });
-      localStorage.setItem(key, JSON.stringify(list));
-    }
-  }
-}
 
 // ── Inscription (Sign Up) ───────────────────────────────────────────────────
 document.querySelector('.sign-up form').addEventListener('submit', (e) => {
@@ -191,7 +156,7 @@ document.querySelector('.sign-up form').addEventListener('submit', (e) => {
 
   showStyledMessage(`Welcome, ${firstName}. Your account is ready.`, 'success');
   setTimeout(() => {
-    window.location.href = role === 'medecin' ? '/doctor/doctor.html' : '/patient/patient.html';
+    redirectToDashboard(role);
   }, 600);
 });
 
@@ -217,6 +182,6 @@ document.querySelector('.sign-in form').addEventListener('submit', (e) => {
   addToDirectory(account);
   showStyledMessage('Signed in successfully.', 'success');
   setTimeout(() => {
-    window.location.href = account.role === 'medecin' ? '/doctor/doctor.html' : '/patient/patient.html';
+    redirectToDashboard(account.role);
   }, 600);
 });

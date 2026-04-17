@@ -201,7 +201,7 @@ function initLogoutButton() {
         localStorage.removeItem('email');
         localStorage.removeItem('userId');
         localStorage.removeItem('userAvatar');
-        window.location.href = '/login/index.html';
+        window.location.replace('/login');
     });
 }
 
