@@ -1,3 +1,11 @@
+// ── Auth Guard ─────────────────────────────────────────────────────────────
+(function() {
+    const role = localStorage.getItem('userRole');
+    if (!role || role !== 'medecin') {
+        window.location.href = '/login/index.html';
+    }
+})();
+
 // Global function to show styled messages instead of alerts/console.log
 function showStyledMessage(message, type = 'info', duration = 5000) {
     // Create message container if it doesn't exist
@@ -103,43 +111,15 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         }, duration);
     }
 
-    // Also log to console for debugging
-    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// Override console methods to show styled messages
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
 
-console.log = function(...args) {
-    showStyledMessage(args.join(' '), 'debug', 3000);
-    originalConsoleLog.apply(console, args);
-};
 
-console.warn = function(...args) {
-    showStyledMessage(args.join(' '), 'warning', 5000);
-    originalConsoleWarn.apply(console, args);
-};
-
-console.error = function(...args) {
-    showStyledMessage(args.join(' '), 'error', 8000);
-    originalConsoleError.apply(console, args);
-};
-
-// Override alert to show styled messages
-const originalAlert = window.alert;
-window.alert = function(message) {
-    showStyledMessage(message, 'info', 6000);
-    // Still call original alert for compatibility
-    // originalAlert(message);
-};
 
 // Availability Page JavaScript
 
 // Only load on availability pages
 if (!window.location.href.includes('doctor-availability.html') && !window.location.href.includes('debug-availability.html')) {
-    showStyledMessage('Availability script skipped - not on availability page', 'debug');
 } else {
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -149,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-        showStyledMessage('Availability page loading...', 'debug');
 
         // Load saved availability (with error handling)
         if (typeof loadAvailability === 'function') {
@@ -176,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 100);
 
-        showStyledMessage('Availability page loaded successfully', 'debug');
     } catch (error) {
         console.error('Error loading availability page:', error);
         // Don't show alert for minor errors, just log them
@@ -769,7 +747,6 @@ MediSync Team
     sentEmails.push(emailData);
     localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
 
-    showStyledMessage('Email sent: ' + JSON.stringify(emailData), 'debug');
 }
 
 function resetInvitationForm() {
@@ -845,7 +822,7 @@ function updateAvatarDisplay(avatarContainer) {
         const nameParts = userName.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts[1] || '';
-        const initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
+        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
         if (!initials.trim()) initials = '';
 
         const span = document.createElement('span');

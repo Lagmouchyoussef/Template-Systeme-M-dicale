@@ -1,3 +1,11 @@
+// ── Auth Guard ─────────────────────────────────────────────────────────────
+(function() {
+    const role = localStorage.getItem('userRole');
+    if (!role || role !== 'patient') {
+        window.location.href = '/login/index.html';
+    }
+})();
+
 // Global function to show styled messages instead of alerts/console.log
 function showStyledMessage(message, type = 'info', duration = 5000) {
     // Create message container if it doesn't exist
@@ -103,37 +111,10 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         }, duration);
     }
 
-    // Also log to console for debugging
-    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// Override console methods to show styled messages
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
 
-console.log = function(...args) {
-    showStyledMessage(args.join(' '), 'debug', 3000);
-    originalConsoleLog.apply(console, args);
-};
 
-console.warn = function(...args) {
-    showStyledMessage(args.join(' '), 'warning', 5000);
-    originalConsoleWarn.apply(console, args);
-};
-
-console.error = function(...args) {
-    showStyledMessage(args.join(' '), 'error', 8000);
-    originalConsoleError.apply(console, args);
-};
-
-// Override alert to show styled messages
-const originalAlert = window.alert;
-window.alert = function(message) {
-    showStyledMessage(message, 'info', 6000);
-    // Still call original alert for compatibility
-    // originalAlert(message);
-};
 
 function buildSlotsFromStoredAvailability(date) {
     const saved = localStorage.getItem('doctorAvailability');
@@ -629,7 +610,7 @@ function updateAvatarDisplay(avatarContainer) {
         const nameParts = userName.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts[1] || '';
-        const initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
+        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
         if (!initials.trim()) initials = '';
 
         const span = document.createElement('span');

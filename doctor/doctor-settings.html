@@ -674,156 +674,15 @@
     <script src="doctor-dashboard.js"></script>
     <script src="settings.js"></script>
     <script>
-        // Global function to show styled messages instead of alerts/console.log
-        function showStyledMessage(message, type = 'info', duration = 5000) {
-            // Create message container if it doesn't exist
-            let messageContainer = document.getElementById('styled-message-container');
-            if (!messageContainer) {
-                messageContainer = document.createElement('div');
-                messageContainer.id = 'styled-message-container';
-                messageContainer.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    z-index: 10000;
-                    max-width: 400px;
-                    pointer-events: none;
-                `;
-                document.body.appendChild(messageContainer);
-            }
-
-            // Create message card
-            const messageCard = document.createElement('div');
-            messageCard.style.cssText = `
-                background: var(--card-bg, #ffffff);
-                border: 1px solid var(--border-color, #e0e0e0);
-                border-radius: 12px;
-                padding: 16px 20px;
-                margin-bottom: 12px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-                pointer-events: auto;
-                transform: translateX(100%);
-                opacity: 0;
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-            `;
-
-            // Set colors based on type
-            const colors = {
-                success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
-                error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
-                warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
-                info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
-                debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
-            };
-
-            const colorScheme = colors[type] || colors.info;
-
-            messageCard.style.background = colorScheme.bg;
-            messageCard.style.borderColor = colorScheme.border;
-            messageCard.style.color = colorScheme.text;
-
-            // Create icon based on type
-            const icons = {
-                success: 'check-circle',
-                error: 'exclamation-triangle',
-                warning: 'exclamation-circle',
-                info: 'info-circle',
-                debug: 'bug'
-            };
-
-            const iconName = icons[type] || 'info-circle';
-
-            messageCard.innerHTML = `
-                <div style="display: flex; align-items: flex-start; gap: 12px;">
-                    <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
-                    <div style="flex: 1; font-size: 14px; line-height: 1.4;">
-                        ${message}
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" style="
-                        background: none;
-                        border: none;
-                        color: ${colorScheme.text};
-                        cursor: pointer;
-                        font-size: 16px;
-                        padding: 0;
-                        margin-left: 8px;
-                        opacity: 0.7;
-                        flex-shrink: 0;
-                    ">&times;</button>
-                </div>
-            `;
-
-            // Add to container
-            messageContainer.appendChild(messageCard);
-
-            // Animate in
-            setTimeout(() => {
-                messageCard.style.transform = 'translateX(0)';
-                messageCard.style.opacity = '1';
-            }, 10);
-
-            // Auto remove after duration
-            if (duration > 0) {
-                setTimeout(() => {
-                    if (messageCard.parentElement) {
-                        messageCard.style.transform = 'translateX(100%)';
-                        messageCard.style.opacity = '0';
-                        setTimeout(() => {
-                            if (messageCard.parentElement) {
-                                messageCard.remove();
-                            }
-                        }, 300);
-                    }
-                }, duration);
-            }
-
-            // Also log to console for debugging
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
-
-        // Override console methods to show styled messages
-        const originalConsoleLog = console.log;
-        const originalConsoleWarn = console.warn;
-        const originalConsoleError = console.error;
-
-        console.log = function(...args) {
-            showStyledMessage(args.join(' '), 'debug', 3000);
-            originalConsoleLog.apply(console, args);
-        };
-
-        console.warn = function(...args) {
-            showStyledMessage(args.join(' '), 'warning', 5000);
-            originalConsoleWarn.apply(console, args);
-        };
-
-        console.error = function(...args) {
-            showStyledMessage(args.join(' '), 'error', 8000);
-            originalConsoleError.apply(console, args);
-        };
-
-        // Override alert to show styled messages
-        const originalAlert = window.alert;
-        window.alert = function(message) {
-            showStyledMessage(message, 'info', 6000);
-            // Still call original alert for compatibility
-            // originalAlert(message);
-        };
-
         // Simple avatar handlers
         function handleAvatarUpload() {
-            showStyledMessage('Avatar upload clicked', 'debug');
             const input = document.getElementById('avatar-file-input');
             if (input) {
                 input.click();
-            } else {
-                console.error('File input not found');
             }
         }
 
         function handleAvatarDelete() {
-            showStyledMessage('Avatar delete clicked', 'debug');
             if (confirm('Supprimer la photo de profil ?')) {
                 const img = document.getElementById('profile-avatar');
                 const placeholder = document.querySelector('.avatar-placeholder');
@@ -840,14 +699,11 @@
                 }
 
                 localStorage.removeItem('userAvatar');
-                showStyledMessage('Avatar deleted', 'debug');
             }
         }
 
         // Simple navigation handler
         function switchSection(sectionId) {
-            showStyledMessage('Switching to section: ' + sectionId, 'debug');
-
             // Hide all sections
             const allSections = document.querySelectorAll('.settings-section');
             allSections.forEach(section => section.classList.remove('active'));
@@ -856,9 +712,6 @@
             const targetSection = document.getElementById(sectionId + '-section');
             if (targetSection) {
                 targetSection.classList.add('active');
-                showStyledMessage('Section switched successfully', 'debug');
-            } else {
-                console.error('Section not found:', sectionId);
             }
 
             // Update nav active state
@@ -873,43 +726,28 @@
 
         // Initialize navigation clicks
         document.addEventListener('DOMContentLoaded', function() {
-            showStyledMessage('Setting up navigation clicks...', 'debug');
-
             const navItems = document.querySelectorAll('.settings-nav .nav-item');
-            showStyledMessage('Found nav items: ' + navItems.length, 'debug');
 
-            navItems.forEach((item, index) => {
+            navItems.forEach((item) => {
                 item.addEventListener('click', function() {
                     const sectionId = this.dataset.section;
-                    showStyledMessage('Nav clicked: ' + sectionId, 'debug');
                     switchSection(sectionId);
                 });
-                showStyledMessage(`Nav item ${index} setup: ` + item.dataset.section, 'debug');
             });
 
             // Setup file input handler
             const fileInput = document.getElementById('avatar-file-input');
             if (fileInput) {
                 fileInput.addEventListener('change', function(e) {
-                    showStyledMessage('File selected', 'debug');
                     const file = e.target.files[0];
                     if (file) {
                         handleFileUpload(file);
                     }
                 });
             }
-
-            // Run debug
-            setTimeout(() => {
-                if (window.debugSettingsPage) {
-                    window.debugSettingsPage();
-                }
-            }, 1000);
         });
 
         function handleFileUpload(file) {
-            showStyledMessage('Processing file: ' + file.name, 'debug');
-
             // Basic validation
             if (file.size > 10 * 1024 * 1024) {
                 showStyledMessage('File too large (max 10MB)', 'error');
@@ -942,5 +780,7 @@
             reader.readAsDataURL(file);
         }
     </script>
+
+
 </body>
 </html>

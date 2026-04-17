@@ -103,37 +103,10 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         }, duration);
     }
 
-    // Also log to console for debugging
-    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// Override console methods to show styled messages
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
 
-console.log = function(...args) {
-    showStyledMessage(args.join(' '), 'debug', 3000);
-    originalConsoleLog.apply(console, args);
-};
 
-console.warn = function(...args) {
-    showStyledMessage(args.join(' '), 'warning', 5000);
-    originalConsoleWarn.apply(console, args);
-};
-
-console.error = function(...args) {
-    showStyledMessage(args.join(' '), 'error', 8000);
-    originalConsoleError.apply(console, args);
-};
-
-// Override alert to show styled messages
-const originalAlert = window.alert;
-window.alert = function(message) {
-    showStyledMessage(message, 'info', 6000);
-    // Still call original alert for compatibility
-    // originalAlert(message);
-};
 
 // Notifications Page JavaScript
 

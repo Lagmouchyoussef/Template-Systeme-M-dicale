@@ -1,3 +1,11 @@
+// ── Auth Guard ─────────────────────────────────────────────────────────────
+(function() {
+    const role = localStorage.getItem('userRole');
+    if (!role || role !== 'medecin') {
+        window.location.href = '/login/index.html';
+    }
+})();
+
 // Global function to show styled messages instead of alerts/console.log
 function showStyledMessage(message, type = 'info', duration = 5000) {
     // Create message container if it doesn't exist
@@ -103,37 +111,10 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         }, duration);
     }
 
-    // Also log to console for debugging
-    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// Override console methods to show styled messages
-const originalConsoleLog = console.log;
-const originalConsoleWarn = console.warn;
-const originalConsoleError = console.error;
 
-console.log = function(...args) {
-    showStyledMessage(args.join(' '), 'debug', 3000);
-    originalConsoleLog.apply(console, args);
-};
 
-console.warn = function(...args) {
-    showStyledMessage(args.join(' '), 'warning', 5000);
-    originalConsoleWarn.apply(console, args);
-};
-
-console.error = function(...args) {
-    showStyledMessage(args.join(' '), 'error', 8000);
-    originalConsoleError.apply(console, args);
-};
-
-// Override alert to show styled messages
-const originalAlert = window.alert;
-window.alert = function(message) {
-    showStyledMessage(message, 'info', 6000);
-    // Still call original alert for compatibility
-    // originalAlert(message);
-};
 
 // Settings Page JavaScript
 
@@ -144,7 +125,6 @@ class SettingsManager {
     }
 
     init() {
-        showStyledMessage('Initializing SettingsManager...', 'debug');
 
         // Ensure DOM is ready before setting up everything
         if (document.readyState === 'loading') {
@@ -160,7 +140,6 @@ class SettingsManager {
     }
 
     setupAll() {
-        showStyledMessage('Setting up all components...', 'debug');
 
         this.setupNavigation();
         this.setupFormValidation();
@@ -174,34 +153,27 @@ class SettingsManager {
         this.loadUserData();
 
         // Set default active section
-        showStyledMessage('Setting default active section...', 'debug');
         this.showSection('profile');
         const profileNavItem = document.querySelector('[data-section="profile"]');
         if (profileNavItem) {
             profileNavItem.classList.add('active');
-            showStyledMessage('Profile nav item activated', 'debug');
         } else {
             console.error('Profile nav item not found');
         }
     }
 
     setupNavigation() {
-        showStyledMessage('Setting up navigation...', 'debug');
 
         // Only target nav items in the settings navigation, not the sidebar
         const navItems = document.querySelectorAll('.settings-nav .nav-item');
-        showStyledMessage('Navigation items found: ' + navItems.length, 'debug');
 
         navItems.forEach((item, index) => {
-            showStyledMessage(`Setting up nav item ${index}: ` + item.dataset.section, 'debug');
 
             item.addEventListener('click', (e) => {
-                showStyledMessage('Nav item clicked: ' + item.dataset.section, 'debug');
                 e.preventDefault();
                 e.stopPropagation();
 
                 const sectionId = item.dataset.section;
-                showStyledMessage('Switching to section: ' + sectionId, 'debug');
 
                 // Update navigation active state
                 this.updateNavActive(sectionId);
@@ -213,11 +185,9 @@ class SettingsManager {
     }
 
     showSection(sectionId) {
-        showStyledMessage('Showing section: ' + sectionId, 'debug');
 
         // Hide all sections
         const allSections = document.querySelectorAll('.settings-section');
-        showStyledMessage('Hiding sections, found: ' + allSections.length, 'debug');
 
         allSections.forEach(section => {
             section.classList.remove('active');
@@ -225,18 +195,15 @@ class SettingsManager {
 
         // Show target section
         const targetSection = document.getElementById(`${sectionId}-section`);
-        showStyledMessage('Target section found: ' + !!targetSection, 'debug');
 
         if (targetSection) {
             targetSection.classList.add('active');
-            showStyledMessage('Section activated successfully', 'debug');
         } else {
             console.error('Target section not found:', `${sectionId}-section`);
         }
     }
 
     updateNavActive(sectionId) {
-        showStyledMessage('Updating nav active state for: ' + sectionId, 'debug');
 
         // Update navigation active state - only in settings nav
         document.querySelectorAll('.settings-nav .nav-item').forEach(item => {
@@ -244,11 +211,9 @@ class SettingsManager {
         });
 
         const activeItem = document.querySelector(`.settings-nav [data-section="${sectionId}"]`);
-        showStyledMessage('Active nav item found: ' + !!activeItem, 'debug');
 
         if (activeItem) {
             activeItem.classList.add('active');
-            showStyledMessage('Nav item activated successfully', 'debug');
         } else {
             showStyledMessage('Active nav item not found for: ' + sectionId, 'error');
         }
@@ -995,18 +960,15 @@ Version: ${data.version}
     }
 
     setupAvatarHandlers() {
-        showStyledMessage('Setting up avatar handlers...', 'debug');
 
         // Load avatar on page load
         this.loadAvatar();
 
         // Upload avatar button
         const uploadBtn = document.getElementById('upload-avatar-btn');
-        showStyledMessage('Upload button found: ' + !!uploadBtn, 'debug');
 
         if (uploadBtn) {
             uploadBtn.addEventListener('click', (e) => {
-                showStyledMessage('Upload button clicked', 'debug');
                 e.preventDefault();
                 e.stopPropagation();
                 this.uploadAvatar();
@@ -1015,11 +977,9 @@ Version: ${data.version}
 
         // Delete avatar button
         const deleteBtn = document.getElementById('delete-avatar-btn');
-        showStyledMessage('Delete button found: ' + !!deleteBtn, 'debug');
 
         if (deleteBtn) {
             deleteBtn.addEventListener('click', (e) => {
-                showStyledMessage('Delete button clicked', 'debug');
                 e.preventDefault();
                 e.stopPropagation();
                 this.deleteAvatar();
@@ -1065,7 +1025,6 @@ Version: ${data.version}
 
             // Check image size
             const imageSize = await this.getImageDimensions(file);
-            showStyledMessage('Image size: ' + JSON.stringify(imageSize), 'debug');
             if (imageSize.width < 128 || imageSize.height < 128) {
                 const proceed = confirm(`The selected image is small (${imageSize.width}x${imageSize.height}px). To avoid blurriness, use an image of at least 128x128px. Do you want to use it anyway?`);
                 if (!proceed) return;
@@ -1433,58 +1392,7 @@ Version: ${data.version}
 
 // Navigation functions are now handled by the SettingsManager class
 
-// Debug function for troubleshooting
-function debugSettingsPage() {
-    console.log('=== DEBUGGING SETTINGS PAGE ===');
 
-    // Check if elements exist
-    const uploadBtn = document.getElementById('upload-avatar-btn');
-    const deleteBtn = document.getElementById('delete-avatar-btn');
-    const navItems = document.querySelectorAll('.settings-nav .nav-item');
-    const sections = document.querySelectorAll('.settings-section');
-
-    console.log('Upload button found:', !!uploadBtn);
-    console.log('Delete button found:', !!deleteBtn);
-    console.log('Nav items found:', navItems.length);
-    console.log('Sections found:', sections.length);
-
-    // Log nav items
-    navItems.forEach((item, index) => {
-        console.log(`Nav item ${index}:`, item.dataset.section);
-    });
-
-    // Test clicking buttons manually
-    if (uploadBtn) {
-        console.log('Upload button exists, testing click...');
-        // Don't actually click to avoid file dialog
-    }
-
-    if (deleteBtn) {
-        console.log('Delete button exists, testing click...');
-        // Don't actually click to avoid confirmation dialog
-    }
-
-    return {
-        uploadBtn: !!uploadBtn,
-        deleteBtn: !!deleteBtn,
-        navItems: navItems.length,
-        sections: sections.length
-    };
-}
-
-// Reset app to virgin state
-function resetAppToVirgin() {
-    // Clear all localStorage
-    localStorage.clear();
-    // Clear any session storage if used
-    sessionStorage.clear();
-    // Reload the page to reset all state
-    window.location.reload();
-}
-
-// Make functions available globally
-window.debugSettingsPage = debugSettingsPage;
-window.resetAppToVirgin = resetAppToVirgin;
 
 // Alert Modal System
 class AlertModal {
