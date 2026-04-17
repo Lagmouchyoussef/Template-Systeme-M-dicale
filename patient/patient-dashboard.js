@@ -1,34 +1,175 @@
-// Theme toggle functionality
-const themeSwitch = document.getElementById('theme-switch');
+// Global function to show styled messages instead of alerts/console.log
+function showStyledMessage(message, type = 'info', duration = 5000) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('styled-message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'styled-message-container';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(messageContainer);
+    }
 
-// Check for saved theme preference or default to light mode
-const currentTheme = localStorage.getItem('theme') || 'light';
+    // Create message card
+    const messageCard = document.createElement('div');
+    messageCard.style.cssText = `
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
 
-// Apply the current theme
-if (currentTheme === 'dark') {
-    document.body.setAttribute('data-theme', 'dark');
-    themeSwitch.checked = true;
-} else {
-    document.body.removeAttribute('data-theme');
-    themeSwitch.checked = false;
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
+        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+    };
+
+    const colorScheme = colors[type] || colors.info;
+
+    messageCard.style.background = colorScheme.bg;
+    messageCard.style.borderColor = colorScheme.border;
+    messageCard.style.color = colorScheme.text;
+
+    // Create icon based on type
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle',
+        warning: 'exclamation-circle',
+        info: 'info-circle',
+        debug: 'bug'
+    };
+
+    const iconName = icons[type] || 'info-circle';
+
+    messageCard.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
+                ${message}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: ${colorScheme.text};
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0;
+                margin-left: 8px;
+                opacity: 0.7;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    messageContainer.appendChild(messageCard);
+
+    // Animate in
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(0)';
+        messageCard.style.opacity = '1';
+    }, 10);
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageCard.parentElement) {
+                messageCard.style.transform = 'translateX(100%)';
+                messageCard.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageCard.parentElement) {
+                        messageCard.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
-// Toggle theme when switch is clicked
-themeSwitch.addEventListener('change', function() {
-    if (this.checked) {
-        document.body.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        document.body.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'light');
-    }
-});
+// Override console methods to show styled messages
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
 
-// Sidebar menu active state with enhanced animations
-const sidebarMenuItems = document.querySelectorAll('.sidebar-menu li');
+console.log = function(...args) {
+    showStyledMessage(args.join(' '), 'debug', 3000);
+    originalConsoleLog.apply(console, args);
+};
 
-sidebarMenuItems.forEach(item => {
-    item.addEventListener('click', function() {
+console.warn = function(...args) {
+    showStyledMessage(args.join(' '), 'warning', 5000);
+    originalConsoleWarn.apply(console, args);
+};
+
+console.error = function(...args) {
+    showStyledMessage(args.join(' '), 'error', 8000);
+    originalConsoleError.apply(console, args);
+};
+
+// Override alert to show styled messages
+const originalAlert = window.alert;
+window.alert = function(message) {
+    showStyledMessage(message, 'info', 6000);
+    // Still call original alert for compatibility
+    // originalAlert(message);
+};
+
+// Theme toggle functionality - moved to DOMContentLoaded
+
+// Sidebar menu navigation (only if sidebar exists)
+const sidebar = document.querySelector('.sidebar');
+if (sidebar) {
+    const navItems = document.querySelectorAll('.nav-item');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevent any default behavior
+            // Handle navigation
+            const page = this.getAttribute('data-page');
+            if (page) {
+                showStyledMessage('Navigating to page: ' + page, 'debug');
+                const pageMap = {
+                    'dashboard': './patient.html',
+                    'appointments': './appointments.html',
+                    'history': './history.html',
+                    'settings': './settings.html'
+                };
+                if (pageMap[page]) {
+                    showStyledMessage('Redirecting to: ' + pageMap[page], 'debug');
+                    window.location.href = pageMap[page];
+                }
+            }
+        });
+    });
+}
+
+// Sidebar menu animations (for non-navigation items, only if sidebar exists)
+if (sidebar) {
+    const sidebarMenuItems = document.querySelectorAll('.sidebar-menu li:not(.nav-item)');
+
+    sidebarMenuItems.forEach(item => {
+        item.addEventListener('click', function() {
         // Remove active class from all items with animation
         sidebarMenuItems.forEach(i => {
             i.classList.remove('active');
@@ -75,15 +216,17 @@ sidebarMenuItems.forEach(item => {
             this.style.transform = 'translateX(0)';
         }
     });
-});
+    });
+}
 
 // Notification badge animation removed
+// Notification handlers moved to history.js
 
 // Logout functionality (placeholder)
 const logoutBtn = document.querySelector('.logout-btn');
 logoutBtn.addEventListener('click', function() {
     // In a real app, this would handle logout
-    alert('Logout functionality would be implemented here');
+    showStyledMessage('Logout functionality would be implemented here.', 'info');
 });
 
 // Button hover effects
@@ -114,74 +257,97 @@ cards.forEach(card => {
 
 // Navigation handler - only for sidebar menu items
 function setupNavigation() {
-    const sidebarNavItems = document.querySelectorAll('.sidebar-menu .nav-item');
+    // Set active state based on current page
+    setActiveNavItem();
+}
 
-    sidebarNavItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const page = this.dataset.page;
+function setActiveNavItem() {
+    const currentPath = window.location.pathname;
+    const currentFile = currentPath.split('/').pop();
 
-            // Update active state in sidebar only
-            document.querySelectorAll('.sidebar-menu .nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
+    // Remove active class from all items
+    document.querySelectorAll('.sidebar-menu .nav-item').forEach(nav => nav.classList.remove('active'));
 
-            // Navigate to page
-            switch(page) {
-                case 'dashboard':
-                    window.location.href = 'patient.html';
-                    break;
-                case 'appointments':
-                    window.location.href = 'appointments.html';
-                    break;
-                case 'history':
-                    window.location.href = 'history.html';
-                    break;
-                case 'settings':
-                    window.location.href = 'settings.html';
-                    break;
-            }
-        });
-    });
+    // Set active based on current page
+    if (currentFile === 'patient.html') {
+        document.querySelector('.sidebar-menu .nav-item[data-page="dashboard"]').classList.add('active');
+    } else if (currentFile === 'appointments.html') {
+        document.querySelector('.sidebar-menu .nav-item[data-page="appointments"]').classList.add('active');
+    } else if (currentFile === 'history.html') {
+        document.querySelector('.sidebar-menu .nav-item[data-page="history"]').classList.add('active');
+    } else if (currentFile === 'settings.html') {
+        document.querySelector('.sidebar-menu .nav-item[data-page="settings"]').classList.add('active');
+    }
 }
 
 // Add staggered animation to sidebar elements on load
 document.addEventListener('DOMContentLoaded', function() {
-    // Setup navigation
-    setupNavigation();
-    // Animate patient profile first
-    const patientProfile = document.querySelector('.patient-profile');
-    if (patientProfile) {
-        patientProfile.style.opacity = '0';
-        patientProfile.style.transform = 'translateX(-30px)';
-        setTimeout(() => {
-            patientProfile.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-            patientProfile.style.opacity = '1';
-            patientProfile.style.transform = 'translateX(0)';
-        }, 200);
+    // Theme toggle functionality
+    const themeSwitch = document.getElementById('theme-switch');
+
+    // Check for saved theme preference or default to light mode
+    const currentTheme = localStorage.getItem('theme') || 'light';
+
+    // Apply the current theme
+    if (currentTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        themeSwitch.checked = true;
+    } else {
+        document.body.removeAttribute('data-theme');
+        themeSwitch.checked = false;
     }
 
-    // Animate menu items with staggered delay
-    const menuItems = document.querySelectorAll('.sidebar-menu li');
-    menuItems.forEach((item, index) => {
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(-20px)';
-        setTimeout(() => {
-            item.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-            item.style.opacity = '1';
-            item.style.transform = 'translateX(0)';
-        }, 400 + index * 80);
+    // Toggle theme when switch is clicked
+    themeSwitch.addEventListener('change', function() {
+        if (this.checked) {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
     });
 
-    // Animate footer elements
-    const footerElements = document.querySelectorAll('.sidebar-footer > *');
-    footerElements.forEach((element, index) => {
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            element.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
-        }, 800 + index * 100);
-    });
+    // Setup navigation
+    setupNavigation();
+    // Animate sidebar elements (only if sidebar exists)
+    if (sidebar) {
+        // Animate patient profile first
+        const patientProfile = document.querySelector('.patient-profile');
+        if (patientProfile) {
+            patientProfile.style.opacity = '0';
+            patientProfile.style.transform = 'translateX(-30px)';
+            setTimeout(() => {
+                patientProfile.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                patientProfile.style.opacity = '1';
+                patientProfile.style.transform = 'translateX(0)';
+            }, 200);
+        }
+
+        // Animate menu items with staggered delay
+        const menuItems = document.querySelectorAll('.sidebar-menu li');
+        menuItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                item.style.opacity = '1';
+                item.style.transform = 'translateX(0)';
+            }, 400 + index * 80);
+        });
+
+        // Animate footer elements
+        const footerElements = document.querySelectorAll('.sidebar-footer > *');
+        footerElements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                element.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 800 + index * 100);
+        });
+    }
 
     // Initialize charts
     initializeCharts();
@@ -201,11 +367,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Avatar management
+// Avatar management (only if sidebar exists)
 function loadAvatar() {
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
+    if (sidebar) {
+        const avatarContainer = document.querySelector('.avatar-img');
+        if (avatarContainer) {
+            updateAvatarDisplay(avatarContainer);
+        }
     }
 
     // Listen for avatar updates from other pages
@@ -225,16 +393,18 @@ function loadAvatar() {
 }
 
 function updateSidebar() {
-    // Update name
-    const userName = localStorage.getItem('userName') || '';
-    const sidebarName = document.querySelector('.patient-info h4');
-    if (sidebarName) {
-        sidebarName.textContent = userName;
-    }
-    // Update avatar
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
+    if (sidebar) {
+        // Update name
+        const userName = localStorage.getItem('userName') || '';
+        const sidebarName = document.querySelector('.patient-info h4');
+        if (sidebarName) {
+            sidebarName.textContent = userName;
+        }
+        // Update avatar
+        const avatarContainer = document.querySelector('.avatar-img');
+        if (avatarContainer) {
+            updateAvatarDisplay(avatarContainer);
+        }
     }
 }
 
@@ -420,74 +590,23 @@ function initializeCharts() {
             }
         });
     }
-});
 
-// Load and display appointment invitations
-function loadAppointmentInvitations() {
-    // Get current patient ID (simulate based on email or use a default)
-    const currentPatientEmail = localStorage.getItem('email') || 'alice.dupont@email.com';
-    const patientId = getPatientIdFromEmail(currentPatientEmail);
+    // Load and display appointment invitations
+    loadAppointmentInvitations();
+    loadRecentEmails();
 
-    const invitationsKey = `patient_${patientId}_invitations`;
-    let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
-
-    // For demo purposes, add a sample invitation if none exist
-    if (invitations.length === 0 && currentPatientEmail === 'alice.dupont@email.com') {
-        const sampleInvitation = {
-            id: 'sample-1',
-            patient: {
-                id: '1',
-                name: 'Alice Dupont',
-                email: 'alice.dupont@email.com'
-            },
-            doctor: {
-                name: 'Dr. Smith',
-                email: 'dr.smith@medisync.com'
-            },
-            date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 days from now
-            time: '10:00',
-            type: 'consultation',
-            notes: 'Please bring your medical records and insurance card.',
-            sentAt: new Date().toISOString(),
-            status: 'pending'
-        };
-        invitations = [sampleInvitation];
-        localStorage.setItem(invitationsKey, JSON.stringify(invitations));
-    }
-
-    const container = document.querySelector('.invitations-container');
-
-    const pendingInvitations = invitations.filter(inv => inv.status === 'pending');
-
-    if (pendingInvitations.length === 0) {
-        container.innerHTML = `
-            <div class="no-invitations-message">
-                <i class="fas fa-inbox"></i>
-                <h3>No pending invitations</h3>
-                <p>You'll receive appointment invitations from doctors here</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = '';
-
-    pendingInvitations.forEach(invitation => {
-        const invitationCard = createInvitationCard(invitation);
-        container.appendChild(invitationCard);
+    const scheduleButtons = document.querySelectorAll('.btn-primary');
+    scheduleButtons.forEach(button => {
+        if (button.textContent.includes('Schedule') || button.textContent.includes('Appointment')) {
+            button.addEventListener('click', function() {
+                window.location.href = 'appointments.html';
+            });
+        }
     });
 }
 
-function getPatientIdFromEmail(email) {
-    // Simple mapping for demo - in real app, this would be from user session
-    const emailToIdMap = {
-        'alice.dupont@email.com': '1',
-        'jean.martin@email.com': '2',
-        'marie.leroy@email.com': '3',
-        'pierre.durand@email.com': '4',
-        'sophie.moreau@email.com': '5'
-    };
-    return emailToIdMap[email] || '1';
+function getCurrentPatientId() {
+    return localStorage.getItem('userId') || '';
 }
 
 function createInvitationCard(invitation) {
@@ -561,6 +680,39 @@ function createInvitationCard(invitation) {
     return card;
 }
 
+function loadAppointmentInvitations() {
+    const container = document.querySelector('.invitations-container');
+    if (!container) return;
+
+    const patientId = getCurrentPatientId();
+    if (!patientId) {
+        container.innerHTML = `
+            <div class="no-invitations-message">
+                <i class="fas fa-inbox"></i>
+                <h3>No pending invitations</h3>
+                <p>Sign in to see invitations from your doctor</p>
+            </div>`;
+        return;
+    }
+
+    const invitationsKey = `patient_${patientId}_invitations`;
+    const invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+    const pending = invitations.filter((inv) => inv.status === 'pending');
+
+    if (pending.length === 0) {
+        container.innerHTML = `
+            <div class="no-invitations-message">
+                <i class="fas fa-inbox"></i>
+                <h3>No pending invitations</h3>
+                <p>You'll receive appointment invitations from doctors here</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = '';
+    pending.forEach((inv) => container.appendChild(createInvitationCard(inv)));
+}
+
 function acceptInvitation(invitationId) {
     updateInvitationStatus(invitationId, 'accepted');
     showNotification('Appointment accepted successfully!', 'success');
@@ -574,8 +726,8 @@ function declineInvitation(invitationId) {
 }
 
 function updateInvitationStatus(invitationId, newStatus) {
-    const currentPatientEmail = localStorage.getItem('email') || 'alice.dupont@email.com';
-    const patientId = getPatientIdFromEmail(currentPatientEmail);
+    const patientId = getCurrentPatientId();
+    if (!patientId) return;
     const invitationsKey = `patient_${patientId}_invitations`;
 
     let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
@@ -646,52 +798,27 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Load invitations and emails when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    loadAppointmentInvitations();
-    loadRecentEmails();
-});
+// Load invitations and emails when page loads (already handled in main DOMContentLoaded above)
 
 // Load and display recent emails
 function loadRecentEmails() {
-    const currentPatientEmail = localStorage.getItem('email') || 'alice.dupont@email.com';
-    let sentEmails = JSON.parse(localStorage.getItem('sentEmails') || '[]');
-
-    // Filter emails for current patient
-    let patientEmails = sentEmails.filter(email => email.to === currentPatientEmail);
-
-    // For demo purposes, add a sample email if none exist
-    if (patientEmails.length === 0 && currentPatientEmail === 'alice.dupont@email.com') {
-        const sampleEmail = {
-            to: 'alice.dupont@email.com',
-            from: 'dr.smith@medisync.com',
-            subject: 'Appointment Invitation - MediSync',
-            body: `Dear Alice Dupont,
-
-You have received an appointment invitation from Dr. Smith.
-
-Appointment Details:
-- Date: ${new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-})}
-- Time: 10:00
-- Type: General Consultation
-
-Please log in to your MediSync account to accept or decline this appointment.
-
-Best regards,
-MediSync Team`,
-            sentAt: new Date(Date.now() - 30 * 60 * 1000).toISOString() // 30 minutes ago
-        };
-        patientEmails = [sampleEmail];
-        sentEmails.push(sampleEmail);
-        localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
-    }
+    const currentPatientEmail = localStorage.getItem('email');
+    const sentEmails = JSON.parse(localStorage.getItem('sentEmails') || '[]');
 
     const container = document.querySelector('.emails-container');
+    if (!container) return;
+
+    if (!currentPatientEmail) {
+        container.innerHTML = `
+            <div class="no-emails-message">
+                <i class="fas fa-envelope-open"></i>
+                <h3>No recent emails</h3>
+                <p>Sign in to see messages sent to your account</p>
+            </div>`;
+        return;
+    }
+
+    const patientEmails = sentEmails.filter((email) => email.to === currentPatientEmail);
 
     if (patientEmails.length === 0) {
         container.innerHTML = `

@@ -64,14 +64,27 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
-                <h1>Doctor Dashboard</h1>
-                <div class="header-actions">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                </div>
-            </header>
+             <header class="header">
+                 <h1>Doctor Dashboard</h1>
+                 <div class="header-actions">
+                     <div class="notifications">
+                         <i class="fas fa-bell"></i>
+                         <div class="notification-badge" style="display: none;">0</div>
+
+                         <!-- Notifications Dropdown -->
+                         <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                             <div class="notifications-header">
+                                 <h4>Notifications</h4>
+                                 <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                             </div>
+                             <div class="notifications-list" id="notifications-list"></div>
+                             <div class="notifications-footer">
+                                 <button class="view-all" id="view-all-notifications">View all notifications</button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </header>
 
             <div class="dashboard-content">
                 <!-- Welcome Section -->
@@ -88,7 +101,7 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>0</h3>
+                            <h3 id="total-patients-card">0</h3>
                             <p>Total Patients</p>
                         </div>
                     </div>
@@ -97,7 +110,7 @@
                             <i class="fas fa-calendar-day"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>0</h3>
+                            <h3 id="todays-appointments-card">0</h3>
                             <p>Today's Appointments</p>
                         </div>
                     </div>
@@ -106,7 +119,7 @@
                             <i class="fas fa-stethoscope"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>0</h3>
+                            <h3 id="completed-consultations-card">0</h3>
                             <p>Completed Consultations</p>
                         </div>
                     </div>
@@ -115,7 +128,7 @@
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>0%</h3>
+                            <h3 id="patient-satisfaction-card">0%</h3>
                             <p>Average Patient Satisfaction</p>
                         </div>
                     </div>
@@ -176,7 +189,7 @@
                     <h2>Practice Statistics</h2>
                     <div class="stats-overview">
                         <div class="stat-box">
-                            <div class="stat-value">0</div>
+                            <div class="stat-value" id="practice-total-patients">0</div>
                             <div class="stat-label">Total Patients</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
@@ -184,7 +197,7 @@
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-value">0</div>
+                            <div class="stat-value" id="practice-active-patients">0</div>
                             <div class="stat-label">Active Patients</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
@@ -192,7 +205,7 @@
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-value">0</div>
+                            <div class="stat-value" id="practice-todays-appointments">0</div>
                             <div class="stat-label">Today's Appointments</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
@@ -200,7 +213,7 @@
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-value">0</div>
+                            <div class="stat-value" id="practice-pending-reviews">0</div>
                             <div class="stat-label">Pending Reviews</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
@@ -219,9 +232,9 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Cardiology</span>
-                                    <span class="specialty-count">0 patients</span>
+                                    <span class="specialty-count" id="specialty-count-cardiology">0 patients</span>
                                 </div>
-                                <div class="specialty-percentage">0%</div>
+                                <div class="specialty-percentage" id="specialty-percentage-cardiology">0%</div>
                             </div>
                             <div class="specialty-item">
                                 <div class="specialty-icon dentistry">
@@ -229,9 +242,9 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Dentistry</span>
-                                    <span class="specialty-count">0 patients</span>
+                                    <span class="specialty-count" id="specialty-count-dentistry">0 patients</span>
                                 </div>
-                                <div class="specialty-percentage">0%</div>
+                                <div class="specialty-percentage" id="specialty-percentage-dentistry">0%</div>
                             </div>
                             <div class="specialty-item">
                                 <div class="specialty-icon neurology">
@@ -239,9 +252,9 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Neurology</span>
-                                    <span class="specialty-count">0 patients</span>
+                                    <span class="specialty-count" id="specialty-count-neurology">0 patients</span>
                                 </div>
-                                <div class="specialty-percentage">0%</div>
+                                <div class="specialty-percentage" id="specialty-percentage-neurology">0%</div>
                             </div>
                             <div class="specialty-item">
                                 <div class="specialty-icon ophthalmology">
@@ -249,9 +262,9 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Ophthalmology</span>
-                                    <span class="specialty-count">0 patients</span>
+                                    <span class="specialty-count" id="specialty-count-ophthalmology">0 patients</span>
                                 </div>
-                                <div class="specialty-percentage">0%</div>
+                                <div class="specialty-percentage" id="specialty-percentage-ophthalmology">0%</div>
                             </div>
                             <div class="specialty-item">
                                 <div class="specialty-icon general-medicine">
@@ -259,9 +272,9 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">General Medicine</span>
-                                    <span class="specialty-count">0 patients</span>
+                                    <span class="specialty-count" id="specialty-count-general-medicine">0 patients</span>
                                 </div>
-                                <div class="specialty-percentage">0%</div>
+                                <div class="specialty-percentage" id="specialty-percentage-general-medicine">0%</div>
                             </div>
                         </div>
                     </div>
@@ -291,6 +304,21 @@
         </main>
     </div>
 
+    <!-- Notifications Modal -->
+    <div id="notifications-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>All Notifications</h3>
+                <span class="modal-close" id="notifications-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="notifications-list" id="modal-notifications-list"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="doctor-dashboard.js"></script>
+    <script src="../notifications.js"></script>
+    <script src="history.js"></script>
 </body>
 </html>

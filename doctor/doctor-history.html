@@ -64,21 +64,32 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
-                <div>
-                    <h1>Consultation History</h1>
-                    <p class="user-info"></p>
-                </div>
-                <div class="header-actions">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                </div>
-            </header>
+             <header class="header">
+                 <div>
+                     <h1>Consultation History</h1>
+                     <p class="user-info"></p>
+                 </div>
+                 <div class="header-actions">
+                     <div class="notifications">
+                         <i class="fas fa-bell"></i>
+                         <div class="notification-badge" style="display: none;">0</div>
+                     </div>
+                     <!-- Notifications Dropdown -->
+                      <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                          <div class="notifications-header">
+                              <h4>Notifications</h4>
+                              <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                          </div>
+                           <div class="notifications-list" id="notifications-list">
+                               <!-- Notifications loaded dynamically -->
+                           </div>
+                      </div>
+                 </div>
+             </header>
 
             <div class="history-content">
                 <!-- Stats Summary -->
-                <div class="stats-summary" style="background: #f8f9fa !important;">
+                <div class="stats-summary">
                     <i class="fas fa-user-md"></i> <span id="total-appointments">0</span> Total |
                     <i class="fas fa-check-circle"></i> <span id="completed-appointments">0</span> Completed |
                     <i class="fas fa-clock"></i> <span id="upcoming-appointments">0</span> Upcoming
@@ -149,14 +160,15 @@
                     <!-- Consultations will be loaded here -->
                 </section>
 
-                <!-- Empty State -->
-                <div id="empty-state" class="empty-state" style="display: none;">
-                    <div class="empty-content">
-                        <i class="fas fa-calendar-times"></i>
-                        <h3>No consultations found</h3>
-                        <p>No consultations found matching your criteria.</p>
-                    </div>
-                </div>
+                 <!-- Empty State -->
+                 <div id="empty-state" class="empty-state">
+                     <div class="empty-content">
+                         <i class="fas fa-calendar-times"></i>
+                         <h3>Please set your availability first before viewing your schedule.</h3>
+                         <p>Set your working hours and availability to start receiving consultations.</p>
+                         <button class="btn-primary" onclick="window.location.href='doctor-availability.html'">Set Availability</button>
+                     </div>
+                 </div>
 
                 <!-- Load More Button -->
                 <div id="load-more-container" class="load-more-container" style="display: none;">
@@ -224,7 +236,21 @@
         <span>Changes saved</span>
     </div>
 
+    <!-- Notifications Modal -->
+    <div id="notifications-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>All Notifications</h3>
+                <span class="modal-close" id="notifications-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="notifications-list" id="modal-notifications-list"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="doctor-dashboard.js"></script>
+    <script src="../notifications.js"></script>
     <script src="history.js"></script>
 </body>
 </html>

@@ -1,3 +1,176 @@
+// Global function to show styled messages instead of alerts/console.log
+function showStyledMessage(message, type = 'info', duration = 5000) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('styled-message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'styled-message-container';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Create message card
+    const messageCard = document.createElement('div');
+    messageCard.style.cssText = `
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
+        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+    };
+
+    const colorScheme = colors[type] || colors.info;
+
+    messageCard.style.background = colorScheme.bg;
+    messageCard.style.borderColor = colorScheme.border;
+    messageCard.style.color = colorScheme.text;
+
+    // Create icon based on type
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle',
+        warning: 'exclamation-circle',
+        info: 'info-circle',
+        debug: 'bug'
+    };
+
+    const iconName = icons[type] || 'info-circle';
+
+    messageCard.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
+                ${message}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: ${colorScheme.text};
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0;
+                margin-left: 8px;
+                opacity: 0.7;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    messageContainer.appendChild(messageCard);
+
+    // Animate in
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(0)';
+        messageCard.style.opacity = '1';
+    }, 10);
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageCard.parentElement) {
+                messageCard.style.transform = 'translateX(100%)';
+                messageCard.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageCard.parentElement) {
+                        messageCard.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// Override console methods to show styled messages
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+console.log = function(...args) {
+    showStyledMessage(args.join(' '), 'debug', 3000);
+    originalConsoleLog.apply(console, args);
+};
+
+console.warn = function(...args) {
+    showStyledMessage(args.join(' '), 'warning', 5000);
+    originalConsoleWarn.apply(console, args);
+};
+
+console.error = function(...args) {
+    showStyledMessage(args.join(' '), 'error', 8000);
+    originalConsoleError.apply(console, args);
+};
+
+// Override alert to show styled messages
+const originalAlert = window.alert;
+window.alert = function(message) {
+    showStyledMessage(message, 'info', 6000);
+    // Still call original alert for compatibility
+    // originalAlert(message);
+};
+
+function buildSlotsFromStoredAvailability(date) {
+    const saved = localStorage.getItem('doctorAvailability');
+    if (!saved) return [];
+    let availability;
+    try {
+        availability = JSON.parse(saved);
+    } catch {
+        return [];
+    }
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const selectedDayName = dayNames[date.getDay()];
+    if (!availability.days || !availability.days.includes(selectedDayName)) {
+        return [];
+    }
+    const startTime = availability.startTime || '09:00';
+    const endTime = availability.endTime || '17:00';
+    const startHour = parseInt(startTime.split(':')[0], 10);
+    const startMinute = parseInt(startTime.split(':')[1], 10);
+    const endHour = parseInt(endTime.split(':')[0], 10);
+    const endMinute = parseInt(endTime.split(':')[1], 10);
+    const slots = [];
+    let currentHour = startHour;
+    let currentMinute = startMinute;
+    while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+        slots.push(
+            `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`
+        );
+        currentMinute += 30;
+        if (currentMinute >= 60) {
+            currentMinute = 0;
+            currentHour++;
+        }
+    }
+    return slots;
+}
+
 // Appointments Page JavaScript
 
 class AppointmentCalendar {
@@ -7,15 +180,14 @@ class AppointmentCalendar {
         this.selectedDoctor = null;
         this.availableSlots = {};
 
-        // Mock data for available slots (in real app, this would come from backend)
-        this.initializeMockData();
+        this.initializeAvailableSlotsFromStorage();
 
         this.init();
     }
 
-    initializeMockData() {
-        // Generate mock availability data
-        const doctors = ['dr-johnson', 'dr-chen', 'dr-smith', 'dr-brown'];
+    initializeAvailableSlotsFromStorage() {
+        this.availableSlots = {};
+        const doctors = JSON.parse(localStorage.getItem('registeredDoctors') || '[]');
         const baseDate = new Date();
 
         for (let i = 0; i < 30; i++) {
@@ -24,67 +196,27 @@ class AppointmentCalendar {
 
             const dateKey = this.formatDate(date);
             this.availableSlots[dateKey] = {};
-
-            doctors.forEach(doctor => {
-                this.availableSlots[dateKey][doctor] = this.generateTimeSlots(date, doctor);
+            const slotsForDay = buildSlotsFromStoredAvailability(date);
+            doctors.forEach((doctor) => {
+                this.availableSlots[dateKey][doctor.id] = [...slotsForDay];
             });
         }
     }
 
-    generateTimeSlots(date, doctor) {
-        // Simulate different availability patterns for different doctors
-        const dayOfWeek = date.getDay();
-        const slots = [];
-
-        // Base time slots (9 AM to 5 PM)
-        const baseSlots = [
-            '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-        ];
-
-        // Different doctors have different availability
-        let availableSlots = [...baseSlots];
-
-        switch (doctor) {
-            case 'dr-johnson':
-                // Cardiologist - available Mon, Wed, Fri
-                if ([1, 3, 5].includes(dayOfWeek)) {
-                    availableSlots = availableSlots.slice(0, 8); // Shorter day
-                } else {
-                    availableSlots = [];
-                }
-                break;
-            case 'dr-chen':
-                // Dentist - available Tue, Thu, Sat
-                if ([2, 4, 6].includes(dayOfWeek)) {
-                    availableSlots = availableSlots.slice(2, 10);
-                } else {
-                    availableSlots = [];
-                }
-                break;
-            case 'dr-smith':
-                // GP - available most days
-                if (dayOfWeek === 0) { // Sunday
-                    availableSlots = [];
-                } else {
-                    availableSlots = availableSlots.slice(0, 10);
-                }
-                break;
-            case 'dr-brown':
-                // Orthopedic - available Mon-Fri
-                if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-                    availableSlots = availableSlots.slice(4, 12);
-                } else {
-                    availableSlots = [];
-                }
-                break;
-        }
-
-        // Randomly remove some slots to simulate bookings
-        return availableSlots.filter(() => Math.random() > 0.3);
+    populateDoctorSelect() {
+        const select = document.getElementById('doctor-select');
+        if (!select) return;
+        select.innerHTML = '<option value="">Select a doctor</option>';
+        JSON.parse(localStorage.getItem('registeredDoctors') || '[]').forEach((d) => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = `${d.name} (${d.email})`;
+            select.appendChild(opt);
+        });
     }
 
     init() {
+        this.populateDoctorSelect();
         this.renderCalendar();
         this.setupEventListeners();
         this.updateSidebar(); // Update with current data
@@ -343,26 +475,25 @@ class AppointmentCalendar {
         // Check GDPR consent
         if (!document.getElementById('gdpr-consent').checked) {
             isValid = false;
-            alert('Please accept the privacy notice to continue.');
+        showStyledMessage('Please accept the privacy notice to continue.', 'warning');
         }
 
         return isValid;
     }
 
     showBookingSuccess(bookingData) {
-        const doctorNames = {
-            'dr-johnson': '',
-            'dr-chen': '',
-            'dr-smith': '',
-            'dr-brown': ''
-        };
+        const doctorId = String(bookingData.doctor);
+        const escaped =
+            typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(doctorId) : doctorId.replace(/\\/g, '\\\\');
+        const doctorLabel =
+            document.querySelector(`#doctor-select option[value="${escaped}"]`)?.textContent || doctorId;
 
         const successMessage = `
             <div style="text-align: center; padding: 20px;">
                 <i class="fas fa-check-circle" style="font-size: 48px; color: var(--accent-color); margin-bottom: 20px;"></i>
                 <h3 style="color: var(--text-primary); margin-bottom: 15px;">Appointment Booked Successfully!</h3>
                 <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 5px 0;"><strong>Doctor:</strong> ${doctorNames[bookingData.doctor]}</p>
+                    <p style="margin: 5px 0;"><strong>Doctor:</strong> ${doctorLabel}</p>
                     <p style="margin: 5px 0;"><strong>Date:</strong> ${this.formatDateReadable(bookingData.date)}</p>
                     <p style="margin: 5px 0;"><strong>Time:</strong> ${bookingData.time}</p>
                     <p style="margin: 5px 0;"><strong>Type:</strong> ${bookingData.customType || bookingData.type.charAt(0).toUpperCase() + bookingData.type.slice(1)}</p>
@@ -397,21 +528,22 @@ class AppointmentCalendar {
         this.selectedDate = null;
         this.selectedTime = null;
         this.selectedDoctor = null;
+        this.populateDoctorSelect();
         this.renderCalendar();
         this.updateTimeSlots();
     }
 
     sendEmailReminder(bookingData) {
         // Simulate sending email reminder
-        console.log('Email reminder sent:', {
+        showStyledMessage('Email reminder sent: ' + JSON.stringify({
             to: bookingData.email,
             subject: 'Appointment Reminder - MediSync',
             body: `Your appointment is scheduled for ${this.formatDateReadable(bookingData.date)} at ${bookingData.time}`
-        });
+        }), 'debug');
 
         // In a real app, this would make an API call to send the email
         setTimeout(() => {
-            console.log('Automated email reminder sent successfully');
+            showStyledMessage('Automated email reminder sent successfully', 'success');
         }, 1000);
     }
 

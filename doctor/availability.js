@@ -1,8 +1,145 @@
+// Global function to show styled messages instead of alerts/console.log
+function showStyledMessage(message, type = 'info', duration = 5000) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('styled-message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'styled-message-container';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Create message card
+    const messageCard = document.createElement('div');
+    messageCard.style.cssText = `
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
+        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+    };
+
+    const colorScheme = colors[type] || colors.info;
+
+    messageCard.style.background = colorScheme.bg;
+    messageCard.style.borderColor = colorScheme.border;
+    messageCard.style.color = colorScheme.text;
+
+    // Create icon based on type
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle',
+        warning: 'exclamation-circle',
+        info: 'info-circle',
+        debug: 'bug'
+    };
+
+    const iconName = icons[type] || 'info-circle';
+
+    messageCard.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
+                ${message}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: ${colorScheme.text};
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0;
+                margin-left: 8px;
+                opacity: 0.7;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    messageContainer.appendChild(messageCard);
+
+    // Animate in
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(0)';
+        messageCard.style.opacity = '1';
+    }, 10);
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageCard.parentElement) {
+                messageCard.style.transform = 'translateX(100%)';
+                messageCard.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageCard.parentElement) {
+                        messageCard.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// Override console methods to show styled messages
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+console.log = function(...args) {
+    showStyledMessage(args.join(' '), 'debug', 3000);
+    originalConsoleLog.apply(console, args);
+};
+
+console.warn = function(...args) {
+    showStyledMessage(args.join(' '), 'warning', 5000);
+    originalConsoleWarn.apply(console, args);
+};
+
+console.error = function(...args) {
+    showStyledMessage(args.join(' '), 'error', 8000);
+    originalConsoleError.apply(console, args);
+};
+
+// Override alert to show styled messages
+const originalAlert = window.alert;
+window.alert = function(message) {
+    showStyledMessage(message, 'info', 6000);
+    // Still call original alert for compatibility
+    // originalAlert(message);
+};
+
 // Availability Page JavaScript
 
 // Only load on availability pages
 if (!window.location.href.includes('doctor-availability.html') && !window.location.href.includes('debug-availability.html')) {
-    console.log('Availability script skipped - not on availability page');
+    showStyledMessage('Availability script skipped - not on availability page', 'debug');
 } else {
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-        console.log('Availability page loading...');
+        showStyledMessage('Availability page loading...', 'debug');
 
         // Load saved availability (with error handling)
         if (typeof loadAvailability === 'function') {
@@ -39,12 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 100);
 
-        console.log('Availability page loaded successfully');
+        showStyledMessage('Availability page loaded successfully', 'debug');
     } catch (error) {
         console.error('Error loading availability page:', error);
         // Don't show alert for minor errors, just log them
         if (error.message && !error.message.includes('undefined')) {
-            alert('Page loaded with some errors. Check console for details.');
+            showStyledMessage('Page loaded with some errors. Check console for details.', 'warning');
         }
     }
 });
@@ -58,7 +195,7 @@ function saveAvailability() {
     const dayCards = document.querySelectorAll('.day-card input');
 
     if (!startTimeEl || !endTimeEl || dayCards.length === 0) {
-        alert('Error: Required form elements not found. Please refresh the page.');
+        showStyledMessage('Error: Required form elements not found. Please refresh the page.', 'error');
         return;
     }
 
@@ -67,17 +204,17 @@ function saveAvailability() {
     const endTime = endTimeEl.value;
 
     if (selectedDays.length === 0) {
-        alert('Please select at least one day');
+        showStyledMessage('Please select at least one day', 'warning');
         return;
     }
 
     if (!startTime || !endTime) {
-        alert('Please set both start and end times');
+        showStyledMessage('Please set both start and end times', 'warning');
         return;
     }
 
     if (startTime >= endTime) {
-        alert('Start time must be before end time');
+        showStyledMessage('Start time must be before end time', 'warning');
         return;
     }
 
@@ -89,7 +226,7 @@ function saveAvailability() {
 
     localStorage.setItem('doctorAvailability', JSON.stringify(availability));
 
-    alert('Availability saved successfully!');
+    showStyledMessage('Availability saved successfully!', 'success');
     displayCurrentAvailability(availability);
 }
 
@@ -156,7 +293,7 @@ function showScheduleView() {
         // Get saved availability
         const saved = localStorage.getItem('doctorAvailability');
         if (!saved) {
-            alert('Please set your availability first before viewing your schedule.');
+            showStyledMessage('Please set your availability first before viewing your schedule.', 'warning');
             return;
         }
 
@@ -194,7 +331,7 @@ function showScheduleView() {
         });
     } catch (error) {
         console.error('Error showing schedule view:', error);
-        alert('An error occurred while displaying the schedule. Please try again.');
+        showStyledMessage('An error occurred while displaying the schedule. Please try again.', 'error');
     }
 }
 
@@ -275,7 +412,7 @@ window.AvailabilityManager = {
             // Simple export functionality
             const saved = localStorage.getItem('doctorAvailability');
             if (!saved) {
-                alert('No availability data to export.');
+                showStyledMessage('No availability data to export.', 'warning');
                 return;
             }
 
@@ -294,10 +431,10 @@ window.AvailabilityManager = {
             link.download = 'doctor_schedule.json';
             link.click();
 
-            alert('Schedule exported successfully!');
+            showStyledMessage('Schedule exported successfully!', 'success');
         } catch (error) {
             console.error('Export error:', error);
-            alert('Error exporting schedule. Please try again.');
+            showStyledMessage('Error exporting schedule. Please try again.', 'error');
         }
     }
 };
@@ -335,14 +472,7 @@ function initializeInvitationSystem() {
 
 function loadPatientsList() {
     try {
-        // Mock patient data - in a real app, this would come from an API
-        const mockPatients = [
-            { id: '1', name: 'Alice Dupont', email: 'alice.dupont@email.com', phone: '+33 6 12 34 56 78' },
-            { id: '2', name: 'Jean Martin', email: 'jean.martin@email.com', phone: '+33 6 98 76 54 32' },
-            { id: '3', name: 'Marie Leroy', email: 'marie.leroy@email.com', phone: '+33 6 55 44 33 22' },
-            { id: '4', name: 'Pierre Durand', email: 'pierre.durand@email.com', phone: '+33 6 11 22 33 44' },
-            { id: '5', name: 'Sophie Moreau', email: 'sophie.moreau@email.com', phone: '+33 6 77 88 99 00' }
-        ];
+        const patients = JSON.parse(localStorage.getItem('registeredPatients') || '[]');
 
         const patientSelect = document.getElementById('patient-select');
         if (!patientSelect) {
@@ -350,7 +480,8 @@ function loadPatientsList() {
             return;
         }
 
-        mockPatients.forEach(patient => {
+        patientSelect.innerHTML = '<option value="">Select a patient...</option>';
+        patients.forEach(patient => {
             const option = document.createElement('option');
             option.value = patient.id;
             option.textContent = `${patient.name} (${patient.email})`;
@@ -458,7 +589,7 @@ function sendInvitation() {
     const typeSelect = document.getElementById('appointment-type');
 
     if (!patientSelect.value || !dateInput.value || !timeSelect.value || !typeSelect.value) {
-        alert('Please fill in all required fields');
+        showStyledMessage('Please fill in all required fields', 'warning');
         return;
     }
 
@@ -467,8 +598,8 @@ function sendInvitation() {
     const patientData = JSON.parse(selectedOption.dataset.patient);
 
     // Get doctor's info
-    const doctorName = localStorage.getItem('userName') || 'Dr. [Your Name]';
-    const doctorEmail = localStorage.getItem('email') || 'doctor@medisync.com';
+    const doctorName = localStorage.getItem('userName') || '';
+    const doctorEmail = localStorage.getItem('email') || '';
 
     // Get form data
     const invitationData = {
@@ -527,7 +658,7 @@ function previewInvitation() {
     const notesInput = document.getElementById('invitation-notes');
 
     if (!patientSelect.value || !dateInput.value || !timeSelect.value) {
-        alert('Please select a patient, date, and time first');
+        showStyledMessage('Please select a patient, date, and time first', 'warning');
         return;
     }
 
@@ -565,7 +696,7 @@ function previewInvitation() {
 
                 <p style="margin-bottom: 0;">
                     Best regards,<br>
-                    ${localStorage.getItem('userName') || 'Dr. [Your Name]'}
+                    ${localStorage.getItem('userName') || ''}
                 </p>
             </div>
 
@@ -638,7 +769,7 @@ MediSync Team
     sentEmails.push(emailData);
     localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
 
-    console.log('Email sent:', emailData);
+    showStyledMessage('Email sent: ' + JSON.stringify(emailData), 'debug');
 }
 
 function resetInvitationForm() {

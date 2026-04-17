@@ -1,3 +1,140 @@
+// Global function to show styled messages instead of alerts/console.log
+function showStyledMessage(message, type = 'info', duration = 5000) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('styled-message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'styled-message-container';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Create message card
+    const messageCard = document.createElement('div');
+    messageCard.style.cssText = `
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
+        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+    };
+
+    const colorScheme = colors[type] || colors.info;
+
+    messageCard.style.background = colorScheme.bg;
+    messageCard.style.borderColor = colorScheme.border;
+    messageCard.style.color = colorScheme.text;
+
+    // Create icon based on type
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle',
+        warning: 'exclamation-circle',
+        info: 'info-circle',
+        debug: 'bug'
+    };
+
+    const iconName = icons[type] || 'info-circle';
+
+    messageCard.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
+                ${message}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: ${colorScheme.text};
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0;
+                margin-left: 8px;
+                opacity: 0.7;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    messageContainer.appendChild(messageCard);
+
+    // Animate in
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(0)';
+        messageCard.style.opacity = '1';
+    }, 10);
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageCard.parentElement) {
+                messageCard.style.transform = 'translateX(100%)';
+                messageCard.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageCard.parentElement) {
+                        messageCard.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// Override console methods to show styled messages
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+console.log = function(...args) {
+    showStyledMessage(args.join(' '), 'debug', 3000);
+    originalConsoleLog.apply(console, args);
+};
+
+console.warn = function(...args) {
+    showStyledMessage(args.join(' '), 'warning', 5000);
+    originalConsoleWarn.apply(console, args);
+};
+
+console.error = function(...args) {
+    showStyledMessage(args.join(' '), 'error', 8000);
+    originalConsoleError.apply(console, args);
+};
+
+// Override alert to show styled messages
+const originalAlert = window.alert;
+window.alert = function(message) {
+    showStyledMessage(message, 'info', 6000);
+    // Still call original alert for compatibility
+    // originalAlert(message);
+};
+
 // History Page JavaScript
 
 class AppointmentHistory {
@@ -30,8 +167,8 @@ class AppointmentHistory {
         setTimeout(() => this.updateStatistics(), 100);
 
         // Log initialization
-        console.log('🏥 Medical History initialized');
-        console.log('📊 Empty state ready');
+        showStyledMessage('🏥 Medical History initialized', 'debug');
+        showStyledMessage('📊 Empty state ready', 'debug');
     }
 
     setupEventListeners() {
@@ -368,7 +505,7 @@ class AppointmentHistory {
         const reasonTextarea = document.getElementById('reschedule-reason');
 
         if (!dateInput.value || !timeSelect.value) {
-            alert('Please select a date and time.');
+            showStyledMessage('Please select a date and time.', 'warning');
             return;
         }
 
@@ -381,18 +518,18 @@ class AppointmentHistory {
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            console.log('Appointment rescheduled:', {
+            showStyledMessage('Appointment rescheduled: ' + JSON.stringify({
                 appointmentId: this.selectedAppointment.id,
                 newDate: dateInput.value,
                 newTime: timeSelect.value,
                 reason: reasonTextarea.value
-            });
+            }), 'debug');
 
             this.showSuccessToast();
             this.closeModal();
 
         } catch (error) {
-            alert('Error rescheduling appointment. Please try again.');
+            showStyledMessage('Error rescheduling appointment. Please try again.', 'error');
         } finally {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -464,7 +601,10 @@ class AppointmentHistory {
 
 // Initialize the history page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new AppointmentHistory();
+    const hasHistoryElements = document.getElementById('search-input') || document.getElementById('appointments-list');
+    if (hasHistoryElements) {
+        new AppointmentHistory();
+    }
     loadAvatar();
 });
 
@@ -492,7 +632,7 @@ function updateAvatarDisplay(avatarContainer) {
 
     if (savedImage) {
         // Display saved image
-        const img = document.createElement('img');
+        let img = document.createElement('img');
         img.src = savedImage;
         img.alt = 'Avatar';
         img.onload = () => {
@@ -505,7 +645,7 @@ function updateAvatarDisplay(avatarContainer) {
         const nameParts = userName.split(' ');
         const firstName = nameParts[0] || '';
         const lastName = nameParts[1] || '';
-        const initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
+        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
         if (!initials.trim()) initials = '';
 
         const span = document.createElement('span');
