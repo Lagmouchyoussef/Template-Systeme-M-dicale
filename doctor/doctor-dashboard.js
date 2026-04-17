@@ -584,6 +584,154 @@ function initPage() {
     initButtonInteractions();
     initCardHoverEffects();
     initKeyboardNavigation();
+    loadPatientsDirectory();
+    initConsultationModal();
+}
+
+function loadPatientsDirectory() {
+    const grid = document.getElementById('patients-directory-grid');
+    if (!grid) return;
+    
+    // Using registeredPatients from localStorage (set by sync.js)
+    const patients = JSON.parse(localStorage.getItem('registeredPatients') || '[]');
+    
+    if (patients.length === 0) {
+        grid.innerHTML = `
+            <div class="no-data-message" style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-users" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No patients registered in the system yet.</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = '';
+    patients.forEach(patient => {
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: all 0.3s ease;
+        `;
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 50px; height: 50px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold;">
+                    ${patient.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">${patient.name}</h3>
+                    <p style="margin: 3px 0 0; font-size: 13px; color: var(--text-secondary);"><i class="fas fa-envelope"></i> ${patient.email}</p>
+                </div>
+            </div>
+            <button class="btn-primary send-consultation-btn" data-id="${patient.id}" data-name="${patient.name}" data-email="${patient.email}" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto;">
+                <i class="fas fa-paper-plane"></i> Send Consultation
+            </button>
+        `;
+        
+        // Add hover effect
+        card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-3px)');
+        card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
+        
+        grid.appendChild(card);
+    });
+
+    // Add event listeners to the buttons
+    document.querySelectorAll('.send-consultation-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const { id, name, email } = e.target.closest('button').dataset;
+            openConsultationModal(id, name, email);
+        });
+    });
+}
+
+function initConsultationModal() {
+    const modal = document.getElementById('send-consultation-modal');
+    const closeBtn = document.getElementById('consultation-modal-close');
+    const form = document.getElementById('send-consultation-form');
+
+    if (!modal || !closeBtn || !form) return;
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const doctorName = localStorage.getItem('userName') || 'Doctor';
+        const doctorId = localStorage.getItem('userId');
+        
+        const patientId = document.getElementById('consultation-patient-id').value;
+        const patientName = document.getElementById('consultation-patient-name').textContent;
+        const patientEmail = document.getElementById('consultation-patient-email').value;
+        const date = document.getElementById('consultation-date').value;
+        const time = document.getElementById('consultation-time').value;
+        const type = document.getElementById('consultation-type').value;
+        const notes = document.getElementById('consultation-notes').value;
+
+        // Create invitation object
+        const invitation = {
+            id: 'inv_' + Date.now(),
+            patientId: patientId,
+            patientName: patientName,
+            patientEmail: patientEmail,
+            doctorName: doctorName,
+            doctorId: doctorId,
+            date: date,
+            time: time,
+            type: type,
+            notes: notes,
+            status: 'pending',
+            createdAt: new Date().toISOString()
+        };
+
+        // Save to sent invitations (Doctor side)
+        const sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+        sentInvitations.push(invitation);
+        localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
+
+        // Save to patient's received invitations (Patient side)
+        const patientKey = 'patient_' + patientId + '_invitations';
+        const receivedInvitations = JSON.parse(localStorage.getItem(patientKey) || '[]');
+        receivedInvitations.push(invitation);
+        localStorage.setItem(patientKey, JSON.stringify(receivedInvitations));
+
+        // Close modal and show success
+        modal.style.display = 'none';
+        form.reset();
+        
+        if (typeof showToast === 'function') {
+            showToast('Consultation invitation sent successfully to ' + patientName, 'success');
+        } else {
+            alert('Consultation invitation sent successfully!');
+        }
+    });
+}
+
+function openConsultationModal(id, name, email) {
+    const modal = document.getElementById('send-consultation-modal');
+    if (!modal) return;
+    
+    document.getElementById('consultation-patient-id').value = id;
+    document.getElementById('consultation-patient-name').textContent = name;
+    document.getElementById('consultation-patient-email').value = email;
+    
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('consultation-date').min = today;
+    
+    modal.style.display = 'flex';
 }
 
 document.addEventListener('DOMContentLoaded', initPage);

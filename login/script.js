@@ -152,7 +152,7 @@ document.querySelector('.sign-up form').addEventListener('submit', (e) => {
   accounts.push(account);
   saveAccounts(accounts);
   addToDirectory(account);
-  applySession(account);
+  setSession(account);
 
   showStyledMessage(`Welcome, ${firstName}. Your account is ready.`, 'success');
   setTimeout(() => {
@@ -178,7 +178,7 @@ document.querySelector('.sign-in form').addEventListener('submit', (e) => {
     return;
   }
 
-  applySession(account);
+  setSession(account);
   addToDirectory(account);
   showStyledMessage('Signed in successfully.', 'success');
   setTimeout(() => {

@@ -120,9 +120,9 @@ function syncSidebarName() {
     if (nameEl) {
         nameEl.textContent = session.userName;
     }
-    const emailEl = document.querySelector('.patient-info p, .doctor-info p, .sidebar .user-email');
-    if (emailEl && session.email) {
-        emailEl.textContent = session.email;
+    const roleEl = document.querySelector('.patient-info p, .doctor-info p, .sidebar .user-email');
+    if (roleEl && session.role) {
+        roleEl.textContent = session.role === 'medecin' ? 'Doctor Portal' : 'Patient Portal';
     }
 }
 
