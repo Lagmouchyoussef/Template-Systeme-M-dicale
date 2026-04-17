@@ -612,6 +612,88 @@
 }
 
 /* Dark Theme Adjustments */
+/* Notifications Page Styles */
+.notifications-content {
+    padding: 20px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    transition: all 0.3s ease;
+}
+
+.notification-item.unread {
+    border-left: 4px solid var(--accent-color);
+    background: var(--unread-bg, rgba(0, 123, 255, 0.05));
+}
+
+.notification-item i {
+    font-size: 20px;
+    color: var(--accent-color);
+    margin-right: 15px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content p {
+    margin: 0 0 5px 0;
+    font-weight: 500;
+}
+
+.notification-content small {
+    color: var(--text-secondary);
+}
+
+.notification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mark-read-btn,
+.delete-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.mark-read-btn {
+    background: var(--accent-color);
+    color: white;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.mark-read-btn:hover,
+.delete-btn:hover {
+    opacity: 0.8;
+}
+
 [data-theme="dark"] .modal {
     background-color: rgba(0, 0, 0, 0.7);
 }

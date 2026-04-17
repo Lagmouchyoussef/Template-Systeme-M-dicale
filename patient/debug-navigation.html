@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Patient Navigation</title>
+</head>
+<body>
+    <h1>Debug Patient Navigation</h1>
+    <div id="debug-output"></div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('debug-output');
+            const p = document.createElement('p');
+            p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            output.appendChild(p);
+            showStyledMessage(message, 'debug');
+        }
+
+        log('Page loaded');
+
+        // Test navigation setup
+        function setupNavigation() {
+            log('Setting up navigation...');
+            const sidebarNavItems = document.querySelectorAll('.sidebar-menu .nav-item');
+
+            log('Found ' + sidebarNavItems.length + ' nav items');
+
+            sidebarNavItems.forEach((item, index) => {
+                log('Setting up nav item ' + index + ' with data-page: ' + item.dataset.page);
+                item.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    log('Clicked on page: ' + page);
+
+                    // Navigate to page
+                    switch(page) {
+                        case 'dashboard':
+                            log('Navigating to patient.html');
+                            // window.location.href = 'patient.html';
+                            break;
+                        case 'appointments':
+                            log('Navigating to appointments.html');
+                            // window.location.href = 'appointments.html';
+                            break;
+                        case 'history':
+                            log('Navigating to history.html');
+                            // window.location.href = 'history.html';
+                            break;
+                        case 'settings':
+                            log('Navigating to settings.html');
+                            // window.location.href = 'settings.html';
+                            break;
+                        default:
+                            log('Unknown page: ' + page);
+                    }
+                });
+            });
+        }
+
+        // Test DOM elements
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOMContentLoaded fired');
+
+            // Check if elements exist
+            const sidebar = document.querySelector('.sidebar-menu');
+            log('Sidebar found: ' + !!sidebar);
+
+            const navItems = document.querySelectorAll('.sidebar-menu .nav-item');
+            log('Nav items found: ' + navItems.length);
+
+            navItems.forEach((item, index) => {
+                log('Nav item ' + index + ': ' + item.textContent.trim() + ' (data-page: ' + item.dataset.page + ')');
+            });
+
+            setupNavigation();
+        });
+    </script>
+</body>
+</html>

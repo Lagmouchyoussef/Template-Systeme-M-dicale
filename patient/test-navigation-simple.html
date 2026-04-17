@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Patient Navigation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        nav { background: #f0f0f0; padding: 10px; margin-bottom: 20px; }
+        .nav-item { display: inline-block; margin: 0 10px; padding: 10px; cursor: pointer; background: #ddd; border-radius: 4px; }
+        .nav-item.active { background: #007bff; color: white; }
+        .nav-item:hover { background: #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Test Patient Navigation</h1>
+    <p>Ouvrez la console (F12) pour voir les logs de débogage.</p>
+
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active ripple tooltip nav-item" data-page="dashboard">
+                <span>Dashboard</span>
+            </li>
+            <li class="ripple tooltip nav-item" data-page="appointments">
+                <span>Appointments</span>
+            </li>
+            <li class="ripple tooltip nav-item" data-page="history">
+                <span>History</span>
+            </li>
+            <li class="ripple tooltip nav-item" data-page="settings">
+                <span>Settings</span>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="output">
+        <p>Cliquez sur les boutons du menu pour tester la navigation.</p>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            const p = document.createElement('p');
+            p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            output.appendChild(p);
+            showStyledMessage(message, 'debug');
+        }
+
+        function setupNavigation() {
+            log('Setting up patient navigation...');
+            const sidebarNavItems = document.querySelectorAll('.sidebar-menu .nav-item');
+
+            log('Found nav items: ' + sidebarNavItems.length);
+
+            if (sidebarNavItems.length === 0) {
+                log('ERROR: No nav items found! Check HTML structure.');
+                return;
+            }
+
+            sidebarNavItems.forEach((item, index) => {
+                log(`Setting up nav item ${index} with data-page: ` + item.dataset.page);
+                item.addEventListener('click', function(event) {
+                    log('Nav item clicked: ' + this.dataset.page);
+                    event.preventDefault();
+
+                    const page = this.dataset.page;
+
+                    // Update active state
+                    document.querySelectorAll('.sidebar-menu .nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Navigate to page
+                    const basePath = window.location.pathname.includes('/patient/') ? '' : './';
+                    log('Base path: ' + basePath);
+
+                    switch(page) {
+                        case 'dashboard':
+                            log('Would navigate to: ' + basePath + 'patient.html');
+                            // window.location.href = basePath + 'patient.html';
+                            break;
+                        case 'appointments':
+                            log('Would navigate to: ' + basePath + 'appointments.html');
+                            // window.location.href = basePath + 'appointments.html';
+                            break;
+                        case 'history':
+                            log('Would navigate to: ' + basePath + 'history.html');
+                            // window.location.href = basePath + 'history.html';
+                            break;
+                        case 'settings':
+                            log('Would navigate to: ' + basePath + 'settings.html');
+                            // window.location.href = basePath + 'settings.html';
+                            break;
+                        default:
+                            log('ERROR: Unknown page: ' + page);
+                    }
+                });
+            });
+
+            log('Navigation setup completed');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOMContentLoaded fired');
+            setupNavigation();
+        });
+
+        // Fallback in case DOMContentLoaded doesn't fire
+        if (document.readyState === 'complete') {
+            log('Document already loaded, setting up navigation');
+            setupNavigation();
+        }
+    </script>
+</body>
+</html>

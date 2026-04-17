@@ -438,6 +438,115 @@ body {
     font-weight: 600;
 }
 
+/* Notifications Dropdown */
+.notifications-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 350px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.notifications-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notifications-header h4 {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.mark-all-read {
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.mark-all-read:hover {
+    background-color: rgba(45, 160, 168, 0.1);
+}
+
+.notifications-list {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+}
+
+.notification-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.notification-item.unread {
+    background-color: rgba(45, 160, 168, 0.05);
+    border-left: 3px solid var(--accent-color);
+}
+
+.notification-item i {
+    color: var(--accent-color);
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.notification-content p {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+}
+
+.notification-content small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.notifications-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.view-all {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-all:hover {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
 
 
 .dashboard-content {

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Patient Navigation Links</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .nav-links { margin: 20px 0; }
+        .nav-links a { display: block; margin: 10px 0; padding: 10px; background: #f0f0f0; text-decoration: none; color: #333; border-radius: 4px; }
+        .nav-links a:hover { background: #e0e0e0; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Test Patient Navigation Links</h1>
+
+    <div class="nav-links">
+        <h2>Navigation Links:</h2>
+        <a href="patient.html">Dashboard (patient.html)</a>
+        <a href="appointments.html">Appointments (appointments.html)</a>
+        <a href="history.html">History (history.html)</a>
+        <a href="settings.html">Settings (settings.html)</a>
+    </div>
+
+    <div id="test-results">
+        <h2>Test Results:</h2>
+    </div>
+
+    <script>
+        // Test if files exist by trying to fetch them
+        const files = ['patient.html', 'appointments.html', 'history.html', 'settings.html'];
+
+        files.forEach(file => {
+            fetch(file, { method: 'HEAD' })
+                .then(response => {
+                    const result = document.createElement('div');
+                    result.className = 'test-result ' + (response.ok ? 'success' : 'error');
+                    result.textContent = `${file}: ${response.ok ? 'EXISTS' : 'NOT FOUND'}`;
+                    document.getElementById('test-results').appendChild(result);
+                })
+                .catch(error => {
+                    const result = document.createElement('div');
+                    result.className = 'test-result error';
+                    result.textContent = `${file}: ERROR - ${error.message}`;
+                    document.getElementById('test-results').appendChild(result);
+                });
+        });
+
+        // Test current page detection
+        const currentPath = window.location.pathname;
+        const currentFile = currentPath.split('/').pop();
+        const result = document.createElement('div');
+        result.className = 'test-result success';
+        result.textContent = `Current file detected: ${currentFile}`;
+        document.getElementById('test-results').appendChild(result);
+    </script>
+</body>
+</html>

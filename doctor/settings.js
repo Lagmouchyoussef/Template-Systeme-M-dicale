@@ -1,3 +1,140 @@
+// Global function to show styled messages instead of alerts/console.log
+function showStyledMessage(message, type = 'info', duration = 5000) {
+    // Create message container if it doesn't exist
+    let messageContainer = document.getElementById('styled-message-container');
+    if (!messageContainer) {
+        messageContainer = document.createElement('div');
+        messageContainer.id = 'styled-message-container';
+        messageContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(messageContainer);
+    }
+
+    // Create message card
+    const messageCard = document.createElement('div');
+    messageCard.style.cssText = `
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        pointer-events: auto;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+
+    // Set colors based on type
+    const colors = {
+        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
+        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
+        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+    };
+
+    const colorScheme = colors[type] || colors.info;
+
+    messageCard.style.background = colorScheme.bg;
+    messageCard.style.borderColor = colorScheme.border;
+    messageCard.style.color = colorScheme.text;
+
+    // Create icon based on type
+    const icons = {
+        success: 'check-circle',
+        error: 'exclamation-triangle',
+        warning: 'exclamation-circle',
+        info: 'info-circle',
+        debug: 'bug'
+    };
+
+    const iconName = icons[type] || 'info-circle';
+
+    messageCard.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
+                ${message}
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: ${colorScheme.text};
+                cursor: pointer;
+                font-size: 16px;
+                padding: 0;
+                margin-left: 8px;
+                opacity: 0.7;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    messageContainer.appendChild(messageCard);
+
+    // Animate in
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(0)';
+        messageCard.style.opacity = '1';
+    }, 10);
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageCard.parentElement) {
+                messageCard.style.transform = 'translateX(100%)';
+                messageCard.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageCard.parentElement) {
+                        messageCard.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+
+    // Also log to console for debugging
+    console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// Override console methods to show styled messages
+const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+
+console.log = function(...args) {
+    showStyledMessage(args.join(' '), 'debug', 3000);
+    originalConsoleLog.apply(console, args);
+};
+
+console.warn = function(...args) {
+    showStyledMessage(args.join(' '), 'warning', 5000);
+    originalConsoleWarn.apply(console, args);
+};
+
+console.error = function(...args) {
+    showStyledMessage(args.join(' '), 'error', 8000);
+    originalConsoleError.apply(console, args);
+};
+
+// Override alert to show styled messages
+const originalAlert = window.alert;
+window.alert = function(message) {
+    showStyledMessage(message, 'info', 6000);
+    // Still call original alert for compatibility
+    // originalAlert(message);
+};
+
 // Settings Page JavaScript
 
 class SettingsManager {
@@ -7,7 +144,7 @@ class SettingsManager {
     }
 
     init() {
-        console.log('Initializing SettingsManager...');
+        showStyledMessage('Initializing SettingsManager...', 'debug');
 
         // Ensure DOM is ready before setting up everything
         if (document.readyState === 'loading') {
@@ -23,7 +160,7 @@ class SettingsManager {
     }
 
     setupAll() {
-        console.log('Setting up all components...');
+        showStyledMessage('Setting up all components...', 'debug');
 
         this.setupNavigation();
         this.setupFormValidation();
@@ -37,34 +174,34 @@ class SettingsManager {
         this.loadUserData();
 
         // Set default active section
-        console.log('Setting default active section...');
+        showStyledMessage('Setting default active section...', 'debug');
         this.showSection('profile');
         const profileNavItem = document.querySelector('[data-section="profile"]');
         if (profileNavItem) {
             profileNavItem.classList.add('active');
-            console.log('Profile nav item activated');
+            showStyledMessage('Profile nav item activated', 'debug');
         } else {
             console.error('Profile nav item not found');
         }
     }
 
     setupNavigation() {
-        console.log('Setting up navigation...');
+        showStyledMessage('Setting up navigation...', 'debug');
 
         // Only target nav items in the settings navigation, not the sidebar
         const navItems = document.querySelectorAll('.settings-nav .nav-item');
-        console.log('Navigation items found:', navItems.length);
+        showStyledMessage('Navigation items found: ' + navItems.length, 'debug');
 
         navItems.forEach((item, index) => {
-            console.log(`Setting up nav item ${index}:`, item.dataset.section);
+            showStyledMessage(`Setting up nav item ${index}: ` + item.dataset.section, 'debug');
 
             item.addEventListener('click', (e) => {
-                console.log('Nav item clicked:', item.dataset.section);
+                showStyledMessage('Nav item clicked: ' + item.dataset.section, 'debug');
                 e.preventDefault();
                 e.stopPropagation();
 
                 const sectionId = item.dataset.section;
-                console.log('Switching to section:', sectionId);
+                showStyledMessage('Switching to section: ' + sectionId, 'debug');
 
                 // Update navigation active state
                 this.updateNavActive(sectionId);
@@ -76,11 +213,11 @@ class SettingsManager {
     }
 
     showSection(sectionId) {
-        console.log('Showing section:', sectionId);
+        showStyledMessage('Showing section: ' + sectionId, 'debug');
 
         // Hide all sections
         const allSections = document.querySelectorAll('.settings-section');
-        console.log('Hiding sections, found:', allSections.length);
+        showStyledMessage('Hiding sections, found: ' + allSections.length, 'debug');
 
         allSections.forEach(section => {
             section.classList.remove('active');
@@ -88,18 +225,18 @@ class SettingsManager {
 
         // Show target section
         const targetSection = document.getElementById(`${sectionId}-section`);
-        console.log('Target section found:', !!targetSection);
+        showStyledMessage('Target section found: ' + !!targetSection, 'debug');
 
         if (targetSection) {
             targetSection.classList.add('active');
-            console.log('Section activated successfully');
+            showStyledMessage('Section activated successfully', 'debug');
         } else {
             console.error('Target section not found:', `${sectionId}-section`);
         }
     }
 
     updateNavActive(sectionId) {
-        console.log('Updating nav active state for:', sectionId);
+        showStyledMessage('Updating nav active state for: ' + sectionId, 'debug');
 
         // Update navigation active state - only in settings nav
         document.querySelectorAll('.settings-nav .nav-item').forEach(item => {
@@ -107,13 +244,13 @@ class SettingsManager {
         });
 
         const activeItem = document.querySelector(`.settings-nav [data-section="${sectionId}"]`);
-        console.log('Active nav item found:', !!activeItem);
+        showStyledMessage('Active nav item found: ' + !!activeItem, 'debug');
 
         if (activeItem) {
             activeItem.classList.add('active');
-            console.log('Nav item activated successfully');
+            showStyledMessage('Nav item activated successfully', 'debug');
         } else {
-            console.error('Active nav item not found for:', sectionId);
+            showStyledMessage('Active nav item not found for: ' + sectionId, 'error');
         }
 
         this.currentSection = sectionId;
@@ -858,18 +995,18 @@ Version: ${data.version}
     }
 
     setupAvatarHandlers() {
-        console.log('Setting up avatar handlers...');
+        showStyledMessage('Setting up avatar handlers...', 'debug');
 
         // Load avatar on page load
         this.loadAvatar();
 
         // Upload avatar button
         const uploadBtn = document.getElementById('upload-avatar-btn');
-        console.log('Upload button found:', !!uploadBtn);
+        showStyledMessage('Upload button found: ' + !!uploadBtn, 'debug');
 
         if (uploadBtn) {
             uploadBtn.addEventListener('click', (e) => {
-                console.log('Upload button clicked');
+                showStyledMessage('Upload button clicked', 'debug');
                 e.preventDefault();
                 e.stopPropagation();
                 this.uploadAvatar();
@@ -878,11 +1015,11 @@ Version: ${data.version}
 
         // Delete avatar button
         const deleteBtn = document.getElementById('delete-avatar-btn');
-        console.log('Delete button found:', !!deleteBtn);
+        showStyledMessage('Delete button found: ' + !!deleteBtn, 'debug');
 
         if (deleteBtn) {
             deleteBtn.addEventListener('click', (e) => {
-                console.log('Delete button clicked');
+                showStyledMessage('Delete button clicked', 'debug');
                 e.preventDefault();
                 e.stopPropagation();
                 this.deleteAvatar();
@@ -917,18 +1054,18 @@ Version: ${data.version}
 
             // Basic validations
             if (file.size > 10 * 1024 * 1024) { // 10MB max
-                alert('File too large (max 10MB).');
+                showStyledMessage('File too large (max 10MB).', 'error');
                 return;
             }
 
             if (!file.type.startsWith('image/')) {
-                alert('Invalid file format. Please use images only.');
+                showStyledMessage('Invalid file format. Please use images only.', 'error');
                 return;
             }
 
             // Check image size
             const imageSize = await this.getImageDimensions(file);
-            console.log('Image size:', imageSize);
+            showStyledMessage('Image size: ' + JSON.stringify(imageSize), 'debug');
             if (imageSize.width < 128 || imageSize.height < 128) {
                 const proceed = confirm(`The selected image is small (${imageSize.width}x${imageSize.height}px). To avoid blurriness, use an image of at least 128x128px. Do you want to use it anyway?`);
                 if (!proceed) return;
@@ -982,7 +1119,7 @@ Version: ${data.version}
 
             } catch (error) {
                 console.error('Error processing image:', error);
-                alert('Error processing image. Please try again.');
+                showStyledMessage('Error processing image. Please try again.', 'error');
 
                 // Restore button on error
                 const uploadBtn = document.getElementById('upload-avatar-btn');

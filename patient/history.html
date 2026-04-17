@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="history.css?v=3">
     <title>MediSync - Appointment History</title>
 </head>
-<body>
+    <body>
     <div class="dashboard">
         <!-- Left Navbar -->
         <nav class="sidebar">
@@ -21,7 +21,7 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </li>
-                <li class="ripple tooltip nav-item" data-tooltip="Manage Appointments" data-page="appointments">
+                <li class="ripple tooltip nav-item" data-tooltip="My Appointments" data-page="appointments">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Appointments</span>
                 </li>
@@ -65,9 +65,11 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <div>
-                    <h1>Appointment History</h1>
-                    <p class="user-info"></p>
+                <div class="header-left">
+                    <div>
+                        <h1>Appointment History</h1>
+                        <p class="user-info"></p>
+                    </div>
                 </div>
                 <div class="header-actions">
                     <div class="notifications">
@@ -78,7 +80,7 @@
 
             <div class="history-content">
                 <!-- Stats Summary -->
-                <div class="stats-summary" style="background: #f8f9fa !important;">
+                <div class="stats-summary">
                     <i class="fas fa-calendar-alt"></i> <span id="total-appointments">0</span> Total |
                     <i class="fas fa-check-circle"></i> <span id="completed-appointments">0</span> Completed |
                     <i class="fas fa-clock"></i> <span id="upcoming-appointments">0</span> Upcoming
