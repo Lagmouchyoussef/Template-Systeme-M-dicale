@@ -1,261 +1,15 @@
-// Global function to show styled messages instead of alerts/console.log
-function showStyledMessage(message, type = 'info', duration = 5000) {
-    // Create message container if it doesn't exist
-    let messageContainer = document.getElementById('styled-message-container');
-    if (!messageContainer) {
-        messageContainer = document.createElement('div');
-        messageContainer.id = 'styled-message-container';
-        messageContainer.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            max-width: 400px;
-            pointer-events: none;
-        `;
-        document.body.appendChild(messageContainer);
-    }
-
-    // Create message card
-    const messageCard = document.createElement('div');
-    messageCard.style.cssText = `
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e0e0e0);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        pointer-events: auto;
-        transform: translateX(100%);
-        opacity: 0;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    `;
-
-    // Set colors based on type
-    const colors = {
-        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
-        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
-        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
-        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
-        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
-    };
-
-    const colorScheme = colors[type] || colors.info;
-
-    messageCard.style.background = colorScheme.bg;
-    messageCard.style.borderColor = colorScheme.border;
-    messageCard.style.color = colorScheme.text;
-
-    // Create icon based on type
-    const icons = {
-        success: 'check-circle',
-        error: 'exclamation-triangle',
-        warning: 'exclamation-circle',
-        info: 'info-circle',
-        debug: 'bug'
-    };
-
-    const iconName = icons[type] || 'info-circle';
-
-    messageCard.innerHTML = `
-        <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
-            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
-                ${message}
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: none;
-                border: none;
-                color: ${colorScheme.text};
-                cursor: pointer;
-                font-size: 16px;
-                padding: 0;
-                margin-left: 8px;
-                opacity: 0.7;
-                flex-shrink: 0;
-            ">&times;</button>
-        </div>
-    `;
-
-    // Add to container
-    messageContainer.appendChild(messageCard);
-
-    // Animate in
-    setTimeout(() => {
-        messageCard.style.transform = 'translateX(0)';
-        messageCard.style.opacity = '1';
-    }, 10);
-
-    // Auto remove after duration
-    if (duration > 0) {
-        setTimeout(() => {
-            if (messageCard.parentElement) {
-                messageCard.style.transform = 'translateX(100%)';
-                messageCard.style.opacity = '0';
-                setTimeout(() => {
-                    if (messageCard.parentElement) {
-                        messageCard.remove();
-                    }
-                }, 300);
-            }
-        }, duration);
-    }
-
-}
-
-
-
-
 // ── Auth Guard ─────────────────────────────────────────────────────────────
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        window.location.replace('/login');
+        globalThis.location.replace('/login');
     }
 })();
 
-// Theme toggle functionality - moved to DOMContentLoaded
+// ── Global Variables ────────────────────────────────────────────────────────
+let currentPatientData = null;
 
-// Sidebar menu navigation (only if sidebar exists)
-const sidebar = document.querySelector('.sidebar');
-if (sidebar) {
-    const navItems = document.querySelectorAll('.nav-item');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent any default behavior
-            // Handle navigation
-            const page = this.getAttribute('data-page');
-            if (page) {
-                const pageMap = {
-                    'dashboard': './patient.html',
-                    'appointments': './appointments.html',
-                    'history': './history.html',
-                    'settings': './settings.html'
-                };
-                if (pageMap[page]) {
-                    window.location.href = pageMap[page];
-                }
-            }
-        });
-    });
-}
-
-// Sidebar menu animations (for non-navigation items, only if sidebar exists)
-if (sidebar) {
-    const sidebarMenuItems = document.querySelectorAll('.sidebar-menu li:not(.nav-item)');
-
-    sidebarMenuItems.forEach(item => {
-        item.addEventListener('click', function() {
-        // Remove active class from all items with animation
-        sidebarMenuItems.forEach(i => {
-            i.classList.remove('active');
-            // Add a subtle animation when removing active state
-            i.style.transform = 'translateX(0)';
-            setTimeout(() => {
-                i.style.transform = '';
-            }, 150);
-        });
-
-        // Add active class to clicked item with animation
-        this.classList.add('active');
-
-        // Add click ripple effect
-        this.style.position = 'relative';
-        const ripple = document.createElement('div');
-        ripple.style.position = 'absolute';
-        ripple.style.borderRadius = '50%';
-        ripple.style.background = 'rgba(255, 255, 255, 0.3)';
-        ripple.style.transform = 'scale(0)';
-        ripple.style.animation = 'ripple 0.6s linear';
-        ripple.style.left = '50%';
-        ripple.style.top = '50%';
-        ripple.style.width = '20px';
-        ripple.style.height = '20px';
-        ripple.style.marginLeft = '-10px';
-        ripple.style.marginTop = '-10px';
-
-        this.appendChild(ripple);
-        setTimeout(() => {
-            ripple.remove();
-        }, 600);
-    });
-
-    });
-}
-
-// Notification badge animation removed
-// Notification handlers moved to history.js
-
-// Logout functionality
-const logoutBtn = document.querySelector('.logout-btn');
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('firstName');
-        localStorage.removeItem('lastName');
-        localStorage.removeItem('email');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userAvatar');
-        window.location.replace('/login');
-    });
-}
-
-// Button hover effects
-const buttons = document.querySelectorAll('.btn-primary, .btn-secondary, .btn-cancel');
-buttons.forEach(button => {
-    button.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-2px)';
-    });
-
-    button.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-    });
-});
-
-// Card hover effects with enhanced animations
-const cards = document.querySelectorAll('.stat-card, .appointment-card, .activity-item, .welcome-card');
-cards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-5px)';
-        this.style.boxShadow = 'var(--shadow), 0 8px 25px rgba(0, 0, 0, 0.15)';
-    });
-
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = 'var(--shadow)';
-    });
-});
-
-// Navigation handler - only for sidebar menu items
-function setupNavigation() {
-    // Set active state based on current page
-    setActiveNavItem();
-}
-
-function setActiveNavItem() {
-    const currentPath = window.location.pathname;
-    const currentFile = currentPath.split('/').pop();
-
-    // Remove active class from all items
-    document.querySelectorAll('.sidebar-menu .nav-item').forEach(nav => nav.classList.remove('active'));
-
-    // Set active based on current page
-    if (currentFile === 'patient.html') {
-        document.querySelector('.sidebar-menu .nav-item[data-page="dashboard"]').classList.add('active');
-    } else if (currentFile === 'appointments.html') {
-        document.querySelector('.sidebar-menu .nav-item[data-page="appointments"]').classList.add('active');
-    } else if (currentFile === 'history.html') {
-        document.querySelector('.sidebar-menu .nav-item[data-page="history"]').classList.add('active');
-    } else if (currentFile === 'settings.html') {
-        document.querySelector('.sidebar-menu .nav-item[data-page="settings"]').classList.add('active');
-    }
-}
-
-// Add staggered animation to sidebar elements on load
+// ── Theme Management ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     // Theme toggle functionality
     const themeSwitch = document.getElementById('theme-switch');
@@ -265,528 +19,605 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Apply the current theme
     if (currentTheme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
+        document.body.dataset.theme = 'dark';
         themeSwitch.checked = true;
     } else {
-        document.body.removeAttribute('data-theme');
+        delete document.body.dataset.theme;
         themeSwitch.checked = false;
     }
 
     // Toggle theme when switch is clicked
     themeSwitch.addEventListener('change', function() {
         if (this.checked) {
-            document.body.setAttribute('data-theme', 'dark');
+            document.body.dataset.theme = 'dark';
             localStorage.setItem('theme', 'dark');
         } else {
-            document.body.removeAttribute('data-theme');
+            delete document.body.dataset.theme;
             localStorage.setItem('theme', 'light');
         }
     });
 
-    // Setup navigation
-    setupNavigation();
-    // Animate sidebar elements (only if sidebar exists)
-    if (sidebar) {
-        // Animate patient profile first
-        const patientProfile = document.querySelector('.patient-profile');
-        if (patientProfile) {
-            patientProfile.style.opacity = '0';
-            patientProfile.style.transform = 'translateX(-30px)';
-            setTimeout(() => {
-                patientProfile.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                patientProfile.style.opacity = '1';
-                patientProfile.style.transform = 'translateX(0)';
-            }, 200);
-        }
-
-        // Animate menu items with staggered delay
-        const menuItems = document.querySelectorAll('.sidebar-menu li');
-        menuItems.forEach((item, index) => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateX(-20px)';
-            setTimeout(() => {
-                item.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-                item.style.opacity = '1';
-                item.style.transform = 'translateX(0)';
-            }, 400 + index * 80);
-        });
-
-        // Animate footer elements
-        const footerElements = document.querySelectorAll('.sidebar-footer > *');
-        footerElements.forEach((element, index) => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                element.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-            }, 800 + index * 100);
-        });
-    }
-
-    // Initialize charts
-    initializeCharts();
-
-    // Load avatar from localStorage
+    // Initialize dashboard
+    initializeDashboard();
     loadAvatar();
-    updateSidebar(); // Ensure sidebar is updated
+    updateSidebar();
 
-    // Handle schedule appointment buttons
-    const scheduleButtons = document.querySelectorAll('.btn-primary');
-    scheduleButtons.forEach(button => {
-        if (button.textContent.includes('Schedule') || button.textContent.includes('Appointment')) {
-            button.addEventListener('click', function() {
-                window.location.href = 'appointments.html';
-            });
-        }
-    });
+    // Listen for data changes
+    globalThis.addEventListener('storage', handleStorageChange);
 });
 
-// Avatar management (only if sidebar exists)
-function loadAvatar() {
-    if (sidebar) {
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
-        }
+// ── Storage Change Handler ──────────────────────────────────────────────────
+function handleStorageChange(e) {
+    if (e.key && (
+        e.key.includes('doctorAppointments') ||
+        e.key.includes('appointmentRequests') ||
+        e.key.includes('_invitations') ||
+        e.key === 'userName'
+    )) {
+        // Refresh dashboard data
+        setTimeout(() => {
+            loadDashboardData();
+        }, 100);
     }
+}
 
-    // Listen for avatar updates from other pages
-    window.addEventListener('avatarUpdated', () => {
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
-        }
+// ── Dashboard Initialization ────────────────────────────────────────────────
+function initializeDashboard() {
+    loadDashboardData();
+    initializeCharts();
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    // Add any additional event listeners here
+}
+
+// ── Data Loading Functions ──────────────────────────────────────────────────
+function loadDashboardData() {
+    const patientId = localStorage.getItem('userId');
+    const patientName = localStorage.getItem('userName') || '';
+    const patientEmail = localStorage.getItem('email') || '';
+
+    if (!patientId) return;
+
+    // Load all relevant data
+    const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+    const appointmentRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    const patientInvitations = JSON.parse(localStorage.getItem(`patient_${patientId}_invitations`) || '[]');
+
+    // Filter data for current patient
+    const patientAppointments = filterPatientData(confirmedAppointments, patientId, patientName, patientEmail);
+    const patientRequests = filterPatientData(appointmentRequests, patientId, patientName, patientEmail);
+    const activeInvitations = patientInvitations.filter(inv => !['declined', 'cancelled'].includes(inv.status));
+
+    // Update dashboard
+    updateWelcomeSection(patientName);
+    updateKeyMetrics(patientAppointments, patientRequests, activeInvitations);
+    updateAppointmentStatistics(patientAppointments);
+    updateSpecialtyBreakdown(patientAppointments);
+    updateUpcomingAppointments(patientAppointments, patientRequests);
+    updateRecentActivity(patientAppointments, patientRequests);
+    updateDoctorsList(patientAppointments);
+    updatePendingInvitations(activeInvitations);
+
+    // Store for charts
+    currentPatientData = {
+        appointments: patientAppointments,
+        requests: patientRequests,
+        invitations: activeInvitations
+    };
+}
+
+function filterPatientData(data, patientId, patientName, patientEmail) {
+    return data.filter(item => {
+        const itemId = item.patientId || item.userId || '';
+        const itemName = (item.patientName || item.name || '').toLowerCase();
+        const itemEmail = (item.patientEmail || item.email || '').toLowerCase();
+
+        return itemId === patientId ||
+               itemName.includes(patientName.toLowerCase()) ||
+               itemEmail === patientEmail.toLowerCase();
+    });
+}
+
+// ── UI Update Functions ─────────────────────────────────────────────────────
+function updateWelcomeSection(patientName) {
+    const welcomeName = document.getElementById('welcome-name');
+    if (welcomeName) {
+        welcomeName.textContent = patientName.split(' ')[0] || 'Patient';
+    }
+}
+
+function updateKeyMetrics(appointments, requests, invitations) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Today's appointments
+    const todayAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate >= today && aptDate < new Date(today.getTime() + 24 * 60 * 60 * 1000);
     });
 
-    // Listen for localStorage changes to update sidebar
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'userName' || e.key === 'firstName' || e.key === 'lastName') {
-            updateSidebar();
+    // Upcoming appointments (next 30 days)
+    const upcomingAppointments = [...appointments, ...requests].filter(item => {
+        const itemDate = new Date(item.date);
+        const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        return itemDate >= now && itemDate <= thirtyDaysFromNow;
+    });
+
+    // Calculate metrics
+    const totalAppointments = appointments.length;
+    const doctorsCount = new Set(appointments.map(apt => apt.doctorName || apt.doctor)).size;
+    const pendingInvitations = invitations.filter(inv => inv.status === 'pending').length;
+
+    // Calculate health score (simple algorithm based on appointment regularity)
+    const healthScore = calculateHealthScore(appointments, requests);
+
+    // Update DOM
+    updateElement('today-appointments', todayAppointments.length);
+    updateElement('upcoming-count', upcomingAppointments.length);
+    updateElement('total-appointments-card', totalAppointments);
+    updateElement('doctors-visited-count', doctorsCount);
+    updateElement('health-score-card', `${healthScore}%`);
+    updateElement('pending-invitations', pendingInvitations);
+
+    // Update trends
+    updateTrends(appointments);
+}
+
+function calculateHealthScore(appointments, requests) {
+    if (appointments.length === 0) return 0;
+
+    // Simple scoring based on:
+    // - Regularity of appointments
+    // - Number of different doctors
+    // - Recent activity
+
+    const now = new Date();
+    const sixMonthsAgo = new Date(now.getTime() - 6 * 30 * 24 * 60 * 60 * 1000);
+
+    const recentAppointments = appointments.filter(apt => new Date(apt.date) >= sixMonthsAgo);
+    const doctorsCount = new Set(appointments.map(apt => apt.doctorName || apt.doctor)).size;
+
+    let score = 50; // Base score
+
+    // Bonus for recent activity
+    if (recentAppointments.length > 0) {
+        score += Math.min(recentAppointments.length * 5, 25);
+    }
+
+    // Bonus for seeing multiple doctors (diversified care)
+    score += Math.min(doctorsCount * 3, 15);
+
+    // Bonus for regular appointments
+    if (appointments.length >= 3) {
+        score += 10;
+    }
+
+    return Math.min(Math.max(score, 0), 100);
+}
+
+function updateTrends(appointments) {
+    const now = new Date();
+    const thisMonth = now.getMonth();
+    const thisYear = now.getFullYear();
+    const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+    const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+    const thisMonthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate.getMonth() === thisMonth && aptDate.getFullYear() === thisYear;
+    }).length;
+
+    const lastMonthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate.getMonth() === lastMonth && aptDate.getFullYear() === lastMonthYear;
+    }).length;
+
+    const appointmentsChange = thisMonthAppointments - lastMonthAppointments;
+    const appointmentsTrend = document.getElementById('appointments-trend');
+
+    if (appointmentsTrend) {
+        appointmentsTrend.innerHTML = `<i class="fas fa-arrow-${appointmentsChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(appointmentsChange)} ce mois`;
+        appointmentsTrend.className = `metric-trend ${appointmentsChange >= 0 ? 'positive' : 'negative'}`;
+    }
+}
+
+function updateAppointmentStatistics(appointments) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Total appointments
+    updateElement('total-appointments-count', appointments.length);
+
+    // Upcoming appointments (next 30 days)
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const upcomingCount = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate >= now && aptDate <= thirtyDaysFromNow;
+    }).length;
+    updateElement('upcoming-appointments-count', upcomingCount);
+
+    // Completed appointments (past appointments)
+    const completedCount = appointments.filter(apt => new Date(apt.date) < now).length;
+    updateElement('completed-appointments-count', completedCount);
+
+    // Cancelled appointments
+    const cancelledCount = appointments.filter(apt => apt.status === 'cancelled').length;
+    updateElement('cancelled-appointments-count', cancelledCount);
+
+    // Update trends
+    updateAppointmentTrends(appointments);
+}
+
+function updateAppointmentTrends(appointments) {
+    // Simple trend calculation - compare current vs previous period
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const currentMonthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate.getMonth() === currentMonth && aptDate.getFullYear() === currentYear;
+    }).length;
+
+    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const previousMonthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate.getMonth() === previousMonth && aptDate.getFullYear() === previousYear;
+    }).length;
+
+    const trendElements = document.querySelectorAll('.stat-trend');
+    trendElements.forEach(element => {
+        const change = currentMonthAppointments - previousMonthAppointments;
+        if (change > 0) {
+            element.innerHTML = '<i class="fas fa-arrow-up"></i> Improving';
+            element.className = 'stat-trend positive';
+        } else if (change < 0) {
+            element.innerHTML = '<i class="fas fa-arrow-down"></i> Declining';
+            element.className = 'stat-trend negative';
+        } else {
+            element.innerHTML = '<i class="fas fa-minus"></i> Stable';
+            element.className = 'stat-trend neutral';
         }
     });
 }
 
-function updateSidebar() {
-    if (sidebar) {
-        // Update name
-        const userName = localStorage.getItem('userName') || '';
-        const sidebarName = document.querySelector('.patient-info h4');
-        if (sidebarName) {
-            sidebarName.textContent = userName;
-        }
-        // Update avatar
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
-        }
-    }
+function updateSpecialtyBreakdown(appointments) {
+    const specialtyCount = {};
+
+    appointments.forEach(apt => {
+        const specialty = apt.specialty || apt.type || 'General Medicine';
+        // Normalize specialty name to match HTML IDs
+        const normalizedSpecialty = normalizeSpecialtyName(specialty);
+        specialtyCount[normalizedSpecialty] = (specialtyCount[normalizedSpecialty] || 0) + 1;
+    });
+
+    const totalAppointments = appointments.length;
+
+    // Update specialty items - only update existing HTML elements
+    const specialtyIds = [
+        'cardiology', 'dentistry', 'neurology', 'ophthalmology', 'general-medicine'
+    ];
+
+    specialtyIds.forEach(specialtyId => {
+        const specialtyName = specialtyId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const count = specialtyCount[specialtyName] || 0;
+        const percentage = totalAppointments > 0 ? Math.round((count / totalAppointments) * 100) : 0;
+
+        updateElement(`specialty-count-${specialtyId}`, `${count} appointments`);
+        updateElement(`specialty-percentage-${specialtyId}`, `${percentage}%`);
+    });
 }
 
-function updateAvatarDisplay(avatarContainer) {
-    const savedImage = localStorage.getItem('userAvatar');
+function updateUpcomingAppointments(appointments, requests) {
+    const container = document.getElementById('upcoming-appointments-list');
+    if (!container) return;
 
-    // Clear existing content
-    avatarContainer.innerHTML = '';
+    const now = new Date();
+    const upcoming = [...appointments, ...requests]
+        .filter(item => new Date(item.date) >= now)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 5); // Show next 5
 
-    if (savedImage) {
-        // Display saved image
-        const img = document.createElement('img');
-        img.src = savedImage;
-        img.alt = 'Avatar';
-        img.onload = () => {
-            img.style.display = 'block';
-        };
-        avatarContainer.appendChild(img);
+    if (upcoming.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-calendar-plus"></i>
+                <h3>Aucun rendez-vous à venir</h3>
+                <p>Prenez rendez-vous avec un médecin pour commencer votre suivi médical.</p>
+                <button class="btn-primary" onclick="window.location.href='appointments.html'">
+                    Prendre rendez-vous
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = upcoming.map(item => createAppointmentCard(item)).join('');
+}
+
+function createAppointmentCard(item) {
+    const isConfirmed = item.status === 'confirmed' || item.status === 'completed';
+    const doctorName = item.doctorName || item.doctor || 'Médecin non spécifié';
+    const appointmentDate = new Date(item.date);
+    const formattedDate = appointmentDate.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    const time = item.time || 'Heure non spécifiée';
+    const type = item.type || item.specialty || 'Consultation';
+
+    return `
+        <div class="appointment-card ${isConfirmed ? 'confirmed' : 'pending'}">
+            <div class="appointment-header">
+                <div class="doctor-info">
+                    <div class="doctor-avatar">
+                        ${doctorName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </div>
+                    <div>
+                        <h4>${doctorName}</h4>
+                        <span class="appointment-type">${type}</span>
+                    </div>
+                </div>
+                <div class="appointment-status ${isConfirmed ? 'confirmed' : 'pending'}">
+                    ${isConfirmed ? 'Confirmé' : 'En attente'}
+                </div>
+            </div>
+            <div class="appointment-details">
+                <div class="detail-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>${formattedDate}</span>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-clock"></i>
+                    <span>${time}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function updateRecentActivity(appointments, requests) {
+    const container = document.getElementById('recent-activity-list');
+    if (!container) return;
+
+    const recentItems = [...appointments, ...requests]
+        .sort((a, b) => new Date(b.date || b.requestDate) - new Date(a.date || a.requestDate))
+        .slice(0, 10);
+
+    if (recentItems.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-history"></i>
+                <h3>Aucune activité récente</h3>
+                <p>Vos activités médicales apparaîtront ici une fois que vous commencerez à utiliser la plateforme.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = recentItems.map(item => createActivityItem(item)).join('');
+}
+
+function createActivityItem(item) {
+    const date = new Date(item.date || item.requestDate);
+    const formattedDate = date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'short'
+    });
+
+    const isAppointment = item.status && ['confirmed', 'completed', 'cancelled'].includes(item.status);
+    const doctorName = item.doctorName || item.doctor || 'Médecin';
+    const type = item.type || 'Consultation';
+
+    let icon, title, description;
+
+    if (isAppointment) {
+        if (item.status === 'completed') {
+            icon = 'fas fa-check-circle';
+            title = `Rendez-vous terminé avec ${doctorName}`;
+            description = `${type} - ${formattedDate}`;
+        } else if (item.status === 'confirmed') {
+            icon = 'fas fa-calendar-check';
+            title = `Rendez-vous confirmé avec ${doctorName}`;
+            description = `${type} - ${formattedDate}`;
+        } else {
+            icon = 'fas fa-times-circle';
+            title = `Rendez-vous annulé avec ${doctorName}`;
+            description = `${type} - ${formattedDate}`;
+        }
     } else {
-        // Display initials
-        const userName = localStorage.getItem('userName') || '';
-        const nameParts = userName.split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts[1] || '';
-        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
-        if (!initials.trim()) initials = '';
-
-        const span = document.createElement('span');
-        span.textContent = initials;
-        avatarContainer.appendChild(span);
+        icon = 'fas fa-envelope';
+        title = `Demande de rendez-vous envoyée à ${doctorName}`;
+        description = `${type} - ${formattedDate}`;
     }
+
+    return `
+        <div class="activity-item">
+            <div class="activity-icon">
+                <i class="${icon}"></i>
+            </div>
+            <div class="activity-content">
+                <h4>${title}</h4>
+                <p>${description}</p>
+                <span class="activity-date">${formattedDate}</span>
+            </div>
+        </div>
+    `;
 }
 
-// Chart initialization and data
-function initializeCharts() {
-    // Blood Pressure Chart
-    const bloodPressureCtx = document.getElementById('bloodPressureChart');
-    if (bloodPressureCtx) {
-        new Chart(bloodPressureCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Systolic',
-                    data: [null, null, null, null, null, null],
-                    borderColor: '#dc3545',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    tension: 0.4,
-                    fill: false
-                }, {
-                    label: 'Diastolic',
-                    data: [null, null, null, null, null, null],
-                    borderColor: '#2da0a8',
-                    backgroundColor: 'rgba(45, 160, 168, 0.1)',
-                    tension: 0.4,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 60,
-                        max: 160
-                    }
-                }
+function updateDoctorsList(appointments) {
+    const container = document.getElementById('doctors-directory-grid');
+    if (!container) return;
+
+    const doctorsMap = new Map();
+
+    appointments.forEach(apt => {
+        const doctorName = apt.doctorName || apt.doctor;
+        if (doctorName && doctorName !== 'Médecin non spécifié') {
+            if (!doctorsMap.has(doctorName)) {
+                doctorsMap.set(doctorName, {
+                    name: doctorName,
+                    specialty: apt.specialty || apt.type || 'Médecin généraliste',
+                    appointmentsCount: 0,
+                    lastAppointment: null
+                });
             }
-        });
-    }
-
-    // Weight Chart
-    const weightCtx = document.getElementById('weightChart');
-    if (weightCtx) {
-        new Chart(weightCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Weight (kg)',
-                    data: [null, null, null, null, null, null],
-                    borderColor: '#28a745',
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 70,
-                        max: 80
-                    }
-                }
+            doctorsMap.get(doctorName).appointmentsCount++;
+            const aptDate = new Date(apt.date);
+            if (!doctorsMap.get(doctorName).lastAppointment ||
+                aptDate > new Date(doctorsMap.get(doctorName).lastAppointment)) {
+                doctorsMap.get(doctorName).lastAppointment = apt.date;
             }
-        });
-    }
-
-    // Appointments Chart
-    const appointmentsCtx = document.getElementById('appointmentsChart');
-    if (appointmentsCtx) {
-        new Chart(appointmentsCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: 'Appointments',
-                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    backgroundColor: 'rgba(45, 160, 168, 0.8)',
-                    borderColor: '#2da0a8',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Health Metrics Chart
-    const healthMetricsCtx = document.getElementById('healthMetricsChart');
-    if (healthMetricsCtx) {
-        new Chart(healthMetricsCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Excellent', 'Good', 'Fair', 'Needs Attention'],
-                datasets: [{
-                    data: [0, 0, 0, 0],
-                    backgroundColor: [
-                        '#28a745',
-                        '#2da0a8',
-                        '#ffc107',
-                        '#dc3545'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Load and display appointment invitations
-    loadAppointmentInvitations();
-    loadDashboardUpcomingAppointments();
-    loadRecentEmails();
-
-    const scheduleButtons = document.querySelectorAll('.btn-primary');
-    scheduleButtons.forEach(button => {
-        if (button.textContent.includes('Schedule') || button.textContent.includes('Appointment')) {
-            button.addEventListener('click', function() {
-                window.location.href = 'appointments.html';
-            });
         }
     });
+
+    const doctors = Array.from(doctorsMap.values())
+        .sort((a, b) => b.appointmentsCount - a.appointmentsCount)
+        .slice(0, 6); // Show top 6 doctors
+
+    if (doctors.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-user-md"></i>
+                <h3>Aucun médecin consulté</h3>
+                <p>Commencez par prendre rendez-vous avec un médecin pour établir votre réseau médical.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = doctors.map(doctor => createDoctorCard(doctor)).join('');
 }
 
-function getCurrentPatientId() {
-    return localStorage.getItem('userId') || '';
+function createDoctorCard(doctor) {
+    const lastAppointment = doctor.lastAppointment ?
+        new Date(doctor.lastAppointment).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        }) : 'Jamais';
+
+    return `
+        <div class="doctor-card">
+            <div class="doctor-avatar">
+                ${doctor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </div>
+            <div class="doctor-info">
+                <h4>${doctor.name}</h4>
+                <p class="doctor-specialty">${doctor.specialty}</p>
+                <div class="doctor-stats">
+                    <span><i class="fas fa-calendar"></i> ${doctor.appointmentsCount} rendez-vous</span>
+                    <span><i class="fas fa-clock"></i> Dernier: ${lastAppointment}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function updatePendingInvitations(invitations) {
+    const badge = document.getElementById('pending-invitations-badge');
+    const container = document.getElementById('pending-invitations-list');
+
+    if (!container) return;
+
+    const pendingInvitations = invitations.filter(inv => inv.status === 'pending');
+
+    // Update badge
+    if (badge) {
+        badge.textContent = pendingInvitations.length;
+        if (pendingInvitations.length === 0) {
+            badge.style.display = 'none';
+        } else {
+            badge.style.display = 'inline-block';
+        }
+    }
+
+    if (pendingInvitations.length === 0) {
+        container.innerHTML = `
+            <div class="no-data-message" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-envelope" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No pending invitations.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = pendingInvitations.map(inv => createInvitationCard(inv)).join('');
 }
 
 function createInvitationCard(invitation) {
-    const card = document.createElement('div');
-    card.className = `invitation-card ${invitation.status === 'pending' ? 'new' : ''}`;
-
+    const doctorName = invitation.doctor?.name || 'Médecin';
     const appointmentDate = new Date(invitation.date);
-    const formattedDate = appointmentDate.toLocaleDateString('en-US', {
+    const formattedDate = appointmentDate.toLocaleDateString('fr-FR', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
 
-    const appointmentTypes = {
-        'consultation': 'General Consultation',
-        'follow-up': 'Follow-up Visit',
-        'emergency': 'Emergency Visit',
-        'specialist': 'Specialist Consultation'
-    };
-
-    card.innerHTML = `
-        <div class="invitation-header">
-            <div class="invitation-doctor">
-                <div class="doctor-avatar">
-                    ${invitation.doctor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                </div>
+    return `
+        <div class="invitation-card">
+            <div class="invitation-header">
                 <div class="doctor-info">
-                    <h4>${invitation.doctor.name}</h4>
-                    <p>Doctor</p>
+                    <div class="doctor-avatar">
+                        ${doctorName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </div>
+                    <div>
+                        <h4>${doctorName}</h4>
+                        <span class="invitation-type">${invitation.type || 'Consultation'}</span>
+                    </div>
+                </div>
+                <div class="invitation-status pending">
+                    En attente
                 </div>
             </div>
-            <div class="invitation-status ${invitation.status}">
-                ${invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}
-            </div>
-        </div>
-
-        <div class="invitation-details">
-            <div class="invitation-detail">
-                <i class="fas fa-calendar"></i>
-                <span>${formattedDate}</span>
-            </div>
-            <div class="invitation-detail">
-                <i class="fas fa-clock"></i>
-                <span>${invitation.time}</span>
-            </div>
-            <div class="invitation-detail">
-                <i class="fas fa-stethoscope"></i>
-                <span>${appointmentTypes[invitation.type] || invitation.type}</span>
-            </div>
-            ${invitation.notes ? `
-                <div class="invitation-notes">
-                    <i class="fas fa-sticky-note"></i>
-                    "${invitation.notes}"
+            <div class="invitation-details">
+                <div class="detail-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>${formattedDate}</span>
                 </div>
-            ` : ''}
-        </div>
-
-        <div class="invitation-actions">
-            <button class="btn-accept" onclick="acceptInvitation('${invitation.id}')">
-                <i class="fas fa-check"></i>
-                Accept
-            </button>
-            <button class="btn-decline" onclick="declineInvitation('${invitation.id}')">
-                <i class="fas fa-times"></i>
-                Decline
-            </button>
+                <div class="detail-item">
+                    <i class="fas fa-clock"></i>
+                    <span>${invitation.time || 'Heure à confirmer'}</span>
+                </div>
+            </div>
+            <div class="invitation-actions">
+                <button class="btn-accept" onclick="acceptInvitation('${invitation.id}')">
+                    <i class="fas fa-check"></i> Accepter
+                </button>
+                <button class="btn-decline" onclick="declineInvitation('${invitation.id}')">
+                    <i class="fas fa-times"></i> Refuser
+                </button>
+            </div>
         </div>
     `;
-
-    return card;
 }
 
-function loadDashboardUpcomingAppointments() {
-    const container = document.querySelector('.appointments-section');
-    if (!container) return;
-
-    const patientId = getCurrentPatientId();
-    const patientName = (localStorage.getItem('userName') || '').trim().toLowerCase();
-    const patientEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
-    
-    const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
-    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
-    
-    const myRequests = allRequests.filter(req => {
-        const reqId = req.patientId || '';
-        const reqName = (req.patientName || '').trim().toLowerCase();
-        const reqEmail = (req.email || '').trim().toLowerCase();
-        return (reqId !== '' && reqId === patientId) || 
-               (reqName !== '' && reqName.includes(patientName) && patientName !== '') ||
-               (reqEmail !== '' && reqEmail === patientEmail);
-    });
-    
-    const myConfirmed = confirmedAppointments.filter(app => {
-        const appId = app.patientId || '';
-        const appName = (app.patientName || '').trim().toLowerCase();
-        const appEmail = (app.patientEmail || app.email || '').trim().toLowerCase();
-        return (appId !== '' && appId === patientId) || 
-               (appName !== '' && appName.includes(patientName) && patientName !== '') ||
-               (appEmail !== '' && appEmail === patientEmail) ||
-               (!appId && appName.includes(patientName) && patientName !== '');
-    });
-
-    const combined = [...myRequests, ...myConfirmed]
-        .filter(a => a.status !== 'declined' && a.status !== 'cancelled')
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (combined.length === 0) {
-        container.innerHTML = `
-            <h2>Upcoming Appointments</h2>
-            <div class="no-data-message">
-                <i class="fas fa-calendar-plus"></i>
-                <h3>No upcoming appointments</h3>
-                <p>Schedule your first appointment to get started</p>
-                <button class="btn-primary" onclick="window.location.href='appointments.html'">Schedule Appointment</button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = `<h2>Upcoming Appointments</h2><div class="appointments-list" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">`;
-    
-    combined.forEach(appt => {
-        const isPending = appt.status === 'pending';
-        const docName = appt.doctorName || (appt.doctor && appt.doctor.name ? appt.doctor.name : appt.doctor) || 'Unknown Doctor';
-        const apptDate = appt.date || 'Date TBD';
-        const apptTime = appt.time || 'Time TBD';
-        const apptType = appt.type || 'Consultation';
-        const apptStatus = appt.status || 'Pending';
-
-        const typeBadge = isPending ? 
-            '<span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Pending</span>' : 
-            `<span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${apptStatus.toUpperCase()}</span>`;
-        
-        html += `
-            <div class="appointment-card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-                <div class="appointment-info">
-                    <h4 style="margin: 0 0 5px 0;">${docName}</h4>
-                    <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
-                        <i class="fas fa-calendar"></i> ${apptDate} at ${apptTime} <br>
-                        <i class="fas fa-stethoscope"></i> ${apptType}
-                    </p>
-                </div>
-                <div class="appointment-status">
-                    ${typeBadge}
-                </div>
-            </div>
-        `;
-    });
-    
-    html += `</div>`;
-    container.innerHTML = html;
-}
-
-function loadAppointmentInvitations() {
-    const container = document.getElementById('dashboard-invitations-list');
-    const dashboardSection = document.getElementById('invitations-dashboard-section');
-    const statCounter = document.getElementById('invitations-count-stat');
-    if (!container) return;
-
-    const patientId = getCurrentPatientId();
-    if (!patientId) {
-        if (dashboardSection) dashboardSection.style.display = 'none';
-        return;
-    }
-
-    const invitationsKey = `patient_${patientId}_invitations`;
-    const invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
-    const pending = invitations.filter((inv) => inv.status === 'pending');
-
-    // Update Counter
-    if (statCounter) statCounter.textContent = pending.length;
-
-    if (pending.length === 0) {
-        if (dashboardSection) dashboardSection.style.display = 'none';
-        container.innerHTML = '';
-        return;
-    }
-
-    // Show section if there are pending invitations
-    if (dashboardSection) dashboardSection.style.display = 'block';
-
-    container.innerHTML = '';
-    pending.forEach((inv) => container.appendChild(createInvitationCard(inv)));
-}
-
+// ── Invitation Management ───────────────────────────────────────────────────
 function acceptInvitation(invitationId) {
     updateInvitationStatus(invitationId, 'accepted');
-    showNotification('Appointment accepted successfully!', 'success');
-    loadAppointmentInvitations();
+    showNotification('Invitation acceptée avec succès !', 'success');
+    loadDashboardData();
 }
 
 function declineInvitation(invitationId) {
     updateInvitationStatus(invitationId, 'declined');
-    showNotification('Appointment declined.', 'info');
-    loadAppointmentInvitations();
+    showNotification('Invitation refusée.', 'info');
+    loadDashboardData();
 }
 
 function updateInvitationStatus(invitationId, newStatus) {
-    const patientId = getCurrentPatientId();
+    const patientId = localStorage.getItem('userId');
     if (!patientId) return;
-    const invitationsKey = `patient_${patientId}_invitations`;
 
-    let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+    const key = `patient_${patientId}_invitations`;
+    let invitations = JSON.parse(localStorage.getItem(key) || '[]');
 
     invitations = invitations.map(inv => {
         if (inv.id === invitationId) {
@@ -795,7 +626,7 @@ function updateInvitationStatus(invitationId, newStatus) {
         return inv;
     });
 
-    localStorage.setItem(invitationsKey, JSON.stringify(invitations));
+    localStorage.setItem(key, JSON.stringify(invitations));
 
     // If accepted, add to appointments
     if (newStatus === 'accepted') {
@@ -817,213 +648,483 @@ function addToAppointments(invitation) {
         type: invitation.type,
         status: 'confirmed',
         notes: invitation.notes,
-        patientId: getCurrentPatientId(),
+        patientId: localStorage.getItem('userId'),
         patientName: localStorage.getItem('userName')
     };
 
     appointments.push(appointment);
     localStorage.setItem('doctorAppointments', JSON.stringify(appointments));
-    
-    // Update UI if on dashboard
-    if (typeof loadDashboardUpcomingAppointments === 'function') {
-        loadDashboardUpcomingAppointments();
+}
+
+// ── Charts Initialization ───────────────────────────────────────────────────
+function initializeCharts() {
+    // Wait for data to be loaded
+    setTimeout(() => {
+        if (currentPatientData) {
+            createAppointmentsChart();
+            createHealthOverviewChart();
+            createSpecialtiesChart();
+        }
+    }, 500);
+}
+
+function createAppointmentsChart() {
+    const ctx = document.getElementById('appointmentTrendsChart');
+    if (!ctx || !currentPatientData) return;
+
+    const appointments = currentPatientData.appointments;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Get data for current year and previous year for comparison
+    const currentYearData = new Array(12).fill(0);
+    const previousYearData = new Array(12).fill(0);
+
+    appointments.forEach(apt => {
+        const date = new Date(apt.date);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+
+        if (year === currentYear) {
+            currentYearData[month]++;
+        } else if (year === currentYear - 1) {
+            previousYearData[month]++;
+        }
+    });
+
+    // Create datasets array
+    const datasets = [{
+        label: `${currentYear}`,
+        data: currentYearData,
+        borderColor: '#2da0a8',
+        backgroundColor: 'rgba(45, 160, 168, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#2da0a8',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2
+    }];
+
+    // Add previous year data if available
+    const hasPreviousYearData = previousYearData.some(count => count > 0);
+    if (hasPreviousYearData) {
+        datasets.unshift({
+            label: `${currentYear - 1}`,
+            data: previousYearData,
+            borderColor: '#6c757d',
+            backgroundColor: 'rgba(108, 117, 125, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#6c757d',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            borderDash: [5, 5]
+        });
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: datasets.length > 1
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y} appointment${context.parsed.y !== 1 ? 's' : ''}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return Math.floor(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createHealthOverviewChart() {
+    const ctx = document.getElementById('healthOverviewChart');
+    if (!ctx || !currentPatientData) return;
+
+    const appointments = currentPatientData.appointments;
+    const now = new Date();
+
+    // Calculate health scores for the last 12 months
+    const healthScores = [];
+    const months = [];
+
+    for (let i = 11; i >= 0; i--) {
+        const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthName = targetDate.toLocaleDateString('en-US', { month: 'short' });
+        months.push(monthName);
+
+        // Calculate health score for this month
+        const monthScore = calculateMonthlyHealthScore(appointments, targetDate);
+        healthScores.push(monthScore);
+    }
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Health Score',
+                data: healthScores,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#28a745',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Health Score: ${context.parsed.y}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function calculateMonthlyHealthScore(appointments, targetMonth) {
+    const monthStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+    const monthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+
+    // Get appointments for this month
+    const monthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate >= monthStart && aptDate <= monthEnd;
+    });
+
+    // Base score
+    let score = 50;
+
+    // Factor 1: Number of appointments (regular check-ups are good)
+    if (monthAppointments.length > 0) {
+        score += Math.min(monthAppointments.length * 8, 25); // Max 25 points for appointments
+    }
+
+    // Factor 2: Diversity of specialties (seeing different specialists shows comprehensive care)
+    const specialties = new Set(monthAppointments.map(apt => apt.specialty || apt.type));
+    score += Math.min(specialties.size * 5, 15); // Max 15 points for specialty diversity
+
+    // Factor 3: Different doctors (building relationships with healthcare providers)
+    const doctors = new Set(monthAppointments.map(apt => apt.doctorName || apt.doctor));
+    score += Math.min(doctors.size * 3, 10); // Max 10 points for doctor diversity
+
+    // Factor 4: Preventive care (regular check-ups vs emergency visits)
+    const preventiveTypes = ['check-up', 'consultation', 'follow-up', 'general'];
+    const preventiveAppointments = monthAppointments.filter(apt =>
+        preventiveTypes.some(type => (apt.type || '').toLowerCase().includes(type))
+    );
+    if (monthAppointments.length > 0) {
+        const preventiveRatio = preventiveAppointments.length / monthAppointments.length;
+        score += preventiveRatio * 10; // Max 10 points for preventive care
+    }
+
+    // Factor 5: Consistency with previous months (trend analysis)
+    const previousMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
+    const prevMonthAppointments = appointments.filter(apt => {
+        const aptDate = new Date(apt.date);
+        return aptDate >= previousMonth && aptDate < monthStart;
+    });
+
+    if (prevMonthAppointments.length > 0 && monthAppointments.length > prevMonthAppointments.length) {
+        score += 5; // Bonus for increasing healthcare engagement
+    }
+
+    // Ensure score is within bounds
+    return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function createSpecialtiesChart() {
+    const ctx = document.getElementById('specialtyChart');
+    if (!ctx || !currentPatientData) return;
+
+    const appointments = currentPatientData.appointments;
+    const specialtyCount = {};
+
+    appointments.forEach(apt => {
+        const specialty = apt.specialty || apt.type || 'General Medicine';
+        // Normalize specialty names
+        const normalizedSpecialty = normalizeSpecialtyName(specialty);
+        specialtyCount[normalizedSpecialty] = (specialtyCount[normalizedSpecialty] || 0) + 1;
+    });
+
+    const labels = Object.keys(specialtyCount);
+    const data = Object.values(specialtyCount);
+
+    // Specialty-specific colors
+    const specialtyColors = {
+        'Cardiology': '#e74c3c',
+        'Dentistry': '#f39c12',
+        'Neurology': '#9b59b6',
+        'Ophthalmology': '#3498db',
+        'General Medicine': '#2ecc71',
+        'Dermatology': '#e67e22',
+        'Orthopedics': '#1abc9c',
+        'Pediatrics': '#f1c40f',
+        'Gynecology': '#e84393',
+        'Psychiatry': '#8e44ad',
+        'Radiology': '#34495e',
+        'Surgery': '#c0392b'
+    };
+
+    const backgroundColors = labels.map(label => specialtyColors[label] || '#95a5a6');
+    const borderColors = backgroundColors.map(color => color);
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 3,
+                hoverBorderWidth: 5,
+                hoverBorderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((context.parsed / total) * 100);
+                            return `${context.label}: ${context.parsed} appointment${context.parsed !== 1 ? 's' : ''} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+}
+
+function normalizeSpecialtyName(specialty) {
+    const specialtyMap = {
+        'cardiology': 'Cardiology',
+        'heart': 'Cardiology',
+        'cardio': 'Cardiology',
+        'dentistry': 'Dentistry',
+        'dental': 'Dentistry',
+        'dentist': 'Dentistry',
+        'neurology': 'Neurology',
+        'brain': 'Neurology',
+        'neuro': 'Neurology',
+        'ophthalmology': 'Ophthalmology',
+        'eye': 'Ophthalmology',
+        'ophtalmology': 'Ophthalmology',
+        'general medicine': 'General Medicine',
+        'general': 'General Medicine',
+        'médecine générale': 'General Medicine',
+        'généraliste': 'General Medicine',
+        'dermatology': 'Dermatology',
+        'skin': 'Dermatology',
+        'dermato': 'Dermatology',
+        'orthopedics': 'Orthopedics',
+        'ortho': 'Orthopedics',
+        'bone': 'Orthopedics',
+        'pediatrics': 'Pediatrics',
+        'pediatric': 'Pediatrics',
+        'children': 'Pediatrics',
+        'gynecology': 'Gynecology',
+        'gyn': 'Gynecology',
+        'women': 'Gynecology',
+        'psychiatry': 'Psychiatry',
+        'psych': 'Psychiatry',
+        'mental': 'Psychiatry',
+        'radiology': 'Radiology',
+        'radio': 'Radiology',
+        'imaging': 'Radiology',
+        'surgery': 'Surgery',
+        'chirurgie': 'Surgery',
+        'consultation': 'General Medicine',
+        'check-up': 'General Medicine',
+        'follow-up': 'General Medicine'
+    };
+
+    const lowerSpecialty = specialty.toLowerCase();
+    return specialtyMap[lowerSpecialty] || specialty.charAt(0).toUpperCase() + specialty.slice(1).toLowerCase();
+}
+
+// ── Utility Functions ───────────────────────────────────────────────────────
+function updateElement(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = value;
     }
 }
 
 function showNotification(message, type = 'info') {
+    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
+
+    // Determine icon based on type
+    let iconClass;
+    if (type === 'success') {
+        iconClass = 'check-circle';
+    } else if (type === 'error') {
+        iconClass = 'exclamation-triangle';
+    } else {
+        iconClass = 'info-circle';
+    }
+
     notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <i class="fas fa-${iconClass}"></i>
         <span>${message}</span>
     `;
+
+    // Determine colors based on type
+    let backgroundColor, textColor;
+    if (type === 'success') {
+        backgroundColor = '#d4edda';
+        textColor = '#155724';
+    } else if (type === 'error') {
+        backgroundColor = '#f8d7da';
+        textColor = '#721c24';
+    } else {
+        backgroundColor = '#d1ecf1';
+        textColor = '#0c5460';
+    }
 
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
-        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+        background: ${backgroundColor};
+        color: ${textColor};
         padding: 12px 20px;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 1000;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: slideInRight 0.3s ease;
+        animation: slideIn 0.3s ease;
     `;
 
     document.body.appendChild(notification);
 
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
+        notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// Load invitations and emails when page loads (already handled in main DOMContentLoaded above)
-
-// Load and display recent emails
-function loadRecentEmails() {
-    const currentPatientEmail = localStorage.getItem('email');
-    const sentEmails = JSON.parse(localStorage.getItem('sentEmails') || '[]');
-
-    const container = document.querySelector('.emails-container');
-    if (!container) return;
-
-    if (!currentPatientEmail) {
-        container.innerHTML = `
-            <div class="no-emails-message">
-                <i class="fas fa-envelope-open"></i>
-                <h3>No recent emails</h3>
-                <p>Sign in to see messages sent to your account</p>
-            </div>`;
-        return;
+// ── Sidebar Management ──────────────────────────────────────────────────────
+function loadAvatar() {
+    const avatarContainer = document.querySelector('.avatar-img');
+    if (avatarContainer) {
+        updateAvatarDisplay(avatarContainer);
     }
-
-    const patientEmails = sentEmails.filter((email) => email.to === currentPatientEmail);
-
-    if (patientEmails.length === 0) {
-        container.innerHTML = `
-            <div class="no-emails-message">
-                <i class="fas fa-envelope-open"></i>
-                <h3>No recent emails</h3>
-                <p>Email notifications will appear here</p>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = '';
-
-    // Show last 5 emails
-    const recentEmails = patientEmails.slice(-5).reverse();
-
-    recentEmails.forEach(email => {
-        const emailCard = createEmailCard(email);
-        container.appendChild(emailCard);
-    });
 }
 
-function createEmailCard(email) {
-    const card = document.createElement('div');
-    card.className = 'email-card unread';
+function updateSidebar() {
+    const userName = localStorage.getItem('userName') || '';
+    const sidebarName = document.querySelector('.patient-info h4');
+    if (sidebarName) {
+        sidebarName.textContent = userName;
+    }
 
-    const sentDate = new Date(email.sentAt);
-    const timeAgo = getTimeAgo(sentDate);
-
-    // Extract subject from body for display
-    const subject = email.subject || 'Appointment Invitation';
-    const preview = email.body.split('\n')[0].substring(0, 100) + '...';
-
-    card.innerHTML = `
-        <div class="email-header">
-            <div>
-                <div class="email-sender">${email.from.split('@')[0]}@medisync.com</div>
-                <div class="email-subject">${subject}</div>
-                <div class="email-preview">${preview}</div>
-            </div>
-            <div class="email-timestamp">${timeAgo}</div>
-        </div>
-    `;
-
-    // Mark as read when clicked
-    card.addEventListener('click', () => {
-        card.classList.remove('unread');
-        showEmailModal(email);
-    });
-
-    return card;
+    const avatarContainer = document.querySelector('.avatar-img');
+    if (avatarContainer) {
+        updateAvatarDisplay(avatarContainer);
+    }
 }
 
-function showEmailModal(email) {
-    const sentDate = new Date(email.sentAt);
-    const formattedDate = sentDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+function updateAvatarDisplay(avatarContainer) {
+    const savedImage = localStorage.getItem('userAvatar');
 
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6); z-index: 3000; display: flex;
-        align-items: center; justify-content: center; animation: fadeIn 0.3s ease;
-    `;
+    avatarContainer.innerHTML = '';
 
-    modal.innerHTML = `
-        <div style="background: var(--card-bg); border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <div style="padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-                    <div>
-                        <h3 style="color: var(--text-primary); margin-bottom: 8px;">${email.subject}</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px;">
-                            From: ${email.from.split('@')[0]}@medisync.com<br>
-                            To: ${email.to}<br>
-                            Date: ${formattedDate}
-                        </p>
-                    </div>
-                    <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">&times;</button>
-                </div>
-                <div style="color: var(--text-primary); line-height: 1.6; white-space: pre-line;">
-                    ${email.body}
-                </div>
-            </div>
-        </div>
-    `;
+    if (savedImage) {
+        const img = document.createElement('img');
+        img.src = savedImage;
+        img.alt = 'Avatar';
+        img.onload = () => {
+            img.style.display = 'block';
+        };
+        avatarContainer.appendChild(img);
+    } else {
+        const userName = localStorage.getItem('userName') || '';
+        const nameParts = userName.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts[1] || '';
+        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
+        if (!initials.trim()) initials = '';
 
-    document.body.appendChild(modal);
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
+        const span = document.createElement('span');
+        span.textContent = initials;
+        avatarContainer.appendChild(span);
+    }
 }
 
-function getTimeAgo(date) {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+// ── Logout Functionality ────────────────────────────────────────────────────
+const logoutBtn = document.querySelector('.logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', function() {
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('firstName');
+        localStorage.removeItem('lastName');
+        localStorage.removeItem('email');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userAvatar');
+        globalThis.location.replace('/login');
+    });
 }
-
-// Keyboard navigation for sidebar
-document.addEventListener('keydown', function(e) {
-    const menuItems = Array.from(document.querySelectorAll('.sidebar-menu li'));
-    const activeItem = document.querySelector('.sidebar-menu li.active');
-    const activeIndex = menuItems.indexOf(activeItem);
-
-    if (e.key === 'ArrowDown' && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        const nextIndex = (activeIndex + 1) % menuItems.length;
-        menuItems[nextIndex].click();
-        menuItems[nextIndex].focus();
-    } else if (e.key === 'ArrowUp' && !e.ctrlKey && !e.altKey) {
-        e.preventDefault();
-        const prevIndex = activeIndex === 0 ? menuItems.length - 1 : activeIndex - 1;
-        menuItems[prevIndex].click();
-        menuItems[prevIndex].focus();
-    }
-});
-
-// Add CSS animations for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);

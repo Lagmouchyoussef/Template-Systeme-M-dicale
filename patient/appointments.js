@@ -650,12 +650,15 @@ class AppointmentCalendar {
         const patientId = this.getCurrentPatientId();
         const invitationsKey = `patient_${patientId}_invitations`;
         const invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
-        const pending = invitations.filter(inv => inv.status === 'pending');
+        const activeInvitations = invitations.filter(inv => {
+            const status = String(inv.status || 'pending').toLowerCase();
+            return status !== 'declined' && status !== 'cancelled';
+        });
 
-        if (countBadge) countBadge.textContent = pending.length;
+        if (countBadge) countBadge.textContent = activeInvitations.length;
 
-        if (pending.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">No pending invitations from your doctors.</p>';
+        if (activeInvitations.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">Aucune invitation reçue pour le moment.</p>';
             return;
         }
 
@@ -666,11 +669,21 @@ class AppointmentCalendar {
         };
 
         container.innerHTML = '';
-        pending.forEach(inv => {
+        activeInvitations.forEach(inv => {
             try {
                 const doctorId = inv.doctorId || (inv.doctor ? inv.doctor.id : null);
                 const docName = inv.doctorName || (inv.doctor ? inv.doctor.name : null) || getDoctorName(doctorId) || 'Medical Specialist';
                 const docSpecialty = inv.doctorSpecialty || (inv.doctor ? inv.doctor.specialty : null) || 'Generalist';
+                const status = String(inv.status || 'pending').toLowerCase();
+                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+                const actionsHtml = status === 'pending' ? `
+                    <button onclick="window.calendarApp.acceptInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Accept</button>
+                    <button onclick="window.calendarApp.declineInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Decline</button>
+                ` : `
+                    <div style="flex: 1; padding: 10px 12px; background: #f3f4f6; color: var(--text-secondary); border-radius: 4px; font-size: 13px; text-align: center;">
+                        Statut : ${statusLabel}
+                    </div>
+                `;
 
                 const card = document.createElement('div');
                 card.style.cssText = `
@@ -684,7 +697,7 @@ class AppointmentCalendar {
                             <h4 style="margin: 0;">Dr. ${docName}</h4>
                             <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">${docSpecialty}</p>
                         </div>
-                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">New Invitation</span>
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${statusLabel}</span>
                     </div>
                     <div style="font-size: 13px; color: var(--text-primary);">
                         <p style="margin: 5px 0;"><i class="fas fa-calendar-alt"></i> ${inv.date}</p>
@@ -692,8 +705,7 @@ class AppointmentCalendar {
                         <p style="margin: 5px 0;"><i class="fas fa-stethoscope"></i> ${inv.type}</p>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 5px;">
-                        <button onclick="window.calendarApp.acceptInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Accept</button>
-                        <button onclick="window.calendarApp.declineInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Decline</button>
+                        ${actionsHtml}
                     </div>
                 `;
                 container.appendChild(card);

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+//──Auth Guard ─────────────────────────────────────────────────────────────
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,11 +6,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="../shared.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="patient-dashboard.css">
-    <title>MediSync - Patient Dashboard</title>
+//──Global Variables ────────────────────────────────────────────────────────
+    <title>MediSync - Doctor Dashboard</title>
     <script src="../sync.js"></script>
 </head>
-    <body>
+<body>
     <div class="dashboard">
         <!-- Left Navbar -->
         <nav class="sidebar">
@@ -19,17 +19,17 @@
             </div>
 
             <ul class="sidebar-menu">
-                <li class="active ripple tooltip nav-item" data-tooltip="Dashboard Overview" data-page="dashboard">
+        document.body.dataset.theme = 'dark';tip nav-item" data-tooltip="Dashboard Overview" data-page="dashboard">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </li>
-                <li class="ripple tooltip nav-item" data-tooltip="My Appointments" data-page="appointments">
+                <li class="ripple tooltip nav-item" data-tooltip="Set Availability" data-page="availability">
                     <i class="fas fa-calendar-alt"></i>
-                    <span>Appointments</span>
+                    <span>Availability</span>
                 </li>
                 <li class="ripple tooltip nav-item" data-tooltip="Appointment History" data-page="history">
                     <i class="fas fa-history"></i>
-                    <span>History</span>
+            document.body.dataset.theme = 'dark';
                 </li>
                 <li class="ripple tooltip nav-item" data-tooltip="Account Settings" data-page="settings">
                     <i class="fas fa-cog"></i>
@@ -37,14 +37,14 @@
                 </li>
             </ul>
 
-            <!-- Patient Profile Section -->
+            <!-- Doctor Profile Section -->
             <div class="patient-profile">
                 <div class="avatar-img">
                     <span></span>
                 </div>
                 <div class="patient-info">
                     <h4 id="heading_1"></h4>
-                    <p>Patient</p>
+                    <p>Doctor</p>
                 </div>
             </div>
 
@@ -66,95 +66,118 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
+             <header class="header">
                 <h1 id="heading_2">Patient Dashboard</h1>
-                <div class="header-actions">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <div id="div_auto_1" class="notification-badge" style="display: none;">0</div>
-                    </div>
-                </div>
-            </header>
+                 <div class="header-actions">
+                     <div class="notifications">
+                         <i class="fas fa-bell"></i>
+                         <div id="div_auto_1" class="notification-badge" style="display: none;">0</div>
+
+                         <!-- Notifications Dropdown -->
+                         <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                             <div class="notifications-header">
+                                 <h4>Notifications</h4>
+                <!-- Welcome Section --> class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                <section class="welcome-card">
+                    <h2 id="heading_3">Welcome to MediSync</h2>="notifications-list"></div>
+                             <div class="notifications-footer">
+                            <h2 id="heading_3">Bonjour, <span id="welcome-name">Patient</span></h2>fications</button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </header>
 
             <div class="dashboard-content">
                 <!-- Welcome Section -->
                 <section class="welcome-card">
-                    <h2 id="heading_3">Welcome to MediSync</h2>
-                    <p>Manage your health appointments and track your medical history.</p>
-                    <button id="btn_1" class="btn-primary">Schedule Appointment</button>
+                    <h2>Welcome to MediSync</h2>
+                    <p>Manage your patients and appointments effectively.</p>
+    updateAppointmentStatistics(patientAppointments);Patient Records</button>
                 </section>
 
                 <!-- Quick Stats -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon appointments">
-                            <i class="fas fa-calendar-alt"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="total-appointments-card">0</h3>
-                            <p>Total Appointments</p>
+                            <h3 id="total-patients-card">0</h3>
+                            <p>Total Patients</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon doctors">
-                            <i class="fas fa-user-md"></i>
+                            <i class="fas fa-calendar-day"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="doctors-visited-count">0</h3>
-                            <p>Doctors Visited</p>
+                            <h3 id="doctors-visited-count">0</h3>h3>
+                            <p>Today's Appointments</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon prescriptions">
-                            <i class="fas fa-pills"></i>
+                            <i class="fas fa-stethoscope"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="completed-appointments-card">0</h3>
-                            <p>Completed Appointments</p>
+                            <h3 id="completed-consultations-card">0</h3>
+                            <p>Completed Consultations</p>
                         </div>
-                    </div>
+                <!-- Pending Invitations Section -->
                     <div class="stat-card">
                         <div class="stat-icon health">
-                            <i class="fas fa-heartbeat"></i>
+                            <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="health-score-card">85%</h3>
-                            <p>Health Score</p>
+                            <h3 id="patient-satisfaction-card">0%</h3>
+                            <p>Average Patient Satisfaction</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pending Invitations Section -->
+                <!-- Pending Appointment Requests Section -->
                 <section class="pending-requests-section" style="margin-bottom: 30px; background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: var(--shadow);">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
-                        <h2 style="font-size: 20px; color: var(--text-primary); margin: 0;">Pending Doctor Invitations</h2>
-                        <span id="pending-invitations-badge" style="background: var(--accent-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;">0</span>
+                        <h2 style="font-size: 20px; color: var(--text-primary); margin: 0;">Pending Appointment Requests</h2>
+                        <span id="pending-requests-badge" style="background: var(--accent-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;">0</span>
                     </div>
-                    <div id="pending-invitations-list" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div id="pending-requests-list" style="display: flex; flex-direction: column; gap: 15px;">
                         <div class="no-data-message" style="text-align: center; color: var(--text-secondary); padding: 20px;">
-                            <i class="fas fa-envelope" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>No pending invitations.</p>
+                            <i class="fas fa-calendar-alt" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                            <p>No pending appointment requests.</p>
                         </div>
                     </div>
                 </section>
 
-                <!-- Doctors Directory Section -->
+                <!-- Patients Directory Section -->
                 <section class="patients-directory-section" style="margin-bottom: 30px; background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: var(--shadow);">
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
-                        <h2 style="font-size: 20px; color: var(--text-primary); margin: 0;">My Doctors</h2>
+                        <h2 style="font-size: 20px; color: var(--text-primary); margin: 0;">Patients Directory</h2>
                     </div>
-                    <div class="patients-grid" id="doctors-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                    <div class="patients-grid" id="patients-directory-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
                         <div class="no-data-message" style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 20px;">
-                            <i class="fas fa-user-md" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>Loading doctors directory...</p>
+                            <i class="fas fa-users" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                            <p>Loading patients directory...</p>
                         </div>
                     </div>
                 </section>
 
                 <!-- Health Charts Section -->
                 <section class="charts-section">
-                    <h2>Health Analytics</h2>
+                    <h2>Patient Analytics</h2>
                     <div class="charts-grid">
+                        <!-- Patient Health Overview -->
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-heartbeat"></i> Patient Health Overview</h3>
+                                <span class="chart-period">Last 6 months</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="patientHealthChart"></canvas>
+                            </div>
+                        </div>
+
                         <!-- Appointment Trends -->
                         <div class="chart-card">
                             <div class="chart-header">
@@ -166,25 +189,25 @@
                             </div>
                         </div>
 
-                        <!-- Health Overview -->
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h3><i class="fas fa-heartbeat"></i> Health Overview</h3>
-                                <span class="chart-period">This year</span>
-                            </div>
-                            <div class="chart-container">
-                                <canvas id="healthOverviewChart"></canvas>
-                            </div>
-                        </div>
-
                         <!-- Specialty Distribution -->
                         <div class="chart-card">
                             <div class="chart-header">
-                                <h3><i class="fas fa-chart-pie"></i> Appointments by Specialty</h3>
-                                <span class="chart-period">All time</span>
+                                <h3><i class="fas fa-chart-pie"></i> Patients by Specialty</h3>
+                                <span class="chart-period">This year</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="specialtyChart"></canvas>
+                            </div>
+                        </div>
+
+                            <div class="stat-value" id="total-appointments-count">0</div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-star"></i> Performance Metrics</h3>
+                                <span class="chart-period">Current status</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -192,35 +215,35 @@
 
                 <!-- Appointments Statistics -->
                 <section class="stats-section">
-                    <h2>Appointment Statistics</h2>
+                    <h2>Practice Statistics</h2>
                     <div class="stats-overview">
                         <div class="stat-box">
-                            <div class="stat-value" id="total-appointments-count">0</div>
-                            <div class="stat-label">Total Appointments</div>
+                            <div class="stat-value" id="practice-total-patients">0</div>
+                            <div class="stat-label">Total Patients</div>
+                            <div class="stat-trend neutral">
+function updateAppointmentStatistics(appointments) {us"></i>
+                                No data yet
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="practice-active-patients">0</div>
+                            <div class="stat-label">Active Patients</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-value" id="upcoming-appointments-count">0</div>
-                            <div class="stat-label">Upcoming</div>
+                            <div class="stat-value" id="practice-todays-appointments">0</div>
+                            <div class="stat-label">Today's Appointments</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
                             </div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-value" id="completed-appointments-count">0</div>
-                            <div class="stat-label">Completed</div>
-                            <div class="stat-trend neutral">
-                                <i class="fas fa-minus"></i>
-                                No data yet
-                            </div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="cancelled-appointments-count">0</div>
-                            <div class="stat-label">Cancelled</div>
+                            <div class="stat-value" id="practice-pending-reviews">0</div>
+                                    <span class="specialty-count" id="specialty-cardiology-count">0 appointments</span>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
                                 No data yet
@@ -230,7 +253,7 @@
 
                     <!-- Specialty Breakdown -->
                     <div class="specialty-breakdown">
-                        <h3>Appointments by Specialty</h3>
+                        <h3>Patients by Specialty</h3>
                         <div class="specialty-grid">
                             <div class="specialty-item">
                                 <div class="specialty-icon cardiology">
@@ -238,7 +261,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Cardiology</span>
-                                    <span class="specialty-count" id="specialty-count-cardiology">0 appointments</span>
+                                    <span class="specialty-count" id="specialty-count-cardiology">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage" id="specialty-percentage-cardiology">0%</div>
                             </div>
@@ -248,7 +271,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Dentistry</span>
-                                    <span class="specialty-count" id="specialty-count-dentistry">0 appointments</span>
+                                    <span class="specialty-count" id="specialty-count-dentistry">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage" id="specialty-percentage-dentistry">0%</div>
                             </div>
@@ -258,7 +281,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">Neurology</span>
-                                    <span class="specialty-count" id="specialty-count-neurology">0 appointments</span>
+                                    <span class="specialty-count" id="specialty-count-neurology">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage" id="specialty-percentage-neurology">0%</div>
                             </div>
@@ -267,8 +290,8 @@
                                     <i class="fas fa-eye"></i>
                                 </div>
                                 <div class="specialty-info">
-                                    <span class="specialty-name">Ophthalmology</span>
-                                    <span class="specialty-count" id="specialty-count-ophthalmology">0 appointments</span>
+        // Normalize specialty name to match HTML IDsialty-name">Ophthalmology</span>
+                                    <span class="specialty-count" id="specialty-count-ophthalmology">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage" id="specialty-percentage-ophthalmology">0%</div>
                             </div>
@@ -278,7 +301,7 @@
                                 </div>
                                 <div class="specialty-info">
                                     <span class="specialty-name">General Medicine</span>
-                                    <span class="specialty-count" id="specialty-count-general-medicine">0 appointments</span>
+                                    <span class="specialty-count" id="specialty-count-general-medicine">0 patients</span>
                                 </div>
                                 <div class="specialty-percentage" id="specialty-percentage-general-medicine">0%</div>
                             </div>
@@ -288,22 +311,22 @@
 
                 <!-- Upcoming Appointments -->
                 <section class="appointments-section">
-                    <h2>Upcoming Appointments</h2>
-                    <div id="upcoming-appointments-list" class="no-data-message">
+                    <h2>Today's Appointments</h2>
+                    <div class="no-data-message">
                         <i class="fas fa-calendar-plus"></i>
-                        <h3>No upcoming appointments</h3>
-                        <p>Your scheduled appointments will appear here</p>
-                        <button class="btn-primary">Schedule Appointment</button>
+                        <h3>No appointments today</h3>
+                        <p>Your schedule will appear here when appointments are booked</p>
+                        <button id="btn_1" class="btn-primary">Manage Schedule</button>
                     </div>
                 </section>
 
                 <!-- Recent Activity -->
                 <section class="activity-section">
                     <h2>Recent Activity</h2>
-                    <div id="recent-activity-list" class="no-data-message">
+                    <div class="no-data-message">
                         <i class="fas fa-history"></i>
                         <h3>No recent activity</h3>
-                        <p>Your medical activities will appear here</p>
+                        <p>Your medical activities will appear here once you start consultations</p>
                     </div>
                 </section>
             </div>
@@ -314,7 +337,7 @@
     <div id="notifications-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="heading_3">All Notifications</h3>
+                <h3>All Notifications</h3>
                 <span class="modal-close" id="notifications-modal-close">&times;</span>
             </div>
             <div class="modal-body">
@@ -323,7 +346,46 @@
         </div>
     </div>
 
-    <script src="patient-dashboard.js"></script>
+    <!-- Send Consultation Modal -->
+    <div id="send-consultation-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Consultation to <span id="consultation-patient-name" style="color: var(--accent-color);"></span></h3>
+                <span class="modal-close" id="consultation-modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="send-consultation-form">
+                    <input type="hidden" id="consultation-patient-id">
+                    <input type="hidden" id="consultation-patient-email">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 500;">Date</label>
+                        <input type="date" id="consultation-date" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 500;">Time</label>
+                        <input type="time" id="consultation-time" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary);">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 500;">Consultation Type</label>
+                        <select id="consultation-type" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary);">
+                            <option value="consultation">Consultation</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="check-up">Regular Check-up</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 500;">Message / Notes</label>
+                        <textarea id="consultation-notes" rows="3" placeholder="Additional notes for the patient..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600; cursor: pointer; border: none; border-radius: 8px;">Send Consultation Invitation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="doctor-dashboard.js"></script>
     <script src="../notifications.js"></script>
+    <script src="history.js"></script>
 </body>
 </html>
+        activeInvitations.forEach(inv => {    const activeInvitations = invitations.filter((inv) => {    const status = String(invitation.status || 'pending').toLowerCase();function normalizeString(value) {    const dashboardData = getPatientDashboardData();                labels: ['Confirmed', 'Pending', 'Cancelled', 'Declined'],/* Welcome Section */function createHealthOverviewChart() {            createHealthOverviewChart();    const badge = document.getElementById('pending-invitations-badge');    const appointments = currentPatientData.appointments;    const now = new Date();        const specialty = apt.specialty || apt.type || 'General Medicine';

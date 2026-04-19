@@ -1,0 +1,869 @@
+/* BLUEPRINT-CSS-START */
+/* 🎨 Auto-generado Smart Layout: 4/19/2026, 11:12:02 PM */
+
+:root {
+    --primary: #7c3aed;
+    --secondary: #6d28d9;
+    --accent: #a78bfa;
+    --bg: #f5f3ff;
+    --text: #1e1b4b;
+    --glass: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Estilo para button: btn_1 */
+#btn_1 {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    animation: fadeIn 1s 0.0s both;
+}
+#btn_1:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    filter: brightness(1.1);
+}
+
+/* Estilo para button: btn_2 */
+#btn_2 {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    animation: fadeIn 1s 0.1s both;
+}
+#btn_2:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    filter: brightness(1.1);
+}
+
+/* Estilo para input: theme-switch */
+#theme-switch {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.2s both;
+}
+#theme-switch:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para input: consultation-patient-id */
+#consultation-patient-id {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.3s both;
+}
+#consultation-patient-id:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para input: consultation-patient-email */
+#consultation-patient-email {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.4s both;
+}
+#consultation-patient-email:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para input: consultation-date */
+#consultation-date {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.5s both;
+}
+#consultation-date:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para input: consultation-time */
+#consultation-time {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.6s both;
+}
+#consultation-time:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para textarea: consultation-notes */
+#consultation-notes {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border: 2px solid transparent;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 15px;
+    animation: fadeIn 1s 0.7s both;
+}
+#consultation-notes:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+/* Estilo para select: consultation-type */
+
+/* Estilo para form: send-consultation-form */
+#send-consultation-form {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--glass-border);
+    max-width: 550px;
+    margin: 40px auto;
+    animation: slideUp 1s ease;
+}
+
+/* Estilo para div: div_auto_1 */
+
+/* Estilo para nav: nav_auto_2 */
+#nav_auto_2 {
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: fadeIn 1s ease;
+}
+#nav_auto_2 a {
+    color: var(--text);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+#nav_auto_2 a:hover {
+    color: var(--primary);
+}
+
+/* Estilo para div: div_auto_3 */
+
+/* Estilo para div: div_auto_4 */
+
+/* Estilo para div: div_auto_5 */
+
+/* Estilo para div: div_auto_6 */
+
+/* Estilo para div: div_auto_7 */
+
+/* Estilo para div: div_auto_8 */
+
+/* Estilo para header: header_auto_9 */
+
+/* Estilo para div: div_auto_10 */
+
+/* Estilo para div: div_auto_11 */
+
+/* Estilo para div: div_auto_12 */
+
+/* Estilo para div: notifications-dropdown */
+
+/* Estilo para div: div_auto_14 */
+
+/* Estilo para section: section_auto_15 */
+#section_auto_15 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 2.4s both;
+}
+#section_auto_15:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_16 */
+
+/* Estilo para div: div_auto_17 */
+
+/* Estilo para section: section_auto_18 */
+#section_auto_18 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 2.7s both;
+}
+#section_auto_18:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_19 */
+
+/* Estilo para div: div_auto_20 */
+#div_auto_20 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 2.9s both;
+}
+#div_auto_20:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_21 */
+
+/* Estilo para div: div_auto_22 */
+
+/* Estilo para div: div_auto_23 */
+#div_auto_23 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 3.2s both;
+}
+#div_auto_23:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_24 */
+
+/* Estilo para div: div_auto_25 */
+
+/* Estilo para div: div_auto_26 */
+#div_auto_26 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 3.5s both;
+}
+#div_auto_26:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_27 */
+
+/* Estilo para div: div_auto_28 */
+
+/* Estilo para div: div_auto_29 */
+#div_auto_29 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 3.8s both;
+}
+#div_auto_29:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_30 */
+
+/* Estilo para div: div_auto_31 */
+
+/* Estilo para section: section_auto_32 */
+
+/* Estilo para div: div_auto_33 */
+
+/* Estilo para div: div_auto_35 */
+
+/* Estilo para section: section_auto_36 */
+
+/* Estilo para div: div_auto_37 */
+
+/* Estilo para div: patients-directory-grid */
+
+/* Estilo para div: div_auto_39 */
+
+/* Estilo para section: section_auto_40 */
+
+/* Estilo para div: div_auto_41 */
+
+/* Estilo para div: div_auto_42 */
+#div_auto_42 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 5.0s both;
+}
+#div_auto_42:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_43 */
+
+/* Estilo para div: div_auto_44 */
+
+/* Estilo para div: div_auto_45 */
+#div_auto_45 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 5.3s both;
+}
+#div_auto_45:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_46 */
+
+/* Estilo para div: div_auto_47 */
+
+/* Estilo para div: div_auto_48 */
+#div_auto_48 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 5.6s both;
+}
+#div_auto_48:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_49 */
+
+/* Estilo para div: div_auto_50 */
+
+/* Estilo para div: total-appointments-count */
+
+/* Estilo para div: div_auto_52 */
+#div_auto_52 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 6.0s both;
+}
+#div_auto_52:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_53 */
+
+/* Estilo para div: div_auto_54 */
+
+/* Estilo para section: section_auto_55 */
+
+/* Estilo para div: div_auto_56 */
+
+/* Estilo para div: div_auto_57 */
+
+/* Estilo para div: practice-total-patients */
+
+/* Estilo para div: div_auto_59 */
+
+/* Estilo para div: div_auto_60 */
+
+/* Estilo para div: div_auto_61 */
+
+/* Estilo para div: practice-active-patients */
+
+/* Estilo para div: div_auto_63 */
+
+/* Estilo para div: div_auto_64 */
+
+/* Estilo para div: div_auto_65 */
+
+/* Estilo para div: practice-todays-appointments */
+
+/* Estilo para div: div_auto_67 */
+
+/* Estilo para div: div_auto_68 */
+
+/* Estilo para div: div_auto_69 */
+
+/* Estilo para div: practice-pending-reviews */
+
+/* Estilo para div: div_auto_71 */
+
+/* Estilo para div: div_auto_72 */
+
+/* Estilo para div: div_auto_73 */
+
+/* Estilo para div: div_auto_74 */
+
+/* Estilo para div: div_auto_75 */
+#div_auto_75 {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 8.3s both;
+}
+#div_auto_75:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_76 */
+
+/* Estilo para div: specialty-percentage-cardiology */
+#specialty-percentage-cardiology {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 8.5s both;
+}
+#specialty-percentage-cardiology:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para div: div_auto_78 */
+
+/* Estilo para div: div_auto_79 */
+
+/* Estilo para div: div_auto_80 */
+
+/* Estilo para div: specialty-percentage-dentistry */
+
+/* Estilo para div: div_auto_82 */
+
+/* Estilo para div: div_auto_83 */
+
+/* Estilo para div: div_auto_84 */
+
+/* Estilo para div: specialty-percentage-neurology */
+
+/* Estilo para div: div_auto_86 */
+
+/* Estilo para div: div_auto_87 */
+
+/* Estilo para div: div_auto_88 */
+
+/* Estilo para div: specialty-percentage-ophthalmology */
+
+/* Estilo para div: div_auto_90 */
+
+/* Estilo para div: div_auto_91 */
+
+/* Estilo para div: div_auto_92 */
+
+/* Estilo para div: specialty-percentage-general-medicine */
+
+/* Estilo para section: section_auto_94 */
+
+/* Estilo para div: div_auto_95 */
+
+/* Estilo para section: section_auto_96 */
+
+/* Estilo para div: div_auto_97 */
+
+/* Estilo para div: notifications-modal */
+
+/* Estilo para div: div_auto_99 */
+
+/* Estilo para div: div_auto_100 */
+
+/* Estilo para div: div_auto_101 */
+
+/* Estilo para div: modal-notifications-list */
+
+/* Estilo para div: send-consultation-modal */
+
+/* Estilo para div: div_auto_104 */
+
+/* Estilo para div: div_auto_105 */
+
+/* Estilo para div: div_auto_106 */
+
+/* Estilo para div: div_auto_107 */
+
+/* Estilo para div: div_auto_108 */
+
+/* Estilo para div: div_auto_109 */
+
+/* Estilo para div: div_auto_110 */
+
+/* Estilo para img: img_1 */
+#img_1 {
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+    margin: 20px 0;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    animation: fadeIn 1.2s 11.9s both;
+}
+#img_1:hover {
+    transform: scale(1.02);
+}
+
+/* Estilo para h4: heading_1 */
+
+/* Estilo para h1: heading_2 */
+
+/* Estilo para h4: heading_3 */
+
+/* Estilo para h2: heading_6 */
+
+/* Estilo para h3: total-patients-card */
+#total-patients-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 12.6s both;
+}
+#total-patients-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para h3: doctors-visited-count */
+
+/* Estilo para h3: completed-consultations-card */
+#completed-consultations-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 12.8s both;
+}
+#completed-consultations-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para h3: patient-satisfaction-card */
+#patient-satisfaction-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s 12.9s both;
+}
+#patient-satisfaction-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    background: white;
+}
+
+/* Estilo para h2: heading_11 */
+
+/* Estilo para h2: heading_12 */
+
+/* Estilo para h2: heading_13 */
+
+/* Estilo para h3: heading_14 */
+
+/* Estilo para h3: heading_15 */
+
+/* Estilo para h3: heading_16 */
+
+/* Estilo para h3: heading_17 */
+
+/* Estilo para h2: heading_18 */
+
+/* Estilo para h3: heading_19 */
+
+/* Estilo para h2: heading_20 */
+
+/* Estilo para h3: heading_21 */
+
+/* Estilo para h2: heading_22 */
+
+/* Estilo para h3: heading_23 */
+
+/* Estilo para h3: heading_24 */
+
+/* Estilo para h3: heading_25 */
+
+/* Auto-Layout Premium */
+.grid, .features, .pricing, .products, .cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+    padding: 20px 0;
+}
+
+.card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.8s ease both;
+}
+
+
+/* 📊 Estilos de Dashboard Premium */
+.stats-container {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: var(--glass);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 24px;
+    flex: 1;
+    min-width: 240px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    transition: transform 0.3s;
+    animation: slideUp 0.8s ease both;
+}
+
+.stat-card:hover {
+    transform: scale(1.05);
+    background: white;
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: -1px;
+}
+
+/* 🛠️ Estilos Consola Admin */
+#admin-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #34495e;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+}
+
+#admin-btn:hover {
+    transform: scale(1.1);
+}
+
+#admin-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 500px;
+    max-height: 80vh;
+    background: white;
+    border: 2px solid #34495e;
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+    z-index: 10001;
+    overflow-y: auto;
+    color: #333;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    font-family: sans-serif;
+}
+
+#admin-panel h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+#admin-panel table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+
+#admin-panel td {
+    border-bottom: 1px solid #eee;
+    padding: 5px;
+}
+
+#admin-panel button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* BLUEPRINT-CSS-END */
