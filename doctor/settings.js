@@ -1227,7 +1227,6 @@ Version: ${data.version}
                 const span = document.createElement('span');
                 span.textContent = initials;
                 avatarContainer.appendChild(span);
-                avatarContainer.style.backgroundColor = '#f0f0f0';
             }
         }
 

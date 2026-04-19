@@ -568,10 +568,14 @@ class SettingsManager {
         });
 
         // Preferences
-        formData.language = document.getElementById('language')?.value || 'en';
-        formData.timezone = document.getElementById('timezone')?.value || 'Europe/Paris';
-        formData.fontSize = document.getElementById('font-size')?.value || 'medium';
-        formData.theme = document.querySelector('input[name="theme"]:checked')?.value || 'light';
+        const languageEl = document.getElementById('language');
+        formData.language = languageEl ? languageEl.value : 'en';
+        const timezoneEl = document.getElementById('timezone');
+        formData.timezone = timezoneEl ? timezoneEl.value : 'Europe/Paris';
+        const fontSizeEl = document.getElementById('font-size');
+        formData.fontSize = fontSizeEl ? fontSizeEl.value : 'medium';
+        const themeEl = document.querySelector('input[name="theme"]:checked');
+        formData.theme = themeEl ? themeEl.value : 'light';
 
         // Behavior settings
         const behaviorToggles = document.querySelectorAll('#preferences-section .preference-item .toggle input[type="checkbox"]');
@@ -1212,7 +1216,6 @@ Version: ${data.version}
                 const span = document.createElement('span');
                 span.textContent = initials;
                 avatarContainer.appendChild(span);
-                avatarContainer.style.backgroundColor = '#f0f0f0';
             }
         }
 

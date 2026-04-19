@@ -134,6 +134,15 @@
                             <p>Health Score</p>
                         </div>
                     </div>
+                    <div class="stat-card" style="border-color: var(--accent-color);">
+                        <div class="stat-icon invitations" style="background: rgba(45, 160, 168, 0.1); color: var(--accent-color);">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="invitations-count-stat">0</h3>
+                            <p>Invitations</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Health Charts Section -->
@@ -279,6 +288,14 @@
                                 <div class="specialty-percentage">0%</div>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- Invitations Received Section -->
+                <section class="invitations-section" style="margin-top: 30px; display: none;" id="invitations-dashboard-section">
+                    <h2>Invitations Received</h2>
+                    <div id="dashboard-invitations-list" class="appointments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+                        <!-- Populated by JS -->
                     </div>
                 </section>
 

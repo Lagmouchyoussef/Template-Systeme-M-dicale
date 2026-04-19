@@ -171,7 +171,7 @@ function initSidebarNavigation() {
 
             switch (targetPage) {
                 case 'dashboard':
-                    window.location.href = 'doctor.html';
+                    window.location.href = 'doctor-dashboard.html';
                     break;
                 case 'availability':
                     window.location.href = 'doctor-availability.html';
@@ -239,7 +239,17 @@ function updateSidebarInfo() {
 }
 
 function getStoredInvitations() {
-    return JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    // We combine all possible sources of appointment data for complete analytics
+    const sent = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    const received = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    const history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+    const confirmed = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+    
+    return [...sent, ...received, ...history, ...confirmed];
+}
+
+function getAnalyticsBaseData() {
+    return getStoredInvitations();
 }
 
 function getLastSixMonthBuckets() {
@@ -258,13 +268,39 @@ function getLastSixMonthBuckets() {
     return buckets;
 }
 
+function resolveDate(item) {
+    if (!item) return null;
+    let dateStr = item.date || item.appointmentDate || item.time;
+    if (!dateStr) return null;
+
+    // Handle case where date is like "Mon, Apr 20" (no year)
+    if (typeof dateStr === 'string' && !dateStr.match(/\d{4}/)) {
+        const currentYear = new Date().getFullYear();
+        dateStr += `, ${currentYear}`;
+    }
+
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+}
+
 function getUniquePatientsCount(invitations) {
-    return new Set(invitations.map(inv => inv.patient?.id).filter(Boolean)).size;
+    const registered = JSON.parse(localStorage.getItem('registeredPatients') || '[]');
+    const patientIds = new Set(registered.map(p => String(p.id)));
+    
+    invitations.forEach(item => {
+        const id = item.patientId || (item.patient && item.patient.id);
+        if (id) patientIds.add(String(id));
+    });
+    
+    return patientIds.size;
 }
 
 function getTodaysAppointmentCount(invitations) {
-    const today = new Date().toISOString().slice(0, 10);
-    return invitations.filter(inv => inv.date === today && inv.status !== 'declined').length;
+    const today = new Date().toISOString().split('T')[0];
+    return invitations.filter(inv => {
+        const d = resolveDate(inv);
+        return d && d.toISOString().split('T')[0] === today && inv.status !== 'declined';
+    }).length;
 }
 
 function getCompletedConsultationsCount(invitations) {
@@ -308,7 +344,8 @@ function calculateSpecialtyCounts(invitations) {
     };
 
     invitations.forEach(invitation => {
-        const specialty = typeToSpecialty[invitation.type] || 'General Medicine';
+        const type = (invitation.type || '').toLowerCase();
+        const specialty = typeToSpecialty[type] || 'General Medicine';
         if (specialtyCounts.hasOwnProperty(specialty)) {
             specialtyCounts[specialty] += 1;
         } else {
@@ -325,8 +362,9 @@ function getAppointmentTrendsData(monthBuckets) {
 
     return monthBuckets.map(bucket => {
         return invitations.reduce((count, invitation) => {
-            const appointmentDate = new Date(invitation.date);
-            if (Number.isNaN(appointmentDate.getTime())) return count;
+            const appointmentDate = resolveDate(invitation);
+            if (!appointmentDate) return count;
+            
             if (appointmentDate.getFullYear() === bucket.year &&
                 appointmentDate.getMonth() === bucket.month &&
                 invitation.status !== 'declined') {
@@ -345,15 +383,17 @@ function getPatientHealthData(monthBuckets) {
 
     return monthBuckets.map(bucket => {
         const monthInvitations = invitations.filter(invitation => {
-            const appointmentDate = new Date(invitation.date);
-            return !Number.isNaN(appointmentDate.getTime()) &&
+            const appointmentDate = resolveDate(invitation);
+            return appointmentDate &&
                 appointmentDate.getFullYear() === bucket.year &&
                 appointmentDate.getMonth() === bucket.month;
         });
 
         if (!monthInvitations.length) return 0;
 
-        const accepted = monthInvitations.filter(inv => inv.status === 'accepted' || inv.status === 'completed').length;
+        const accepted = monthInvitations.filter(inv => 
+            ['accepted', 'completed', 'confirmed', 'restored'].includes(inv.status)
+        ).length;
         return Math.round((accepted / monthInvitations.length) * 100);
     });
 }
@@ -367,17 +407,22 @@ function getPerformanceMetricsData() {
     const total = invitations.length;
     if (total === 0) return [0, 0, 0, 0];
 
-    const today = new Date().toISOString().slice(0, 10);
-    const completed = invitations.filter(inv => inv.status === 'accepted' || inv.status === 'completed').length;
-    const confirmed = invitations.filter(inv => inv.status === 'pending' && inv.date >= today).length;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const completed = invitations.filter(inv => 
+        ['accepted', 'completed', 'confirmed', 'restored'].includes(inv.status)
+    ).length;
+    const confirmed = invitations.filter(inv => {
+        const d = resolveDate(inv);
+        return d && inv.status === 'pending' && d.toISOString().slice(0, 10) >= todayStr;
+    }).length;
     const cancelled = invitations.filter(inv => inv.status === 'declined').length;
     const missed = invitations.filter(inv => {
-        const appointmentDate = new Date(inv.date);
-        return !Number.isNaN(appointmentDate.getTime()) &&
+        const appointmentDate = resolveDate(inv);
+        return appointmentDate &&
             inv.status !== 'declined' &&
             inv.status !== 'accepted' &&
             inv.status !== 'completed' &&
-            appointmentDate.toISOString().slice(0, 10) < today;
+            appointmentDate.toISOString().slice(0, 10) < todayStr;
     }).length;
 
     const excellent = Math.round((completed / total) * 100);
@@ -386,9 +431,9 @@ function getPerformanceMetricsData() {
     const needsAttention = Math.round((missed / total) * 100);
 
     const totalPercent = excellent + good + fair + needsAttention;
-    if (totalPercent === 100) return [excellent, good, fair, needsAttention];
     return [excellent, good + (100 - totalPercent), fair, needsAttention];
 }
+
 
 function setDashboardText(id, value) {
     const element = document.getElementById(id);
@@ -427,10 +472,12 @@ function refreshDashboardCounters() {
 function initializeCharts() {
     const monthBuckets = getLastSixMonthBuckets();
     const monthLabels = monthBuckets.map(bucket => bucket.label);
+    
     const patientHealthCtx = document.getElementById('patientHealthChart');
     const appointmentTrendsCtx = document.getElementById('appointmentTrendsChart');
     const specialtyCtx = document.getElementById('specialtyChart');
     const performanceCtx = document.getElementById('performanceChart');
+    const userDistCtx = document.getElementById('userDistributionChart');
 
     if (patientHealthCtx) {
         new Chart(patientHealthCtx, {
@@ -517,11 +564,12 @@ function initializeCharts() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } }
+                    legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, boxWidth: 10 } }
                 }
             }
         });
     }
+
 }
 
 function initButtonInteractions() {
@@ -586,6 +634,177 @@ function initPage() {
     initKeyboardNavigation();
     loadPatientsDirectory();
     initConsultationModal();
+    loadPendingRequests();
+    loadRecentActivity();
+    loadTodaysAppointments();
+}
+
+function loadTodaysAppointments() {
+    const container = document.getElementById('todays-appointments-container');
+    if (!container) return;
+
+    const appointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+    const today = new Date().toISOString().split('T')[0];
+
+    const todayAppointments = appointments.filter(app => {
+        const d = resolveDate(app);
+        return d && d.toISOString().split('T')[0] === today;
+    });
+
+    if (todayAppointments.length === 0) {
+        container.innerHTML = `
+            <div class="no-data-message" style="text-align: center; padding: 30px; color: var(--text-secondary); opacity: 0.7;">
+                <i class="fas fa-calendar-plus" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <h3>No appointments today</h3>
+                <p>Your schedule will appear here when appointments are booked</p>
+                <button class="btn-primary" onclick="window.location.href='doctor-availability.html'">Manage Schedule</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="appointments-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+            ${todayAppointments.map(app => `
+                <div class="appointment-card" style="
+                    background: var(--card-bg); 
+                    border: 1px solid var(--border-color); 
+                    border-radius: 12px; 
+                    padding: 15px; 
+                    display: flex; 
+                    justify-content: space-between; 
+                    align-items: center;
+                ">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--accent-color)15; color: var(--accent-color); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
+                            ${(app.patientName || 'P').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 16px; color: var(--text-primary); font-weight: 600;">${app.patientName || 'Unknown Patient'}</h4>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                <span style="font-size: 13px; color: var(--text-secondary);">
+                                    <i class="far fa-clock" style="margin-right: 4px;"></i> ${app.time || 'Time N/A'}
+                                </span>
+                                <span style="width: 4px; height: 4px; border-radius: 50%; background: var(--text-secondary); opacity: 0.3;"></span>
+                                <span style="font-size: 12px; color: var(--accent-color);">${app.type || 'Consultation'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: #28a74515; color: #28a745; border: 1px solid #28a74530;">
+                            Confirmed
+                        </span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function loadRecentActivity() {
+    const container = document.getElementById('recent-activity-container');
+    if (!container) return;
+
+    const invitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    const requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+
+    let activities = [];
+
+    // Map invitations to activities
+    invitations.forEach(inv => {
+        activities.push({
+            type: 'invitation',
+            title: `Invitation sent to ${inv.patient?.name || (inv.patientName) || 'Patient'}`,
+            date: resolveDate(inv),
+            icon: 'fa-paper-plane',
+            color: '#6f42c1'
+        });
+    });
+
+    // Map requests to activities
+    requests.forEach(req => {
+        const isValid = (val) => val && val !== 'undefined' && val !== 'null';
+        const pName = isValid(req.patientName) ? req.patientName : 
+                     (isValid(req.patient) && typeof req.patient === 'string' ? req.patient : 
+                     (req.patient && isValid(req.patient.name) ? req.patient.name : 'Patient'));
+        
+        activities.push({
+            type: 'request',
+            title: `Request from ${pName}`,
+            date: resolveDate(req),
+            icon: 'fa-envelope-open-text',
+            color: '#2da0a8'
+        });
+    });
+
+    // Sort by date desc
+    activities.sort((a, b) => {
+        const dateA = a.date ? a.date.getTime() : 0;
+        const dateB = b.date ? b.date.getTime() : 0;
+        return dateB - dateA;
+    });
+
+    // Limit to 5
+    activities = activities.slice(0, 5);
+
+    if (activities.length === 0) {
+        container.innerHTML = `
+            <div class="no-data-message" style="text-align: center; padding: 30px; color: var(--text-secondary); opacity: 0.7;">
+                <i class="fas fa-history" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <h3>No recent activity</h3>
+                <p>Your medical activities will appear here once you start consultations</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="activity-list" style="display: flex; flex-direction: column; gap: 12px;">
+            ${activities.map(act => `
+                <div class="activity-item ripple" style="
+                    display: flex; 
+                    align-items: center; 
+                    gap: 15px; 
+                    padding: 15px; 
+                    background: var(--card-bg); 
+                    border-radius: 12px; 
+                    border: 1px solid var(--border-color);
+                    transition: all 0.3s ease;
+                    cursor: default;
+                ">
+                    <div class="activity-icon" style="
+                        width: 42px; 
+                        height: 42px; 
+                        border-radius: 10px; 
+                        background: ${act.color}15; 
+                        color: ${act.color}; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center;
+                        font-size: 18px;
+                    ">
+                        <i class="fas ${act.icon}"></i>
+                    </div>
+                    <div class="activity-info" style="flex: 1;">
+                        <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 600;">${act.title}</h4>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+                            <span style="font-size: 12px; color: var(--text-secondary);">
+                                <i class="far fa-calendar-alt" style="margin-right: 4px;"></i>
+                                ${act.date ? act.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unknown'}
+                            </span>
+                            <span style="width: 4px; height: 4px; border-radius: 50%; background: var(--text-secondary); opacity: 0.3;"></span>
+                            <span style="font-size: 12px; color: var(--accent-color); font-weight: 500;">
+                                ${act.type.charAt(0).toUpperCase() + act.type.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="activity-arrow" style="color: var(--text-secondary); opacity: 0.3;">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 function loadPatientsDirectory() {
@@ -660,6 +879,21 @@ function initConsultationModal() {
         modal.style.display = 'none';
     });
 
+    const emergencyBtn = document.getElementById('consultation-emergency-btn');
+    if (emergencyBtn) {
+        emergencyBtn.addEventListener('click', () => {
+            const typeSelect = document.getElementById('consultation-type');
+            typeSelect.value = 'emergency';
+            
+            // Visual feedback
+            emergencyBtn.classList.add('active');
+            
+            if (typeof showToast === 'function') {
+                showToast('Urgence activée', 'warning');
+            }
+        });
+    }
+
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
@@ -707,6 +941,20 @@ function initConsultationModal() {
         receivedInvitations.push(invitation);
         localStorage.setItem(patientKey, JSON.stringify(receivedInvitations));
 
+        // NEW: Archive to emailHistory
+        const emailData = {
+            id: 'email_' + Date.now(),
+            to: patientEmail,
+            subject: 'New Consultation Invitation - Dr. ' + doctorName,
+            body: `Hello ${patientName}, Dr. ${doctorName} has invited you to a consultation on ${date} at ${time}. Type: ${type}`,
+            sentAt: new Date().toISOString(),
+            status: 'sent',
+            type: 'invitation'
+        };
+        const emailHistory = JSON.parse(localStorage.getItem('emailHistory') || '[]');
+        emailHistory.push(emailData);
+        localStorage.setItem('emailHistory', JSON.stringify(emailHistory));
+
         // Close modal and show success
         modal.style.display = 'none';
         form.reset();
@@ -733,6 +981,196 @@ function openConsultationModal(id, name, email) {
     
     modal.style.display = 'flex';
 }
+
+function loadPendingRequests() {
+    const list = document.getElementById('pending-requests-list');
+    const badge = document.getElementById('pending-requests-badge');
+    if (!list || !badge) return;
+
+    const doctorId = localStorage.getItem('userId');
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    
+    // In demo mode, show all requests
+    const myPendingRequests = allRequests.filter(req => req.status === 'pending');
+    
+    badge.textContent = myPendingRequests.length;
+    
+    if (myPendingRequests.length === 0) {
+        list.innerHTML = `
+            <div class="no-data-message" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-calendar-check" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p>No pending appointment requests.</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = '';
+    myPendingRequests.forEach(r => {
+        // Map data for robust display - explicit check for "undefined" string
+        const isValid = (val) => val && val !== 'undefined' && val !== 'null';
+        
+        const pName = isValid(r.patientName) ? r.patientName : 
+                     (isValid(r.patient) && typeof r.patient === 'string' ? r.patient : 
+                     (r.patient && isValid(r.patient.name) ? r.patient.name : 'Unknown Patient'));
+                     
+        const pEmail = isValid(r.email) ? r.email : 
+                      (r.patient && isValid(r.patient.email) ? r.patient.email : 'N/A');
+                      
+        const pPhone = isValid(r.phone) ? r.phone : 
+                      (r.patient && isValid(r.patient.phone) ? r.patient.phone : 'N/A');
+                      
+        const pType = isValid(r.customType) ? r.customType : 
+                     (isValid(r.type) ? r.type : 'Consultation');
+                     
+        const pReason = isValid(r.reason) ? r.reason : 
+                       (isValid(r.notes) ? r.notes : 'No reason provided');
+                       
+        const pDate = isValid(r.date) ? r.date : '';
+        const pTime = isValid(r.time) ? r.time : '';
+
+        const item = document.createElement('div');
+        item.style.cssText = `
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        `;
+        
+        item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h4 style="margin: 0 0 5px 0; color: var(--text-primary); font-size: 16px;">${pName}</h4>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 13px;">
+                        <i class="fas fa-envelope"></i> ${pEmail} &nbsp;|&nbsp; 
+                        <i class="fas fa-phone"></i> ${pPhone}
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <strong style="color: var(--accent-color); font-size: 14px;">${pDate ? new Date(pDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'}) : 'N/A'}</strong><br>
+                    <span style="color: var(--text-primary); font-size: 14px;">${pTime}</span>
+                </div>
+            </div>
+            
+            <div style="background: var(--bg-primary); padding: 10px; border-radius: 6px; font-size: 13px; color: var(--text-primary);">
+                <strong>Type:</strong> ${pType.charAt(0).toUpperCase() + pType.slice(1)}<br>
+                <strong>Reason:</strong> ${pReason}
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <button onclick="handleRequest('${r.id}', 'accepted')" style="flex: 1; padding: 8px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                    <i class="fas fa-check"></i> Accept
+                </button>
+                <button onclick="handleRequest('${r.id}', 'declined')" style="flex: 1; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                    <i class="fas fa-times"></i> Decline
+                </button>
+                <button onclick="rescheduleRequest('${r.id}')" style="flex: 1; padding: 8px; background: #ffc107; color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                    <i class="fas fa-calendar-alt"></i> Reschedule
+                </button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+window.handleRequest = function(requestId, newStatus) {
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    const reqIndex = allRequests.findIndex(r => r.id === requestId);
+    
+    if (reqIndex !== -1) {
+        allRequests[reqIndex].status = newStatus;
+        localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
+        
+        if (newStatus === 'accepted') {
+            // Add to confirmed appointments list for both (simulated via addPatientAppointment which we can just adapt)
+            const req = allRequests[reqIndex];
+            
+            const isValid = (val) => val && val !== 'undefined' && val !== 'null';
+            const patientName = isValid(req.patientName) ? req.patientName : 
+                               (isValid(req.patient) && typeof req.patient === 'string' ? req.patient : 
+                               (req.patient && isValid(req.patient.name) ? req.patient.name : 'Unknown Patient'));
+            
+            // For doctor dashboard
+            const doctorAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+            doctorAppointments.push({
+                id: req.id,
+                patientId: req.patientId, // Preserve patientId
+                patientName: patientName,
+                doctorName: localStorage.getItem('userName') || 'Dr. MedSync', // Add doctorName
+                date: req.date,
+                time: req.time,
+                type: req.type,
+                status: 'confirmed'
+            });
+            localStorage.setItem('doctorAppointments', JSON.stringify(doctorAppointments));
+            
+            if (typeof showToast === 'function') {
+                showToast('Appointment accepted successfully.', 'success');
+            } else {
+                alert('Appointment accepted!');
+            }
+        } else if (newStatus === 'declined') {
+            if (typeof showToast === 'function') {
+                showToast('Appointment declined.', 'info');
+            }
+        }
+        
+        // Reload lists
+        loadPendingRequests();
+        loadRecentActivity();
+        loadTodaysAppointments();
+    }
+};
+
+window.rescheduleRequest = function(requestId) {
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    const req = allRequests.find(r => r.id === requestId);
+    if (!req) return;
+    
+    const newDate = prompt('Enter new date (YYYY-MM-DD):', req.date);
+    if (!newDate) return; // User cancelled
+    
+    const newTime = prompt('Enter new time (HH:MM):', req.time);
+    if (!newTime) return; // User cancelled
+    
+    // Update the request
+    req.date = newDate;
+    req.time = newTime;
+    // Keep it pending but update it, or accept it right away. 
+    // Let's keep it pending so patient knows, or accept it with new time. Let's just accept it with new time for simplicity.
+    req.status = 'rescheduled'; 
+    localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
+    
+    const isValid = (val) => val && val !== 'undefined' && val !== 'null';
+    const patientName = isValid(req.patientName) ? req.patientName : 
+                       (isValid(req.patient) && typeof req.patient === 'string' ? req.patient : 
+                       (req.patient && isValid(req.patient.name) ? req.patient.name : 'Unknown Patient'));
+    
+    // Add to doctor appointments
+    const doctorAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+    doctorAppointments.push({
+        id: req.id,
+        patientId: req.patientId, // Preserve patientId
+        patientName: patientName,
+        doctorName: localStorage.getItem('userName') || 'Dr. MedSync', // Add doctorName
+        date: newDate,
+        time: newTime,
+        type: req.type,
+        status: 'confirmed'
+    });
+    localStorage.setItem('doctorAppointments', JSON.stringify(doctorAppointments));
+    
+    if (typeof showToast === 'function') {
+        showToast('Appointment rescheduled and confirmed!', 'success');
+    }
+    
+    loadPendingRequests();
+    loadRecentActivity();
+    loadTodaysAppointments();
+};
 
 document.addEventListener('DOMContentLoaded', initPage);
 

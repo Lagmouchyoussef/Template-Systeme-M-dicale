@@ -68,7 +68,7 @@
         <main class="main-content">
              <header class="header">
                  <div>
-                     <h1>Consultation History</h1>
+                     <h1>Historique des Suppressions</h1>
                      <p class="user-info"></p>
                  </div>
                  <div class="header-actions">
@@ -90,95 +90,113 @@
              </header>
 
             <div class="history-content">
-                <!-- Stats Summary -->
-                <div class="stats-summary">
-                    <i class="fas fa-user-md"></i> <span id="total-appointments">0</span> Total |
-                    <i class="fas fa-check-circle"></i> <span id="completed-appointments">0</span> Completed |
-                    <i class="fas fa-clock"></i> <span id="upcoming-appointments">0</span> Upcoming
-                </div>
-
-                <!-- Filters -->
-                <section class="filters-section">
-                    <div class="filters-grid">
-                        <div class="filter-group">
-                            <label for="search-input">Search</label>
-                            <input type="text" id="search-input" placeholder="Patient, specialty..." class="filter-input">
-                        </div>
-
-                        <div class="filter-group">
-                            <label for="month-filter">Month</label>
-                            <select id="month-filter" class="filter-select">
-                                <option value="">All months</option>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                            </select>
-                        </div>
-
-                        <div class="filter-group">
-                            <label for="year-filter">Year</label>
-                            <select id="year-filter" class="filter-select">
-                                <option value="">All years</option>
-                                <option value="2026">2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                            </select>
-                        </div>
-
-                        <div class="filter-group">
-                            <button id="clear-filters" class="btn-secondary">Clear</button>
-                        </div>
+                <!-- Archives - Demandes de Consultation Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-calendar-times" style="color: #6c757d; margin-right: 10px;"></i> Archives - Demandes de Consultation <span class="pending-count" id="archives-requests-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Patient</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Status</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-requests-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- Loading State -->
-                <div id="loading-state" class="loading-state" style="display: none;">
-                    <div class="loading-spinner"></div>
-                    <p>Loading your history...</p>
-                </div>
-
-                <!-- Error State -->
-                <div id="error-state" class="error-state" style="display: none;">
-                    <div class="error-content">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Loading Error</h3>
-                        <p>Unable to load consultation history.</p>
-                        <button id="retry-btn" class="btn-primary">Retry</button>
+                <!-- Archives - Invitations Envoyées Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-paper-plane" style="color: #6c757d; margin-right: 10px;"></i> Archives - Invitations Envoyées <span class="pending-count" id="archives-invitations-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
                     </div>
-                </div>
-
-                <!-- Consultations List -->
-                <section id="appointments-list" class="appointments-list">
-                    <!-- Consultations will be loaded here -->
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Patient</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Status</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-invitations-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
+                
+                <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 30px 0; opacity: 0.5;">
 
-                 <!-- Empty State -->
-                 <div id="empty-state" class="empty-state">
-                     <div class="empty-content">
-                         <i class="fas fa-calendar-times"></i>
-                         <h3>Please set your availability first before viewing your schedule.</h3>
-                         <p>Set your working hours and availability to start receiving consultations.</p>
-                         <button class="btn-primary" onclick="window.location.href='doctor-availability.html'">Set Availability</button>
-                     </div>
-                 </div>
+                <!-- Archives - Notifications Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-bell-slash" style="color: #6c757d; margin-right: 10px;"></i> Archives - Notifications <span class="pending-count" id="archives-notifications-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type / Sujet</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Message</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-notifications-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 30px 0; opacity: 0.5;">
 
-                <!-- Load More Button -->
-                <div id="load-more-container" class="load-more-container" style="display: none;">
-                    <button id="load-more-btn" class="btn-primary load-more-btn">
-                        <i class="fas fa-plus"></i>
-                        Load More
-                    </button>
-                </div>
+                <!-- Archives - Emails Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-envelope" style="color: #6c757d; margin-right: 10px;"></i> Archives - Emails <span class="pending-count" id="archives-emails-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Destinataire / Expéditeur</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Objet</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-emails-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </main>
     </div>

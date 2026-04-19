@@ -143,7 +143,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="appointment-type">Appointment Type</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label for="appointment-type">Appointment Type</label>
+                                <button type="button" id="emergency-toggle" style="padding: 5px 15px; border: 2px solid #dc3545; background: transparent; color: #dc3545; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                                    <i class="fas fa-exclamation-triangle"></i> EMERGENCY
+                                </button>
+                            </div>
                             <select id="appointment-type" required>
                                 <option value="">Select type</option>
                                 <option value="consultation">Consultation</option>
@@ -186,6 +191,26 @@
                             Book Appointment
                         </button>
                     </form>
+                </section>
+
+                <!-- Invitations Received Section -->
+                <section class="management-section" style="margin-top: 30px;">
+                    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Invitations Received (<span id="invitations-count">0</span>)</h2>
+                    </div>
+                    <div id="doctor-invitations-list" class="appointments-grid">
+                        <!-- Invitations will be populated by JS -->
+                    </div>
+                </section>
+
+                <!-- My Booked Appointments Section -->
+                <section class="management-section" style="margin-top: 30px;">
+                    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>My Booked Appointments (<span id="my-appointments-count">0</span>)</h2>
+                    </div>
+                    <div id="patient-appointments-list" class="appointments-grid">
+                        <!-- Booked appointments will be populated by JS -->
+                    </div>
                 </section>
 
                 <!-- Privacy Notice Modal -->

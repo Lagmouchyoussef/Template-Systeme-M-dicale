@@ -274,19 +274,32 @@ body {
 .avatar-img {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    border: none;
+    border-radius: 50%;
+    border: 1.5px solid rgba(45, 160, 168, 0.2);
     overflow: hidden;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-    color: white;
-    font-weight: 600;
+    background: linear-gradient(135deg, rgba(45, 160, 168, 0.25), rgba(45, 160, 168, 0.1));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--accent-color);
+    font-weight: 700;
     font-size: 16px;
     position: relative;
-    box-shadow: 0 2px 8px rgba(45, 160, 168, 0.25);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: var(--transition);
+}
+
+[data-theme="dark"] .avatar-img {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.3), rgba(78, 205, 196, 0.15));
+    border-color: rgba(78, 205, 196, 0.25);
+    color: var(--accent-color);
+}
+
+.avatar-img span {
+    letter-spacing: -0.5px;
 }
 
 .avatar-img::after {

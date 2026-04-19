@@ -809,3 +809,30 @@ table.data-table {
     .welcome-card { padding: 24px 20px; }
     .welcome-card h2 { font-size: 20px; }
 }
+/* ── 22. Emergency Buttons ────────────────────────────────────────────────── */
+.btn-emergency {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-emergency:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-emergency:active {
+    transform: translateY(0);
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.btn-emergency.active {
+    background-color: #dc3545 !important;
+    color: white !important;
+    animation: pulse-red 2s infinite;
+}

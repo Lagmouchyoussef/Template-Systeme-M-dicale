@@ -54,13 +54,18 @@ function getSession() {
 
 /** Écrit une session complète dans le localStorage */
 function setSession(account) {
-    const fullName = `${account.firstName} ${account.lastName}`.trim();
-    localStorage.setItem(SESSION_KEYS.role,      account.role);
-    localStorage.setItem(SESSION_KEYS.userId,    account.userId);
-    localStorage.setItem(SESSION_KEYS.firstName, account.firstName);
-    localStorage.setItem(SESSION_KEYS.lastName,  account.lastName);
-    localStorage.setItem(SESSION_KEYS.userName,  fullName);
-    localStorage.setItem(SESSION_KEYS.email,     account.email);
+    const isValid = (v) => v !== undefined && v !== null && v !== 'undefined' && v !== 'null';
+    
+    const fName = isValid(account.firstName) ? account.firstName : '';
+    const lName = isValid(account.lastName) ? account.lastName : '';
+    const fullName = `${fName} ${lName}`.trim() || 'User';
+
+    if (isValid(account.role)) localStorage.setItem(SESSION_KEYS.role, account.role);
+    if (isValid(account.userId)) localStorage.setItem(SESSION_KEYS.userId, account.userId);
+    if (isValid(fName)) localStorage.setItem(SESSION_KEYS.firstName, fName);
+    if (isValid(lName)) localStorage.setItem(SESSION_KEYS.lastName, lName);
+    localStorage.setItem(SESSION_KEYS.userName, fullName);
+    if (isValid(account.email)) localStorage.setItem(SESSION_KEYS.email, account.email);
 }
 
 /** Supprime toutes les clés de session (logout) */
@@ -95,7 +100,7 @@ function requireRole(expectedRole) {
  */
 function redirectToDashboard(role) {
     if (role === 'medecin') {
-        window.location.href = '/doctor/doctor.html';
+        window.location.href = '/doctor/doctor-dashboard.html';
     } else if (role === 'patient') {
         window.location.href = '/patient/patient.html';
     } else {
@@ -130,7 +135,7 @@ function syncSidebarName() {
 function getInitials(fullName) {
     if (!fullName) return '';
     const parts = fullName.trim().split(' ');
-    return (parts[0]?.charAt(0) || '') + (parts[1]?.charAt(0) || '');
+    return ((parts[0] ? parts[0].charAt(0) : '') + (parts[1] ? parts[1].charAt(0) : ''));
 }
 
 /** Met à jour l'avatar dans la sidebar (image ou initiales) */
@@ -196,7 +201,7 @@ function addToDirectory(account) {
             list.push({ id: account.userId, name, email: account.email, phone: account.phone || '' });
             localStorage.setItem(DATA_KEYS.registeredPatients, JSON.stringify(list));
         }
-    } else if (account.role === 'medecin') {
+    } else if (account.role === 'medecin' || account.role === 'doctor') {
         const list = JSON.parse(localStorage.getItem(DATA_KEYS.registeredDoctors) || '[]');
         if (!list.some(d => d.email === account.email)) {
             list.push({ id: account.userId, name, email: account.email });

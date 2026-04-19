@@ -6,9 +6,8 @@
     }
 })();
 
-// Global function to show styled messages instead of alerts/console.log
+// Global function to show styled messages
 function showStyledMessage(message, type = 'info', duration = 5000) {
-    // Create message container if it doesn't exist
     let messageContainer = document.getElementById('styled-message-container');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -24,7 +23,6 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         document.body.appendChild(messageContainer);
     }
 
-    // Create message card
     const messageCard = document.createElement('div');
     messageCard.style.cssText = `
         background: var(--card-bg, #ffffff);
@@ -41,598 +39,465 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         overflow: hidden;
     `;
 
-    // Set colors based on type
     const colors = {
         success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
         error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
         warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
-        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
-        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' }
     };
-
     const colorScheme = colors[type] || colors.info;
 
     messageCard.style.background = colorScheme.bg;
     messageCard.style.borderColor = colorScheme.border;
     messageCard.style.color = colorScheme.text;
 
-    // Create icon based on type
-    const icons = {
-        success: 'check-circle',
-        error: 'exclamation-triangle',
-        warning: 'exclamation-circle',
-        info: 'info-circle',
-        debug: 'bug'
-    };
-
-    const iconName = icons[type] || 'info-circle';
+    const iconName = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info-circle';
 
     messageCard.innerHTML = `
         <div style="display: flex; align-items: flex-start; gap: 12px;">
             <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
-            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
-                ${message}
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: none;
-                border: none;
-                color: ${colorScheme.text};
-                cursor: pointer;
-                font-size: 16px;
-                padding: 0;
-                margin-left: 8px;
-                opacity: 0.7;
-                flex-shrink: 0;
-            ">&times;</button>
+            <div style="flex: 1; font-size: 14px; line-height: 1.4;">${message}</div>
+            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: ${colorScheme.text}; cursor: pointer; font-size: 16px; padding: 0; margin-left: 8px; opacity: 0.7; flex-shrink: 0;">&times;</button>
         </div>
     `;
-
-    // Add to container
     messageContainer.appendChild(messageCard);
+    setTimeout(() => { messageCard.style.transform = 'translateX(0)'; messageCard.style.opacity = '1'; }, 10);
+    if (duration > 0) setTimeout(() => { if(messageCard.parentElement){ messageCard.style.transform = 'translateX(100%)'; messageCard.style.opacity = '0'; setTimeout(() => messageCard.remove(), 300); } }, duration);
+}
 
-    // Animate in
+// Global function to show a custom confirmation modal
+function showConfirmModal(title, message, type, onConfirm) {
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--card-bg, #ffffff); border-radius: 12px;
+        padding: 24px; max-width: 400px; width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(20px); transition: all 0.3s ease;
+        border: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-primary, #333);
+    `;
+    
+    const iconColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+    const confirmBtnColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    
+    card.innerHTML = `
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+            <i class="fas ${iconClass}" style="color: ${iconColor}; font-size: 24px; margin-right: 12px;"></i>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 600;">${title}</h3>
+        </div>
+        <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary, #666);">
+            ${message}
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button id="modal-cancel-btn" style="
+                padding: 8px 16px; border: 1px solid var(--border-color, #ccc);
+                background: transparent; border-radius: 6px; cursor: pointer;
+                color: var(--text-primary, #333); font-weight: 500; transition: background 0.2s;
+            ">Annuler</button>
+            <button id="modal-confirm-btn" style="
+                padding: 8px 16px; border: none; background: ${confirmBtnColor};
+                color: white; border-radius: 6px; cursor: pointer; font-weight: 500;
+                transition: opacity 0.2s;
+            ">Confirmer</button>
+        </div>
+    `;
+    
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    
     setTimeout(() => {
-        messageCard.style.transform = 'translateX(0)';
-        messageCard.style.opacity = '1';
+        backdrop.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
     }, 10);
-
-    // Auto remove after duration
-    if (duration > 0) {
-        setTimeout(() => {
-            if (messageCard.parentElement) {
-                messageCard.style.transform = 'translateX(100%)';
-                messageCard.style.opacity = '0';
-                setTimeout(() => {
-                    if (messageCard.parentElement) {
-                        messageCard.remove();
-                    }
-                }, 300);
-            }
-        }, duration);
-    }
-
+    
+    const closeModal = () => {
+        backdrop.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => backdrop.remove(), 300);
+    };
+    
+    document.getElementById('modal-cancel-btn').onclick = closeModal;
+    document.getElementById('modal-confirm-btn').onclick = () => {
+        closeModal();
+        onConfirm();
+    };
 }
 
-
-
-
-// History Page JavaScript
-
-class AppointmentHistory {
-    constructor() {
-        this.appointments = [];
-        this.filteredAppointments = [];
-        this.page = 1;
-        this.hasMore = true;
-        this.loading = false;
-        this.searchTerm = '';
-        this.filterMonth = '';
-        this.filterYear = '';
-
-        // Mock data for demonstration
-        this.mockAppointments = this.generateMockData();
-
-        this.init();
-    }
-
-    generateMockData() {
-        // Return empty array - no demonstration data
-        return [];
-    }
-
-    init() {
-        this.setupEventListeners();
-        this.updateSidebar(); // Update with current data
-        this.loadAppointments(true);
-        // Update statistics immediately
-        setTimeout(() => this.updateStatistics(), 100);
-
-        // Log initialization
-    }
-
-    setupEventListeners() {
-        // Search input
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.searchTerm = e.target.value.toLowerCase();
-                this.applyFilters();
-            });
-        }
-
-        // Month filter
-        const monthFilter = document.getElementById('month-filter');
-        if (monthFilter) {
-            monthFilter.addEventListener('change', (e) => {
-                this.filterMonth = e.target.value;
-                this.applyFilters();
-            });
-        }
-
-        // Year filter
-        const yearFilter = document.getElementById('year-filter');
-        if (yearFilter) {
-            yearFilter.addEventListener('change', (e) => {
-                this.filterYear = e.target.value;
-                this.applyFilters();
-            });
-        }
-
-        // Clear filters
-        const clearFiltersBtn = document.getElementById('clear-filters');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', () => {
-                this.searchTerm = '';
-                this.filterMonth = '';
-                this.filterYear = '';
-                if (searchInput) searchInput.value = '';
-                if (monthFilter) monthFilter.value = '';
-                if (yearFilter) yearFilter.value = '';
-                this.applyFilters();
-            });
-        }
-
-        // Load more button
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        if (loadMoreBtn) {
-            loadMoreBtn.addEventListener('click', () => {
-                this.loadMoreAppointments();
-            });
-        }
-
-        // Retry button
-        const retryBtn = document.getElementById('retry-btn');
-        if (retryBtn) {
-            retryBtn.addEventListener('click', () => {
-                this.loadAppointments(true);
-            });
-        }
-
-        // Modal events
-        const modalClose = document.getElementById('modal-close');
-        const cancelReschedule = document.getElementById('cancel-reschedule');
-        const rescheduleForm = document.getElementById('reschedule-form');
-
-        if (modalClose) modalClose.addEventListener('click', () => this.closeModal());
-        if (cancelReschedule) cancelReschedule.addEventListener('click', () => this.closeModal());
-
-        // Form submission
-        if (rescheduleForm) {
-            rescheduleForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleReschedule();
-            });
-        }
-
-
-        // Listen for localStorage changes to update sidebar
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'userName' || e.key === 'firstName' || e.key === 'lastName') {
-                this.updateSidebar();
-            }
-        });
-    }
-
-    updateSidebar() {
-        // Update name
-        const userName = localStorage.getItem('userName') || '';
-        const sidebarName = document.querySelector('.patient-info h4');
-        if (sidebarName) {
-            sidebarName.textContent = userName;
-        }
-        // Update avatar
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
-        }
-
-        // Close modal when clicking outside
-        window.addEventListener('click', (e) => {
-            const modal = document.getElementById('reschedule-modal');
-            if (e.target === modal) {
-                this.closeModal();
-            }
-        });
-    }
-
-    async loadAppointments(reset = false) {
-        this.showLoading();
-
-        try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            if (reset) {
-                this.page = 1;
-                this.appointments = [];
-                this.hasMore = true;
-            }
-
-            // Get next batch of appointments
-            const startIndex = (this.page - 1) * 10;
-            const endIndex = startIndex + 10;
-            const newAppointments = this.mockAppointments.slice(startIndex, endIndex);
-
-            this.appointments = reset ? newAppointments : [...this.appointments, ...newAppointments];
-            this.hasMore = endIndex < this.mockAppointments.length;
-
-            this.applyFilters();
-
-        } catch (error) {
-            this.showError();
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async loadMoreAppointments() {
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        const originalText = loadMoreBtn.innerHTML;
-
-        loadMoreBtn.classList.add('loading');
-        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
-
-        try {
-            this.page++;
-            await this.loadAppointments(false);
-        } catch (error) {
-            this.page--; // Revert page increment on error
-        } finally {
-            loadMoreBtn.classList.remove('loading');
-            loadMoreBtn.innerHTML = originalText;
-        }
-    }
-
-    applyFilters() {
-        let filtered = this.appointments;
-
-        // Search filter
-        if (this.searchTerm) {
-            filtered = filtered.filter(apt =>
-                apt.doctorName.toLowerCase().includes(this.searchTerm) ||
-                apt.specialty.toLowerCase().includes(this.searchTerm) ||
-                apt.reason?.toLowerCase().includes(this.searchTerm) ||
-                apt.notes?.toLowerCase().includes(this.searchTerm)
-            );
-        }
-
-        // Date filters
-        if (this.filterMonth || this.filterYear) {
-            filtered = filtered.filter(apt => {
-                const aptDate = new Date(apt.date);
-                const aptMonth = (aptDate.getMonth() + 1).toString().padStart(2, '0');
-                const aptYear = aptDate.getFullYear().toString();
-
-                return (!this.filterMonth || aptMonth === this.filterMonth) &&
-                       (!this.filterYear || aptYear === this.filterYear);
-            });
-        }
-
-        this.filteredAppointments = filtered;
-        this.renderAppointments();
-        this.updateLoadMoreVisibility();
-    }
-
-    renderAppointments() {
-        const container = document.getElementById('appointments-list');
-        if (!container) return;
-
-        if (this.filteredAppointments.length === 0) {
-            this.showEmptyState();
-            return;
-        }
-
-        this.hideEmptyState();
-
-        // Update statistics
-        this.updateStatistics();
-
-        container.innerHTML = this.filteredAppointments.map(apt => `
-            <div class="appointment-card">
-                <div class="appointment-header">
-                    <div class="appointment-title">
-                        <h3>${apt.doctorName}</h3>
-                        <span class="status-badge status-${apt.status}">
-                            ${this.getStatusText(apt.status)}
-                        </span>
-                    </div>
-                    <div class="appointment-actions">
-                        ${apt.status === 'completed' ? `
-                            <button class="btn-secondary reschedule-btn" data-id="${apt.id}">
-                                <i class="fas fa-calendar-alt"></i> Reprogrammer
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-
-                <div class="appointment-details">
-                    <div class="detail-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>${this.formatDate(apt.date)}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-clock"></i>
-                        <span>${apt.time}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-stethoscope"></i>
-                        <span>${apt.specialty}</span>
-                    </div>
-                </div>
-
-                ${apt.reason ? `
-                    <div class="appointment-reason">
-                        <p><strong>Motif:</strong> ${apt.reason}</p>
-                    </div>
-                ` : ''}
-
-                ${apt.notes ? `
-                    <div class="appointment-reason">
-                        <p><strong>Notes:</strong> ${apt.notes}</p>
-                    </div>
-                ` : ''}
-            </div>
-        `).join('');
-
-        // Add event listeners to reschedule buttons
-        const rescheduleButtons = container.querySelectorAll('.reschedule-btn');
-        rescheduleButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const appointmentId = e.currentTarget.dataset.id;
-                const appointment = this.appointments.find(apt => apt.id === appointmentId);
-                if (appointment) {
-                    this.openRescheduleModal(appointment);
-                }
-            });
-        });
-    }
-
-    updateStatistics() {
-        const totalAppointments = document.getElementById('total-appointments');
-        const completedAppointments = document.getElementById('completed-appointments');
-        const upcomingAppointments = document.getElementById('upcoming-appointments');
-
-        if (!totalAppointments && !completedAppointments && !upcomingAppointments) return;
-
-        // Calculate statistics from all appointments (not just filtered)
-        const allAppointments = this.mockAppointments;
-        const total = allAppointments.length;
-        const completed = allAppointments.filter(apt => apt.status === 'completed').length;
-        const upcoming = allAppointments.filter(apt => apt.status === 'upcoming').length;
-
-        if (totalAppointments) totalAppointments.textContent = total.toString();
-        if (completedAppointments) completedAppointments.textContent = completed.toString();
-        if (upcomingAppointments) upcomingAppointments.textContent = upcoming.toString();
-    }
-
-    getStatusText(status) {
-        const statusMap = {
-            completed: 'Completed',
-            cancelled: 'Cancelled',
-            missed: 'Missed',
-            upcoming: 'Upcoming'
-        };
-        return statusMap[status] || status;
-    }
-
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
-
-    openRescheduleModal(appointment) {
-        const modal = document.getElementById('reschedule-modal');
-        const appointmentInfo = document.getElementById('modal-appointment-info');
-        const rescheduleDate = document.getElementById('reschedule-date');
-        const rescheduleForm = document.getElementById('reschedule-form');
-
-        if (!modal || !appointmentInfo || !rescheduleDate || !rescheduleForm) return;
-
-        appointmentInfo.innerHTML = `
-            <h4>${appointment.doctorName}</h4>
-            <p><strong>Specialty:</strong> ${appointment.specialty}</p>
-            <p><strong>Current date:</strong> ${this.formatDate(appointment.date)}</p>
-            <p><strong>Current time:</strong> ${appointment.time}</p>
-        `;
-
-        // Set minimum date to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const minDate = tomorrow.toISOString().split('T')[0];
-        rescheduleDate.min = minDate;
-
-        // Reset form
-        rescheduleForm.reset();
-
-        modal.style.display = 'block';
-        this.selectedAppointment = appointment;
-    }
-
-    closeModal() {
-        const modal = document.getElementById('reschedule-modal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-        this.selectedAppointment = null;
-    }
-
-    async handleReschedule() {
-        const dateInput = document.getElementById('reschedule-date');
-        const timeSelect = document.getElementById('reschedule-time');
-        const reasonTextarea = document.getElementById('reschedule-reason');
-
-        if (!dateInput.value || !timeSelect.value) {
-            showStyledMessage('Please select a date and time.', 'warning');
-            return;
-        }
-
-        // Simulate API call
-        const submitBtn = document.querySelector('#reschedule-form button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Reprogrammation...';
-        submitBtn.disabled = true;
-
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            showStyledMessage('Appointment rescheduled: ' + JSON.stringify({
-                appointmentId: this.selectedAppointment.id,
-                newDate: dateInput.value,
-                newTime: timeSelect.value,
-                reason: reasonTextarea.value
-            }), 'debug');
-
-            this.showSuccessToast();
-            this.closeModal();
-
-        } catch (error) {
-            showStyledMessage('Error rescheduling appointment. Please try again.', 'error');
-        } finally {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        }
-    }
-
-    showSuccessToast() {
-        const toast = document.getElementById('success-toast');
-        toast.style.display = 'flex';
-
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 3000);
-    }
-
-    showLoading() {
-        const loadingState = document.getElementById('loading-state');
-        const errorState = document.getElementById('error-state');
-        const emptyState = document.getElementById('empty-state');
-        const appointmentsList = document.getElementById('appointments-list');
-
-        if (loadingState) loadingState.style.display = 'block';
-        if (errorState) errorState.style.display = 'none';
-        if (emptyState) emptyState.style.display = 'none';
-        if (appointmentsList) appointmentsList.style.display = 'none';
-    }
-
-    hideLoading() {
-        const loadingState = document.getElementById('loading-state');
-        const appointmentsList = document.getElementById('appointments-list');
-
-        if (loadingState) loadingState.style.display = 'none';
-        if (appointmentsList) appointmentsList.style.display = 'flex';
-    }
-
-    showError() {
-        const errorState = document.getElementById('error-state');
-        const appointmentsList = document.getElementById('appointments-list');
-        const emptyState = document.getElementById('empty-state');
-
-        if (errorState) errorState.style.display = 'block';
-        if (appointmentsList) appointmentsList.style.display = 'none';
-        if (emptyState) emptyState.style.display = 'none';
-    }
-
-    showEmptyState() {
-        const emptyState = document.getElementById('empty-state');
-        const appointmentsList = document.getElementById('appointments-list');
-
-        if (emptyState) emptyState.style.display = 'block';
-        if (appointmentsList) appointmentsList.style.display = 'none';
-    }
-
-    hideEmptyState() {
-        const emptyState = document.getElementById('empty-state');
-        const appointmentsList = document.getElementById('appointments-list');
-
-        if (emptyState) emptyState.style.display = 'none';
-        if (appointmentsList) appointmentsList.style.display = 'flex';
-    }
-
-    updateLoadMoreVisibility() {
-        const loadMoreContainer = document.getElementById('load-more-container');
-        if (loadMoreContainer) {
-            loadMoreContainer.style.display = this.hasMore ? 'block' : 'none';
-        }
-    }
-}
-
-// Initialize the history page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const hasHistoryElements = document.getElementById('search-input') || document.getElementById('appointments-list');
-    if (hasHistoryElements) {
-        new AppointmentHistory();
-    }
-    loadAvatar();
+    loadDashboardData();
+    
+    // Sidebar navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.dataset.page;
+            if (page && page !== 'history') {
+                window.location.href = `${page}.html`;
+            }
+        });
+    });
+
+    // Cross-tab sync
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'appointmentRequests' || e.key === 'sentInvitations' || e.key === 'doctorAppointments') {
+            loadDashboardData();
+        }
+    });
 });
 
-// Avatar management
-function loadAvatar() {
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
-    }
+function loadDashboardData() {
+    const patientId = localStorage.getItem('userId') || '';
+    const patientEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+    const patientName = (localStorage.getItem('userName') || '').trim().toLowerCase();
 
-    // Listen for avatar updates from other pages
-    window.addEventListener('avatarUpdated', () => {
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
-        }
+    // 1. Appointment Archives
+    let archives = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+    // Filter for current patient
+    const myArchives = archives.filter(a => {
+        const appId = a.patientId || (a.patient ? a.patient.id : '') || '';
+        const appName = (a.patientName || (a.patient ? a.patient.name : '') || '').trim().toLowerCase();
+        const appEmail = (a.patientEmail || a.email || (a.patient ? a.patient.email : '') || '').trim().toLowerCase();
+        
+        return (patientId !== '' && appId === patientId) || 
+               (patientName !== '' && appName.includes(patientName)) ||
+               (patientEmail !== '' && appEmail === patientEmail);
+    });
+    renderArchives(myArchives);
+    
+    // 2. Notification Archives
+    let notificationArchives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
+    // Filter by patient ID or generic matching
+    const myNotifArchives = notificationArchives.filter(n => n.recipientId === patientId || n.target === 'patient' || !n.recipientId);
+    renderNotificationArchives(myNotifArchives);
+    
+    // 3. Email Archives
+    let emailArchives = JSON.parse(localStorage.getItem('emailHistory') || '[]');
+    // Filter by email
+    const myEmailArchives = emailArchives.filter(e => (e.recipient || '').toLowerCase() === patientEmail);
+    renderEmailArchives(myEmailArchives);
+}
+
+function renderArchives(archives) {
+    const requestsTbody = document.getElementById('archives-requests-tbody');
+    const invitationsTbody = document.getElementById('archives-invitations-tbody');
+    
+    if (!requestsTbody || !invitationsTbody) return;
+    
+    requestsTbody.innerHTML = '';
+    invitationsTbody.innerHTML = '';
+    
+    const archivedRequests = archives.filter(a => a.source !== 'invitation');
+    const archivedInvitations = archives.filter(a => a.source === 'invitation');
+    
+    const reqCountEl = document.getElementById('archives-requests-count');
+    if (reqCountEl) reqCountEl.textContent = archivedRequests.length;
+    
+    const invCountEl = document.getElementById('archives-invitations-count');
+    if (invCountEl) invCountEl.textContent = archivedInvitations.length;
+    
+    if (archivedRequests.length === 0) {
+        requestsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune demande archivée.</td></tr>`;
+    } else {
+        archivedRequests.forEach(arc => renderArchiveRow(requestsTbody, arc));
+    }
+    
+    if (archivedInvitations.length === 0) {
+        invitationsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune invitation archivée.</td></tr>`;
+    } else {
+        archivedInvitations.forEach(arc => renderArchiveRow(invitationsTbody, arc));
+    }
+}
+
+function renderArchiveRow(tbody, arc) {
+    let statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Annulé / Archivé</span>`;
+    
+    let actions = `
+        <button class="action-btn accept" title="Restaurer" onclick="restoreFromHistory('${arc.id}')"><i class="fas fa-undo"></i></button>
+        <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteHistory('${arc.id}')"><i class="fas fa-times"></i></button>
+        <button class="action-btn" title="Voir les détails" onclick="viewDetails('${arc.id}')"><i class="fas fa-eye"></i></button>
+    `;
+    
+    const registeredDoctors = JSON.parse(localStorage.getItem('registeredDoctors') || '[]');
+    const getDoctorName = (id) => {
+        const d = registeredDoctors.find(doc => doc.id === id || doc.userId === id);
+        return d ? d.name : (arc.doctorName || 'Médecin Inconnu');
+    };
+
+    const tr = document.createElement('tr');
+    const docName = getDoctorName(arc.doctorId || arc.doctor);
+    
+    tr.innerHTML = `
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><strong>Dr. ${docName}</strong></td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">${statusBadge}</td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${arc.date || '-'} <br> <small>${arc.time || '-'}</small></td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${arc.type || 'Consultation'}</td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${arc.notes || arc.reason || '-'}</td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color);" class="action-buttons">${actions}</td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function renderNotificationArchives(notifications) {
+    const tbody = document.getElementById('archives-notifications-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    const countEl = document.getElementById('archives-notifications-count');
+    if (countEl) countEl.textContent = notifications.length;
+    
+    if (notifications.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune notification archivée.</td></tr>`;
+        return;
+    }
+    
+    notifications.forEach(notif => {
+        let actions = `
+            <button class="action-btn accept" title="Restaurer" onclick="restoreNotification('${notif.id}')"><i class="fas fa-undo"></i></button>
+            <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteNotification('${notif.id}')"><i class="fas fa-times"></i></button>
+        `;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><i class="fas ${notif.icon || 'fa-bell'}"></i> ${notif.type || 'Notification'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${notif.message || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${notif.time || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color);" class="action-buttons">${actions}</td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
-function updateAvatarDisplay(avatarContainer) {
-    const savedImage = localStorage.getItem('userAvatar');
-
-    // Clear existing content
-    avatarContainer.innerHTML = '';
-
-    if (savedImage) {
-        // Display saved image
-        const img = document.createElement('img');
-        img.src = savedImage;
-        img.alt = 'Avatar';
-        img.onload = () => {
-            img.style.display = 'block';
-        };
-        avatarContainer.appendChild(img);
-    } else {
-        // Display initials
-        const userName = localStorage.getItem('userName') || '';
-        const nameParts = userName.split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts[1] || '';
-        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
-        if (!initials.trim()) initials = '';
-
-        const span = document.createElement('span');
-        span.textContent = initials;
-        avatarContainer.appendChild(span);
+function renderEmailArchives(emails) {
+    const tbody = document.getElementById('archives-emails-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    const countEl = document.getElementById('archives-emails-count');
+    if (countEl) countEl.textContent = emails.length;
+    
+    if (emails.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucun email archivé.</td></tr>`;
+        return;
     }
+    
+    emails.forEach(email => {
+        let actions = `
+            <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteEmail('${email.id}')"><i class="fas fa-times"></i></button>
+        `;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><strong>${email.sender || 'MediSync'}</strong></td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${email.subject || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${email.date || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color);" class="action-buttons">${actions}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
+
+window.restoreNotification = function(id) {
+    let archives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
+    const arcIndex = archives.findIndex(a => String(a.id) === String(id));
+    
+    if (arcIndex !== -1) {
+        const itemToRestore = archives[arcIndex];
+        itemToRestore.unread = true;
+        
+        let activeNotifs = JSON.parse(localStorage.getItem('notifications') || '[]');
+        activeNotifs.push(itemToRestore);
+        localStorage.setItem('notifications', JSON.stringify(activeNotifs));
+        
+        archives.splice(arcIndex, 1);
+        localStorage.setItem('notificationHistory', JSON.stringify(archives));
+        
+        showStyledMessage('Notification restaurée avec succès.', 'success');
+        loadDashboardData();
+    }
+};
+
+window.permanentlyDeleteNotification = function(id) {
+    showConfirmModal(
+        'Supprimer la notification',
+        'Voulez-vous supprimer définitivement cette notification ?',
+        'danger',
+        () => {
+            let archives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
+            archives = archives.filter(a => String(a.id) !== String(id));
+            localStorage.setItem('notificationHistory', JSON.stringify(archives));
+            showStyledMessage('Notification supprimée définitivement.', 'success');
+            loadDashboardData();
+        }
+    );
+};
+
+window.permanentlyDeleteEmail = function(id) {
+    showConfirmModal(
+        'Supprimer l\'email',
+        'Voulez-vous supprimer définitivement cet email ?',
+        'danger',
+        () => {
+            let archives = JSON.parse(localStorage.getItem('emailHistory') || '[]');
+            archives = archives.filter(a => String(a.id) !== String(id));
+            localStorage.setItem('emailHistory', JSON.stringify(archives));
+            showStyledMessage('Email supprimé définitivement.', 'success');
+            loadDashboardData();
+        }
+    );
+};
+
+window.restoreFromHistory = function(id) {
+    showConfirmModal(
+        'Restaurer un élément', 
+        'Voulez-vous restaurer cet élément pour le remettre dans votre tableau principal ?', 
+        'info', 
+        () => {
+            let archives = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+            const arcIndex = archives.findIndex(a => String(a.id) === String(id));
+            
+            if (arcIndex !== -1) {
+                const itemToRestore = archives[arcIndex];
+                itemToRestore.status = 'pending';
+                
+                if (itemToRestore.source === 'invitation') {
+                    const patientId = localStorage.getItem('userId');
+                    const invitationsKey = `patient_${patientId}_invitations`;
+                    let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+                    invitations.push(itemToRestore);
+                    localStorage.setItem(invitationsKey, JSON.stringify(invitations));
+                } else {
+                    let requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+                    requests.push(itemToRestore);
+                    localStorage.setItem('appointmentRequests', JSON.stringify(requests));
+                }
+                
+                archives.splice(arcIndex, 1);
+                localStorage.setItem('appointmentHistory', JSON.stringify(archives));
+                
+                showStyledMessage('Élément restauré avec succès.', 'success');
+                loadDashboardData();
+            }
+        }
+    );
+};
+
+window.permanentlyDeleteHistory = function(id) {
+    showConfirmModal(
+        'Suppression définitive', 
+        'Voulez-vous supprimer définitivement cet élément ?', 
+        'danger', 
+        () => {
+            let archives = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+            const arcIndex = archives.findIndex(a => String(a.id) === String(id));
+            
+            if (arcIndex !== -1) {
+                archives.splice(arcIndex, 1);
+                localStorage.setItem('appointmentHistory', JSON.stringify(archives));
+                
+                showStyledMessage('Élément supprimé définitivement.', 'success');
+                loadDashboardData();
+            }
+        }
+    );
+};
+
+window.viewDetails = function(id) {
+    const list = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+    const item = list.find(i => String(i.id) === String(id));
+    if (!item) return;
+
+    const registeredDoctors = JSON.parse(localStorage.getItem('registeredDoctors') || '[]');
+    const doc = registeredDoctors.find(d => d.id === (item.doctorId || item.doctor));
+    const docName = doc ? doc.name : (item.doctorName || 'Médecin Inconnu');
+    
+    const title = 'Détails de l\'Archive';
+    const typeLabel = item.type || 'Consultation';
+    const statusLabel = 'Archivé';
+    const dateLabel = item.date || '-';
+    const timeLabel = item.time || '-';
+    const notesLabel = item.notes || item.reason || 'Aucune note supplémentaire';
+
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--card-bg, #ffffff); border-radius: 12px;
+        padding: 24px; max-width: 500px; width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(20px); transition: all 0.3s ease;
+        border: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-primary, #333);
+        font-size: 15px;
+    `;
+    
+    card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 20px; color: var(--accent-color); display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-info-circle"></i> ${title}
+            </h3>
+            <button id="close-view-x" style="background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Médecin:</strong> 
+                <span style="flex: 1; font-weight: 600;">Dr. ${docName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Statut:</strong> 
+                <span style="flex: 1; font-weight: 600; color: #dc3545;">${statusLabel}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Date & Heure:</strong> 
+                <span style="flex: 1;">${dateLabel} à ${timeLabel}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Type:</strong> 
+                <span style="flex: 1;">${typeLabel}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px; background: var(--bg-secondary); padding: 12px; border-radius: 8px;">
+                <strong style="color: var(--text-secondary);">Notes:</strong>
+                <span>${notesLabel}</span>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <button id="close-view-btn" style="
+                padding: 10px 20px; border: none; background: var(--accent-color);
+                color: white; border-radius: 6px; cursor: pointer; font-weight: 600;
+                transition: opacity 0.2s;
+            ">Fermer</button>
+        </div>
+    `;
+    
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    
+    setTimeout(() => { backdrop.style.opacity = '1'; card.style.transform = 'translateY(0)'; }, 10);
+    
+    const closeModal = () => {
+        backdrop.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => backdrop.remove(), 300);
+    };
+    
+    document.getElementById('close-view-x').onclick = closeModal;
+    document.getElementById('close-view-btn').onclick = closeModal;
+};
 

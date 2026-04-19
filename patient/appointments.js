@@ -156,10 +156,12 @@ function buildSlotsFromStoredAvailability(date) {
 
 class AppointmentCalendar {
     constructor() {
+        window.calendarApp = this; // Set early to avoid undefined errors if init crashes
         this.currentDate = new Date();
         this.selectedDate = null;
         this.selectedDoctor = null;
         this.availableSlots = {};
+        this.isEmergency = false;
 
         this.initializeAvailableSlotsFromStorage();
 
@@ -200,6 +202,9 @@ class AppointmentCalendar {
         this.populateDoctorSelect();
         this.renderCalendar();
         this.setupEventListeners();
+        this.setupEmergencyToggle();
+        this.loadAppointmentInvitations();
+        this.loaddoctorAppointments();
         this.updateSidebar(); // Update with current data
     }
 
@@ -242,16 +247,21 @@ class AppointmentCalendar {
             e.preventDefault();
             this.handleBooking();
         });
-
         // Privacy modal
-        document.querySelector('.privacy-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showPrivacyModal();
-        });
+        const privacyLink = document.querySelector('.privacy-link');
+        if (privacyLink) {
+            privacyLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showPrivacyModal();
+            });
+        }
 
-        document.querySelector('.modal-close').addEventListener('click', () => {
-            this.hidePrivacyModal();
-        });
+        const modalClose = document.querySelector('.modal-close');
+        if (modalClose) {
+            modalClose.addEventListener('click', () => {
+                this.hidePrivacyModal();
+            });
+        }
 
         window.addEventListener('click', (e) => {
             const modal = document.getElementById('privacy-modal');
@@ -264,6 +274,28 @@ class AppointmentCalendar {
         window.addEventListener('storage', (e) => {
             if (e.key === 'userName' || e.key === 'firstName' || e.key === 'lastName') {
                 this.updateSidebar();
+            }
+            if (e.key === 'doctorAppointments' || e.key.includes('_invitations') || e.key === 'appointmentRequests') {
+                this.loadAppointmentInvitations();
+                this.loaddoctorAppointments();
+            }
+        });
+    }
+
+    setupEmergencyToggle() {
+        const toggle = document.getElementById('emergency-toggle');
+        if (!toggle) return;
+
+        toggle.addEventListener('click', () => {
+            this.isEmergency = !this.isEmergency;
+            if (this.isEmergency) {
+                toggle.style.background = '#dc3545';
+                toggle.style.color = 'white';
+                document.getElementById('appointment-type').value = 'emergency';
+            } else {
+                toggle.style.background = 'transparent';
+                toggle.style.color = '#dc3545';
+                document.getElementById('appointment-type').value = '';
             }
         });
     }
@@ -349,7 +381,7 @@ class AppointmentCalendar {
         }
 
         const dateKey = this.formatDate(this.selectedDate);
-        const slots = this.availableSlots[dateKey]?.[this.selectedDoctor] || [];
+        const slots = (this.availableSlots[dateKey] && this.availableSlots[dateKey][this.selectedDoctor]) ? this.availableSlots[dateKey][this.selectedDoctor] : [];
 
         if (slots.length === 0) {
             timeSlotsContainer.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No available slots for this date.</p>';
@@ -404,13 +436,53 @@ class AppointmentCalendar {
 
         // Simulate API call
         setTimeout(() => {
-            this.showBookingSuccess(bookingData);
+            // Save actual booking
+            const patientId = localStorage.getItem('userId');
+            const patientName = localStorage.getItem('userName');
+            
+            const realBooking = {
+                id: 'APT' + Date.now(),
+                patientId: patientId,
+                patientName: patientName,
+                doctor: this.selectedDoctor,
+                doctorName: document.getElementById('doctor-select').options[document.getElementById('doctor-select').selectedIndex].text.split(' (')[0],
+                date: this.formatDate(this.selectedDate),
+                time: this.selectedTime,
+                type: this.isEmergency ? 'emergency' : appointmentType,
+                reason: document.getElementById('reason').value,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+
+            const requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+            requests.push(realBooking);
+            localStorage.setItem('appointmentRequests', JSON.stringify(requests));
+
+            showStyledMessage('Appointment booked successfully! Waiting for doctor confirmation.', 'success');
+            
+            this.loaddoctorAppointments();
+            this.resetForm();
+
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
 
             // Simulate email reminder
             this.sendEmailReminder(bookingData);
-        }, 2000);
+        }, 1500);
+    }
+
+    resetForm() {
+        document.getElementById('appointment-form').reset();
+        this.selectedDate = null;
+        this.selectedTime = null;
+        this.isEmergency = false;
+        const toggle = document.getElementById('emergency-toggle');
+        if (toggle) {
+            toggle.style.background = 'transparent';
+            toggle.style.color = '#dc3545';
+        }
+        this.renderCalendar();
+        this.updateTimeSlots();
     }
 
     validateForm() {
@@ -464,10 +536,9 @@ class AppointmentCalendar {
 
     showBookingSuccess(bookingData) {
         const doctorId = String(bookingData.doctor);
-        const escaped =
-            typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(doctorId) : doctorId.replace(/\\/g, '\\\\');
-        const doctorLabel =
-            document.querySelector(`#doctor-select option[value="${escaped}"]`)?.textContent || doctorId;
+        const escaped = typeof CSS !== 'undefined' && CSS.escape ? CSS.escape(doctorId) : doctorId.replace(/\\/g, '\\\\');
+        const opt = document.querySelector(`#doctor-select option[value="${escaped}"]`);
+        const doctorLabel = opt ? opt.textContent : doctorId;
 
         const successMessage = `
             <div style="text-align: center; padding: 20px;">
@@ -565,11 +636,235 @@ class AppointmentCalendar {
     datesEqual(date1, date2) {
         return date1.toDateString() === date2.toDateString();
     }
+
+    // ── Management Logic ──────────────────────────────────────────────────
+    getCurrentPatientId() {
+        return localStorage.getItem('userId') || '';
+    }
+
+    loadAppointmentInvitations() {
+        const container = document.getElementById('doctor-invitations-list');
+        const countBadge = document.getElementById('invitations-count');
+        if (!container) return;
+
+        const patientId = this.getCurrentPatientId();
+        const invitationsKey = `patient_${patientId}_invitations`;
+        const invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+        const pending = invitations.filter(inv => inv.status === 'pending');
+
+        if (countBadge) countBadge.textContent = pending.length;
+
+        if (pending.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">No pending invitations from your doctors.</p>';
+            return;
+        }
+
+        const registeredDoctors = JSON.parse(localStorage.getItem('registeredDoctors') || '[]');
+        const getDoctorName = (id) => {
+            const d = registeredDoctors.find(doc => doc.id === id || doc.userId === id);
+            return d ? d.name : null;
+        };
+
+        container.innerHTML = '';
+        pending.forEach(inv => {
+            try {
+                const doctorId = inv.doctorId || (inv.doctor ? inv.doctor.id : null);
+                const docName = inv.doctorName || (inv.doctor ? inv.doctor.name : null) || getDoctorName(doctorId) || 'Medical Specialist';
+                const docSpecialty = inv.doctorSpecialty || (inv.doctor ? inv.doctor.specialty : null) || 'Generalist';
+
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background: white; border: 1px solid var(--border-color);
+                    border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+                `;
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h4 style="margin: 0;">Dr. ${docName}</h4>
+                            <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">${docSpecialty}</p>
+                        </div>
+                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">New Invitation</span>
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-primary);">
+                        <p style="margin: 5px 0;"><i class="fas fa-calendar-alt"></i> ${inv.date}</p>
+                        <p style="margin: 5px 0;"><i class="fas fa-clock"></i> ${inv.time}</p>
+                        <p style="margin: 5px 0;"><i class="fas fa-stethoscope"></i> ${inv.type}</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <button onclick="window.calendarApp.acceptInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Accept</button>
+                        <button onclick="window.calendarApp.declineInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Decline</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            } catch (e) {
+                console.error('Error rendering invitation:', e);
+            }
+        });
+    }
+
+    loaddoctorAppointments() {
+        const listContainer = document.getElementById('patient-appointments-list');
+        const countBadge = document.getElementById('my-appointments-count');
+        if (!listContainer) return;
+
+        const patientId = this.getCurrentPatientId();
+        const patientName = (localStorage.getItem('userName') || localStorage.getItem('fullName') || '').trim().toLowerCase();
+        const patientEmail = (localStorage.getItem('email') || localStorage.getItem('userEmail') || '').trim().toLowerCase();
+        
+        const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+        const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+        
+        const myRequests = allRequests.filter(req => {
+            const reqId = req.patientId || req.userId || '';
+            const reqName = (req.patientName || req.name || '').trim().toLowerCase();
+            const reqEmail = (req.email || req.patientEmail || '').trim().toLowerCase();
+            
+            return (patientId !== '' && (reqId === patientId)) || 
+                   (patientName !== '' && reqName.includes(patientName)) ||
+                   (patientName !== '' && patientName.includes(reqName) && reqName !== '') ||
+                   (patientEmail !== '' && reqEmail === patientEmail);
+        });
+        
+        const myConfirmed = confirmedAppointments.filter(app => {
+            const appId = app.patientId || app.userId || '';
+            const appName = (app.patientName || app.name || '').trim().toLowerCase();
+            const appEmail = (app.patientEmail || app.email || '').trim().toLowerCase();
+            
+            return (patientId !== '' && (appId === patientId)) || 
+                   (patientName !== '' && appName.includes(patientName)) ||
+                   (patientName !== '' && patientName.includes(appName) && appName !== '') ||
+                   (appEmail !== '' && appEmail === patientEmail);
+        });
+
+        const combined = [...myRequests, ...myConfirmed]
+            .filter(a => a.status !== 'declined' && a.status !== 'cancelled')
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (countBadge) countBadge.textContent = combined.length;
+
+        if (combined.length === 0) {
+            listContainer.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">You have no booked appointments.</p>';
+            return;
+        }
+
+        const registeredDoctors = JSON.parse(localStorage.getItem('registeredDoctors') || '[]');
+        const getDoctorName = (id) => {
+            const d = registeredDoctors.find(doc => doc.id === id || doc.userId === id);
+            return d ? d.name : null;
+        };
+
+        listContainer.innerHTML = '';
+        combined.forEach(appt => {
+            const card = document.createElement('div');
+            card.style.cssText = `
+                background: white; border: 1px solid var(--border-color);
+                border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+            `;
+            
+            const isConfirmed = appt.status === 'confirmed' || appt.status === 'accepted';
+            const doctorId = appt.doctor || appt.doctorId;
+            const docName = appt.doctorName || (appt.doctor && appt.doctor.name ? appt.doctor.name : null) || getDoctorName(doctorId) || (typeof appt.doctor === 'string' && appt.doctor.length > 5 ? appt.doctor : 'Medical Specialist');
+            
+            const apptDate = appt.date || 'Date TBD';
+            const apptTime = appt.time || 'Time TBD';
+            const apptType = appt.type || 'Consultation';
+            const apptStatus = appt.status || 'Pending';
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h4 style="margin: 0;">${docName}</h4>
+                        <p style="margin: 2px 0 0; font-size: 12px; color: var(--text-secondary);">${apptType}</p>
+                    </div>
+                    <span style="background: ${isConfirmed ? '#dcfce7' : '#fef3c7'}; color: ${isConfirmed ? '#15803d' : '#92400e'}; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${apptStatus.toUpperCase()}</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-primary);">
+                    <p style="margin: 5px 0;"><i class="fas fa-calendar-alt"></i> ${apptDate}</p>
+                    <p style="margin: 5px 0;"><i class="fas fa-clock"></i> ${apptTime}</p>
+                </div>
+                <button onclick="window.calendarApp.deleteAppointment('${appt.id}')" style="width: 100%; padding: 8px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    acceptInvitation(invitationId) {
+        this.updateInvitationStatus(invitationId, 'accepted');
+        showStyledMessage('Invitation accepted!', 'success');
+        this.loadAppointmentInvitations();
+        this.loaddoctorAppointments();
+    }
+
+    declineInvitation(invitationId) {
+        const patientId = this.getCurrentPatientId();
+        const invitationsKey = `patient_${patientId}_invitations`;
+        let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+        const invIndex = invitations.findIndex(inv => inv.id === invitationId);
+        
+        if (invIndex !== -1) {
+            const invitation = invitations[invIndex];
+            invitation.status = 'declined';
+            invitation.source = 'invitation';
+            
+            // Move to history
+            let history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+            history.push(invitation);
+            localStorage.setItem('appointmentHistory', JSON.stringify(history));
+            
+            // Remove from active
+            invitations.splice(invIndex, 1);
+            localStorage.setItem(invitationsKey, JSON.stringify(invitations));
+            
+            showStyledMessage('Invitation declined and moved to history.', 'info');
+            this.loadAppointmentInvitations();
+        }
+    }
+
+    updateInvitationStatus(invitationId, newStatus) {
+        const patientId = this.getCurrentPatientId();
+        const invitationsKey = `patient_${patientId}_invitations`;
+        let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+        invitations = invitations.map(inv => inv.id === invitationId ? { ...inv, status: newStatus } : inv);
+        localStorage.setItem(invitationsKey, JSON.stringify(invitations));
+    }
+
+    deleteAppointment(id) {
+        if (!confirm('Are you sure you want to delete this appointment? It will be moved to history.')) return;
+
+        const requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+        const confirmed = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+        
+        let itemToArchive = requests.find(r => r.id === id) || confirmed.find(c => c.id === id);
+        
+        if (itemToArchive) {
+            itemToArchive.status = 'cancelled';
+            itemToArchive.source = itemToArchive.source || 'request';
+            
+            // Move to history
+            let history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+            history.push(itemToArchive);
+            localStorage.setItem('appointmentHistory', JSON.stringify(history));
+            
+            // Remove from active
+            const newRequests = requests.filter(r => r.id !== id);
+            const newConfirmed = confirmed.filter(c => c.id !== id);
+            localStorage.setItem('appointmentRequests', JSON.stringify(newRequests));
+            localStorage.setItem('doctorAppointments', JSON.stringify(newConfirmed));
+
+            showStyledMessage('Appointment moved to history.', 'success');
+            this.loaddoctorAppointments();
+        }
+    }
 }
 
 // Initialize the calendar when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new AppointmentCalendar();
+    if (!window.calendarApp) {
+        new AppointmentCalendar();
+    }
     loadAvatar();
 });
 

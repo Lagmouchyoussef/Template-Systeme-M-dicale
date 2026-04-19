@@ -568,6 +568,7 @@ function initializeCharts() {
 
     // Load and display appointment invitations
     loadAppointmentInvitations();
+    loadDashboardUpcomingAppointments();
     loadRecentEmails();
 
     const scheduleButtons = document.querySelectorAll('.btn-primary');
@@ -655,18 +656,96 @@ function createInvitationCard(invitation) {
     return card;
 }
 
+function loadDashboardUpcomingAppointments() {
+    const container = document.querySelector('.appointments-section');
+    if (!container) return;
+
+    const patientId = getCurrentPatientId();
+    const patientName = (localStorage.getItem('userName') || '').trim().toLowerCase();
+    const patientEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+    
+    const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    
+    const myRequests = allRequests.filter(req => {
+        const reqId = req.patientId || '';
+        const reqName = (req.patientName || '').trim().toLowerCase();
+        const reqEmail = (req.email || '').trim().toLowerCase();
+        return (reqId !== '' && reqId === patientId) || 
+               (reqName !== '' && reqName.includes(patientName) && patientName !== '') ||
+               (reqEmail !== '' && reqEmail === patientEmail);
+    });
+    
+    const myConfirmed = confirmedAppointments.filter(app => {
+        const appId = app.patientId || '';
+        const appName = (app.patientName || '').trim().toLowerCase();
+        const appEmail = (app.patientEmail || app.email || '').trim().toLowerCase();
+        return (appId !== '' && appId === patientId) || 
+               (appName !== '' && appName.includes(patientName) && patientName !== '') ||
+               (appEmail !== '' && appEmail === patientEmail) ||
+               (!appId && appName.includes(patientName) && patientName !== '');
+    });
+
+    const combined = [...myRequests, ...myConfirmed]
+        .filter(a => a.status !== 'declined' && a.status !== 'cancelled')
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (combined.length === 0) {
+        container.innerHTML = `
+            <h2>Upcoming Appointments</h2>
+            <div class="no-data-message">
+                <i class="fas fa-calendar-plus"></i>
+                <h3>No upcoming appointments</h3>
+                <p>Schedule your first appointment to get started</p>
+                <button class="btn-primary" onclick="window.location.href='appointments.html'">Schedule Appointment</button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `<h2>Upcoming Appointments</h2><div class="appointments-list" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">`;
+    
+    combined.forEach(appt => {
+        const isPending = appt.status === 'pending';
+        const docName = appt.doctorName || (appt.doctor && appt.doctor.name ? appt.doctor.name : appt.doctor) || 'Unknown Doctor';
+        const apptDate = appt.date || 'Date TBD';
+        const apptTime = appt.time || 'Time TBD';
+        const apptType = appt.type || 'Consultation';
+        const apptStatus = appt.status || 'Pending';
+
+        const typeBadge = isPending ? 
+            '<span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Pending</span>' : 
+            `<span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${apptStatus.toUpperCase()}</span>`;
+        
+        html += `
+            <div class="appointment-card" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="appointment-info">
+                    <h4 style="margin: 0 0 5px 0;">${docName}</h4>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">
+                        <i class="fas fa-calendar"></i> ${apptDate} at ${apptTime} <br>
+                        <i class="fas fa-stethoscope"></i> ${apptType}
+                    </p>
+                </div>
+                <div class="appointment-status">
+                    ${typeBadge}
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
 function loadAppointmentInvitations() {
-    const container = document.querySelector('.invitations-container');
+    const container = document.getElementById('dashboard-invitations-list');
+    const dashboardSection = document.getElementById('invitations-dashboard-section');
+    const statCounter = document.getElementById('invitations-count-stat');
     if (!container) return;
 
     const patientId = getCurrentPatientId();
     if (!patientId) {
-        container.innerHTML = `
-            <div class="no-invitations-message">
-                <i class="fas fa-inbox"></i>
-                <h3>No pending invitations</h3>
-                <p>Sign in to see invitations from your doctor</p>
-            </div>`;
+        if (dashboardSection) dashboardSection.style.display = 'none';
         return;
     }
 
@@ -674,15 +753,17 @@ function loadAppointmentInvitations() {
     const invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
     const pending = invitations.filter((inv) => inv.status === 'pending');
 
+    // Update Counter
+    if (statCounter) statCounter.textContent = pending.length;
+
     if (pending.length === 0) {
-        container.innerHTML = `
-            <div class="no-invitations-message">
-                <i class="fas fa-inbox"></i>
-                <h3>No pending invitations</h3>
-                <p>You'll receive appointment invitations from doctors here</p>
-            </div>`;
+        if (dashboardSection) dashboardSection.style.display = 'none';
+        container.innerHTML = '';
         return;
     }
+
+    // Show section if there are pending invitations
+    if (dashboardSection) dashboardSection.style.display = 'block';
 
     container.innerHTML = '';
     pending.forEach((inv) => container.appendChild(createInvitationCard(inv)));
@@ -726,19 +807,27 @@ function updateInvitationStatus(invitationId, newStatus) {
 }
 
 function addToAppointments(invitation) {
-    const appointments = JSON.parse(localStorage.getItem('patientAppointments') || '[]');
+    const appointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
     const appointment = {
         id: invitation.id,
         doctor: invitation.doctor.name,
+        doctorName: invitation.doctor.name,
         date: invitation.date,
         time: invitation.time,
         type: invitation.type,
         status: 'confirmed',
-        notes: invitation.notes
+        notes: invitation.notes,
+        patientId: getCurrentPatientId(),
+        patientName: localStorage.getItem('userName')
     };
 
     appointments.push(appointment);
-    localStorage.setItem('patientAppointments', JSON.stringify(appointments));
+    localStorage.setItem('doctorAppointments', JSON.stringify(appointments));
+    
+    // Update UI if on dashboard
+    if (typeof loadDashboardUpcomingAppointments === 'function') {
+        loadDashboardUpcomingAppointments();
+    }
 }
 
 function showNotification(message, type = 'info') {

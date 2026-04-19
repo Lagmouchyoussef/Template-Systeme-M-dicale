@@ -90,153 +90,79 @@
                 </div>
             </header>
 
-            <div class="availability-content">
+            <div class="availability-content full-width-layout">
+                
                 <!-- Availability Settings Section -->
-                <section class="availability-section">
-                    <h2>Set Your Weekly Availability</h2>
-                    <div class="availability-form">
-                        <div class="days-selection">
-                            <h3>Available Days</h3>
-                            <p class="days-subtitle">Select the days you are available for consultations</p>
-                            <div class="days-grid">
-                                <label class="day-card">
-                                    <input type="checkbox" value="monday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-day"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Monday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="tuesday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-day"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Tuesday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="wednesday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-day"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Wednesday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="thursday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-day"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Thursday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="friday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-day"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Friday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="saturday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-week"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Saturday</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="day-card">
-                                    <input type="checkbox" value="sunday">
-                                    <div class="day-content">
-                                        <div class="day-icon">
-                                            <i class="bi bi-calendar-week"></i>
-                                        </div>
-                                        <div class="day-info">
-                                            <span class="day-name">Sunday</span>
-                                        </div>
-                                    </div>
-                                </label>
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2>Set Your Weekly Availability</h2>
+                    </div>
+                    
+                    <div class="form-grid-layout">
+                        <div class="form-row days-row">
+                            <label class="day-chip"><input type="checkbox" value="monday" id="cb-monday"><span>Monday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="tuesday" id="cb-tuesday"><span>Tuesday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="wednesday" id="cb-wednesday"><span>Wednesday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="thursday" id="cb-thursday"><span>Thursday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="friday" id="cb-friday"><span>Friday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="saturday" id="cb-saturday"><span>Saturday</span></label>
+                            <label class="day-chip"><input type="checkbox" value="sunday" id="cb-sunday"><span>Sunday</span></label>
+                        </div>
+
+                        <div class="form-row time-row">
+                            <div class="form-group flex-1">
+                                <label for="start-time">Start Time</label>
+                                <input type="time" id="start-time" class="form-input" required>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="end-time">End Time</label>
+                                <input type="time" id="end-time" class="form-input" required>
                             </div>
                         </div>
 
-                        <div class="time-settings">
-                            <h3>Time Slots</h3>
-                            <div class="time-inputs">
-                                <div class="time-group">
-                                    <label for="start-time">Start Time</label>
-                                    <input type="time" id="start-time" value="09:00">
-                                </div>
-                                <div class="time-group">
-                                    <label for="end-time">End Time</label>
-                                    <input type="time" id="end-time" value="17:00">
-                                </div>
-                            </div>
-                            <p class="time-note">These times will apply to all selected days</p>
-                        </div>
-
-                        <div class="availability-actions">
+                        <div class="actions-row">
                             <button class="btn-primary" id="save-availability-btn">
-                                <i class="fas fa-save"></i>
-                                Save Availability
+                                <i class="fas fa-save"></i> Save Availability
                             </button>
                             <button class="btn-secondary" id="view-schedule-btn">
-                                <i class="fas fa-calendar"></i>
-                                View Schedule
+                                <i class="fas fa-calendar"></i> View Schedule
                             </button>
                         </div>
                     </div>
                 </section>
 
-                <!-- Send Appointment Invitations -->
-                <section class="send-invitation-section">
-                    <h2>Send Appointment Invitation</h2>
-                    <p>Send appointment invitations to patients for your available dates</p>
+                <hr class="section-divider">
 
-                    <div class="invitation-form">
+                <!-- Send Appointment Invitations -->
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2>Send Appointment Invitation</h2>
+                    </div>
+
+                    <div class="form-grid-layout">
                         <div class="form-row">
-                            <div class="form-group">
+                            <div class="form-group flex-1">
                                 <label for="patient-select">Select Patient</label>
-                                <select id="patient-select" class="form-input">
-                                    <option value="">Choose a patient...</option>
-                                    <!-- Patients will be loaded dynamically -->
+                                <select id="patient-select" class="form-input" required>
+                                    <option value="">Loading patients...</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group flex-1">
                                 <label for="invitation-date">Available Date</label>
-                                <input type="date" id="invitation-date" class="form-input">
+                                <input type="date" id="invitation-date" class="form-input" required>
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group">
+                            <div class="form-group flex-1">
                                 <label for="invitation-time">Available Time</label>
-                                <select id="invitation-time" class="form-input">
-                                    <option value="">Select time...</option>
+                                <select id="invitation-time" class="form-input" required>
+                                    <option value="">Select a date first...</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group flex-1">
                                 <label for="appointment-type">Appointment Type</label>
-                                <select id="appointment-type" class="form-input">
+                                <select id="appointment-type" class="form-input" required>
                                     <option value="consultation">General Consultation</option>
                                     <option value="follow-up">Follow-up</option>
                                     <option value="emergency">Emergency</option>
@@ -245,33 +171,119 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group full-width-group">
                             <label for="invitation-notes">Notes (Optional)</label>
-                            <textarea id="invitation-notes" class="form-input" rows="3" placeholder="Add any specific instructions or notes for the patient"></textarea>
+                            <textarea id="invitation-notes" class="form-input" rows="2" placeholder="Add specific instructions for the patient"></textarea>
                         </div>
 
-                        <div class="invitation-actions">
+                        <div class="actions-row">
                             <button class="btn-primary" id="send-invitation-btn">
-                                <i class="fas fa-paper-plane"></i>
-                                Send Invitation
+                                <i class="fas fa-paper-plane"></i> Send Invitation
                             </button>
                             <button class="btn-secondary" id="preview-invitation-btn">
-                                <i class="fas fa-eye"></i>
-                                Preview Invitation
+                                <i class="fas fa-eye"></i> Preview Invitation
                             </button>
                         </div>
                     </div>
                 </section>
 
+                <hr class="section-divider">
+
+                <!-- Availability Statistics -->
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2>Availability Statistics</h2>
+                    </div>
+                    <div class="stats-row" id="dynamic-stats">
+                        <!-- Loaded dynamically -->
+                        <div class="stat-item"><span class="stat-val" id="stat-received">0</span><span class="stat-label">Total Géré</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-accepted">0</span><span class="stat-label">Acceptées</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-rejected">0</span><span class="stat-label">Refusées</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-pending">0</span><span class="stat-label">En attente</span></div>
+                    </div>
+                </section>
+
+
+
+                <!-- Appointment Requests Section -->
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2><i class="fas fa-calendar-check"></i> Demandes de Consultation <span class="pending-count" id="requests-count">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Status</th>
+                                    <th>Date & Time</th>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requests-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20">Loading requests from server...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <hr class="section-divider">
+
+                <!-- Sent Invitations Section -->
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2>Invitations Envoyées</h2>
+                        <span class="pending-count" id="sent-invitations-count">0</span>
+                    </div>
+                    <div class="requests-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Status</th>
+                                    <th>Date & Time</th>
+                                    <th>Type</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sent-invitations-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20">Loading invitations...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <hr class="section-divider">
+
                 <!-- Current Availability Display -->
-                <section class="current-availability">
-                    <h2>Current Availability</h2>
-                    <div class="availability-display">
-                        <div class="no-data-message">
-                            <i class="fas fa-clock"></i>
-                            <h4>No availability set</h4>
-                            <p>Set your weekly availability above to start accepting appointments</p>
-                        </div>
+                <section class="full-width-section">
+                    <div class="section-header-flex">
+                        <h2><i class="fas fa-clock"></i> Disponibilité Actuelle</h2>
+                    </div>
+                    
+                    <div class="availability-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Jour</th>
+                                    <th>Statut</th>
+                                    <th>Horaires</th>
+                                </tr>
+                            </thead>
+                            <tbody id="current-availability-tbody">
+                                <tr>
+                                    <td colspan="3" class="text-center p-20">Loading current schedule from server...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>

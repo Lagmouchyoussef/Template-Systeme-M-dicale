@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../shared.css">
     <link rel="stylesheet" href="patient-dashboard.css">
-    <link rel="stylesheet" href="history.css?v=3">
-    <title>MediSync - Appointment History</title>
+    <link rel="stylesheet" href="history.css">
+    <title>MediSync - History</title>
     <script src="../sync.js"></script>
 </head>
-    <body>
+<body>
     <div class="dashboard">
         <!-- Left Navbar -->
         <nav class="sidebar">
@@ -65,181 +66,149 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <header class="header">
-                <div class="header-left">
-                    <div>
-                        <h1>Appointment History</h1>
-                        <p class="user-info"></p>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <div class="notification-badge" style="display: none;">0</div>
-                        <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
-                            <div class="notifications-header">
-                                <h4>Notifications</h4>
-                                <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
-                            </div>
-                            <div class="notifications-list" id="notifications-list"></div>
-                            <div class="notifications-footer">
-                                <button class="view-all" id="view-all-notifications">View all notifications</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
+             <header class="header">
+                 <div>
+                     <h1>Archives & Historique</h1>
+                     <p class="user-info"></p>
+                 </div>
+                 <div class="header-actions">
+                     <div class="notifications">
+                         <i class="fas fa-bell"></i>
+                         <div class="notification-badge" style="display: none;">0</div>
+                     </div>
+                     <!-- Notifications Dropdown -->
+                      <div class="notifications-dropdown" id="notifications-dropdown" style="display: none;">
+                          <div class="notifications-header">
+                              <h4>Notifications</h4>
+                              <button class="mark-all-read" id="mark-all-read">Mark all as read</button>
+                          </div>
+                           <div class="notifications-list" id="notifications-list">
+                               <!-- Notifications loaded dynamically -->
+                           </div>
+                      </div>
+                 </div>
+             </header>
 
             <div class="history-content">
-                <!-- Stats Summary -->
-                <div class="stats-summary">
-                    <i class="fas fa-calendar-alt"></i> <span id="total-appointments">0</span> Total |
-                    <i class="fas fa-check-circle"></i> <span id="completed-appointments">0</span> Completed |
-                    <i class="fas fa-clock"></i> <span id="upcoming-appointments">0</span> Upcoming
-                </div>
-
-                <!-- Filters -->
-                <section class="filters-section">
-                    <div class="filters-grid">
-                        <div class="filter-group">
-                            <label for="search-input">Search</label>
-                            <input type="text" id="search-input" placeholder="Doctor, specialty..." class="filter-input">
-                        </div>
-
-                        <div class="filter-group">
-                            <label for="month-filter">Month</label>
-                            <select id="month-filter" class="filter-select">
-                                <option value="">All months</option>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                            </select>
-                        </div>
-
-                        <div class="filter-group">
-                            <label for="year-filter">Year</label>
-                            <select id="year-filter" class="filter-select">
-                                <option value="">All years</option>
-                                <option value="2026">2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                            </select>
-                        </div>
-
-                        <div class="filter-group">
-                            <button id="clear-filters" class="btn-secondary">Clear</button>
-                        </div>
+                <!-- Archives - Mes Demandes de Consultation Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-calendar-times" style="color: #6c757d; margin-right: 10px;"></i> Archives - Mes Demandes <span class="pending-count" id="archives-requests-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Médecin</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Statut d'origine</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-requests-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
-                <!-- Loading State -->
-                <div id="loading-state" class="loading-state" style="display: none;">
-                    <div class="loading-spinner"></div>
-                    <p>Loading your history...</p>
-                </div>
-
-                <!-- Error State -->
-                <div id="error-state" class="error-state" style="display: none;">
-                    <div class="error-content">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Loading Error</h3>
-                        <p>Unable to load appointment history.</p>
-                        <button id="retry-btn" class="btn-primary">Retry</button>
+                <!-- Archives - Invitations Reçues Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-paper-plane" style="color: #6c757d; margin-right: 10px;"></i> Archives - Invitations Reçues <span class="pending-count" id="archives-invitations-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
                     </div>
-                </div>
-
-                <!-- Appointments List -->
-                <section id="appointments-list" class="appointments-list">
-                    <!-- Appointments will be loaded here -->
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Médecin</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Statut</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-invitations-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
+                
+                <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 30px 0; opacity: 0.5;">
 
-                <!-- Empty State -->
-                <div id="empty-state" class="empty-state" style="display: none;">
-                    <div class="empty-content">
-                        <i class="fas fa-calendar-times"></i>
-                        <h3>No appointments found</h3>
-                        <p>No appointments found.</p>
+                <!-- Archives - Notifications Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-bell-slash" style="color: #6c757d; margin-right: 10px;"></i> Archives - Notifications <span class="pending-count" id="archives-notifications-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
                     </div>
-                </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type / Sujet</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Message</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-notifications-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <hr style="border: none; height: 1px; background-color: var(--border-color); margin: 30px 0; opacity: 0.5;">
 
-                <!-- Load More Button -->
-                <div id="load-more-container" class="load-more-container" style="display: none;">
-                    <button id="load-more-btn" class="btn-primary load-more-btn">
-                        <i class="fas fa-plus"></i>
-                        Load More
-                    </button>
-                </div>
+                <!-- Archives - Emails Section -->
+                <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; box-shadow: var(--shadow); opacity: 0.9;">
+                    <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-envelope" style="color: #6c757d; margin-right: 10px;"></i> Archives - Emails <span class="pending-count" id="archives-emails-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                    </div>
+                    
+                    <div class="requests-table-container" style="overflow-x: auto;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--bg-secondary); text-align: left;">
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Expéditeur</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Objet</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archives-emails-tbody">
+                                <tr>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </main>
-    </div>
-
-    <!-- Reschedule Modal -->
-    <div id="reschedule-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Reschedule Appointment</h3>
-                <span class="modal-close" id="modal-close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="modal-appointment-info" class="appointment-info">
-                    <!-- Appointment info will be loaded here -->
-                </div>
-
-                <form id="reschedule-form" class="reschedule-form">
-                    <div class="form-group">
-                        <label for="reschedule-date">New Date</label>
-                        <input type="date" id="reschedule-date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reschedule-time">New Time</label>
-                        <select id="reschedule-time" required>
-                            <option value="">Choose a time</option>
-                            <option value="09:00">09:00</option>
-                            <option value="09:30">09:30</option>
-                            <option value="10:00">10:00</option>
-                            <option value="10:30">10:30</option>
-                            <option value="11:00">11:00</option>
-                            <option value="14:00">14:00</option>
-                            <option value="14:30">14:30</option>
-                            <option value="15:00">15:00</option>
-                            <option value="15:30">15:30</option>
-                            <option value="16:00">16:00</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reschedule-reason">Reason (optional)</label>
-                        <textarea id="reschedule-reason" placeholder="Briefly explain..." rows="3"></textarea>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-reschedule" class="btn-secondary">Cancel</button>
-                        <button type="submit" class="btn-primary">Reschedule</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <!-- Success Toast -->
     <div id="success-toast" class="toast success-toast" style="display: none;">
         <i class="fas fa-check-circle"></i>
-        <span>Changes saved</span>
+        <span>Changements enregistrés</span>
     </div>
 
     <script src="patient-dashboard.js"></script>
-    <script src="history.js"></script>
     <script src="../notifications.js"></script>
+    <script src="history.js"></script>
 </body>
 </html>

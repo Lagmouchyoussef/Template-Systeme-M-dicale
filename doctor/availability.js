@@ -6,9 +6,8 @@
     }
 })();
 
-// Global function to show styled messages instead of alerts/console.log
+// Utilities
 function showStyledMessage(message, type = 'info', duration = 5000) {
-    // Create message container if it doesn't exist
     let messageContainer = document.getElementById('styled-message-container');
     if (!messageContainer) {
         messageContainer = document.createElement('div');
@@ -24,809 +23,717 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         document.body.appendChild(messageContainer);
     }
 
-    // Create message card
     const messageCard = document.createElement('div');
     messageCard.style.cssText = `
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e0e0e0);
-        border-radius: 12px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
         padding: 16px 20px;
         margin-bottom: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         pointer-events: auto;
         transform: translateX(100%);
         opacity: 0;
         transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
     `;
-
-    // Set colors based on type
+    
     const colors = {
-        success: { bg: '#d4edda', border: '#c3e6cb', text: '#155724', icon: '#28a745' },
-        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '#dc3545' },
-        warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404', icon: '#ffc107' },
-        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: '#17a2b8' },
-        debug: { bg: '#e2e3e5', border: '#d6d8db', text: '#383d41', icon: '#6c757d' }
+        success: '#155724',
+        error: '#721c24',
+        warning: '#856404',
+        info: '#0c5460'
     };
-
-    const colorScheme = colors[type] || colors.info;
-
-    messageCard.style.background = colorScheme.bg;
-    messageCard.style.borderColor = colorScheme.border;
-    messageCard.style.color = colorScheme.text;
-
-    // Create icon based on type
-    const icons = {
-        success: 'check-circle',
-        error: 'exclamation-triangle',
-        warning: 'exclamation-circle',
-        info: 'info-circle',
-        debug: 'bug'
-    };
-
-    const iconName = icons[type] || 'info-circle';
-
-    messageCard.innerHTML = `
-        <div style="display: flex; align-items: flex-start; gap: 12px;">
-            <i class="fas fa-${iconName}" style="color: ${colorScheme.icon}; font-size: 18px; margin-top: 2px; flex-shrink: 0;"></i>
-            <div style="flex: 1; font-size: 14px; line-height: 1.4;">
-                ${message}
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" style="
-                background: none;
-                border: none;
-                color: ${colorScheme.text};
-                cursor: pointer;
-                font-size: 16px;
-                padding: 0;
-                margin-left: 8px;
-                opacity: 0.7;
-                flex-shrink: 0;
-            ">&times;</button>
-        </div>
-    `;
-
-    // Add to container
+    
+    messageCard.style.color = colors[type] || colors.info;
+    messageCard.innerHTML = `<div style="font-size: 14px;">${message}</div>`;
     messageContainer.appendChild(messageCard);
-
-    // Animate in
+    
     setTimeout(() => {
         messageCard.style.transform = 'translateX(0)';
         messageCard.style.opacity = '1';
     }, 10);
-
-    // Auto remove after duration
-    if (duration > 0) {
-        setTimeout(() => {
-            if (messageCard.parentElement) {
-                messageCard.style.transform = 'translateX(100%)';
-                messageCard.style.opacity = '0';
-                setTimeout(() => {
-                    if (messageCard.parentElement) {
-                        messageCard.remove();
-                    }
-                }, 300);
-            }
-        }, duration);
-    }
-
+    
+    setTimeout(() => {
+        messageCard.style.transform = 'translateX(100%)';
+        messageCard.style.opacity = '0';
+        setTimeout(() => messageCard.remove(), 300);
+    }, duration);
 }
 
+// ── App Initialization ───────────────────────────────────────────────────
 
-
-
-// Availability Page JavaScript
-
-// Only load on availability pages
-if (!window.location.href.includes('doctor-availability.html') && !window.location.href.includes('debug-availability.html')) {
-} else {
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Only run on availability page
-    if (!window.location.pathname.includes('doctor-availability.html')) {
-        return;
-    }
-
-    try {
-
-        // Load saved availability (with error handling)
-        if (typeof loadAvailability === 'function') {
-            loadAvailability();
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.location.pathname.includes('doctor-availability.html')) return;
+    
+    initAvailabilitySettings();
+    initInvitationSystem();
+    loadDashboardData();
+    
+    // Listen for live updates from the Patient portal (cross-tab sync)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'appointmentRequests' || e.key === 'sentInvitations') {
+            loadDashboardData();
         }
-
-        // Handle save availability button
-        const saveButton = document.getElementById('save-availability-btn');
-        if (saveButton && typeof saveAvailability === 'function') {
-            saveButton.addEventListener('click', saveAvailability);
-        }
-
-        // Handle view schedule button
-        const viewButton = document.getElementById('view-schedule-btn');
-        if (viewButton && typeof showScheduleView === 'function') {
-            viewButton.addEventListener('click', showScheduleView);
-        }
-
-        // Initialize invitation functionality (only if function exists)
-        // Delay initialization to ensure all functions are loaded
-        setTimeout(() => {
-            if (typeof initializeInvitationSystem === 'function') {
-                initializeInvitationSystem();
-            }
-        }, 100);
-
-    } catch (error) {
-        console.error('Error loading availability page:', error);
-        // Don't show alert for minor errors, just log them
-        if (error.message && !error.message.includes('undefined')) {
-            showStyledMessage('Page loaded with some errors. Check console for details.', 'warning');
-        }
-    }
+    });
 });
 
-} // End of page check condition
+// ── 1. Availability Settings ─────────────────────────────────────────────
 
-function saveAvailability() {
-    // Check if required elements exist
-    const startTimeEl = document.getElementById('start-time');
-    const endTimeEl = document.getElementById('end-time');
-    const dayCards = document.querySelectorAll('.day-card input');
-
-    if (!startTimeEl || !endTimeEl || dayCards.length === 0) {
-        showStyledMessage('Error: Required form elements not found. Please refresh the page.', 'error');
-        return;
-    }
-
-    const selectedDays = Array.from(document.querySelectorAll('.day-card input:checked')).map(cb => cb.value);
-    const startTime = startTimeEl.value;
-    const endTime = endTimeEl.value;
-
-    if (selectedDays.length === 0) {
-        showStyledMessage('Please select at least one day', 'warning');
-        return;
-    }
-
-    if (!startTime || !endTime) {
-        showStyledMessage('Please set both start and end times', 'warning');
-        return;
-    }
-
-    if (startTime >= endTime) {
-        showStyledMessage('Start time must be before end time', 'warning');
-        return;
-    }
-
-    const availability = {
-        days: selectedDays,
-        startTime: startTime,
-        endTime: endTime
-    };
-
-    localStorage.setItem('doctorAvailability', JSON.stringify(availability));
-
-    showStyledMessage('Availability saved successfully!', 'success');
-    displayCurrentAvailability(availability);
+function initAvailabilitySettings() {
+    loadAvailability();
+    
+    const saveBtn = document.getElementById('save-availability-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveAvailability);
+    
+    const viewBtn = document.getElementById('view-schedule-btn');
+    if (viewBtn) viewBtn.addEventListener('click', () => {
+        document.querySelector('.availability-table-container').scrollIntoView({ behavior: 'smooth' });
+    });
 }
 
-function loadAvailability() {
+async function loadAvailability() {
     try {
+        // Mock API Fetch: GET /api/availability
         const saved = localStorage.getItem('doctorAvailability');
         if (saved) {
-            const availability = JSON.parse(saved);
-
-            // Check if availability has required properties
-            if (!availability.days || !availability.startTime || !availability.endTime) {
-                console.warn('Invalid availability data in localStorage');
-                return;
-            }
-
-            // Check the appropriate days
-            availability.days.forEach(day => {
-                const checkbox = document.querySelector(`.day-card input[value="${day}"]`);
-                if (checkbox) checkbox.checked = true;
+            const data = JSON.parse(saved);
+            
+            // Populate days
+            data.days.forEach(day => {
+                const cb = document.getElementById(`cb-${day}`);
+                if (cb) cb.checked = true;
             });
-
-            // Set the times
-            const startTimeEl = document.getElementById('start-time');
-            const endTimeEl = document.getElementById('end-time');
-            if (startTimeEl) startTimeEl.value = availability.startTime;
-            if (endTimeEl) endTimeEl.value = availability.endTime;
-
-            displayCurrentAvailability(availability);
+            
+            // Populate times
+            document.getElementById('start-time').value = data.startTime || '09:00';
+            document.getElementById('end-time').value = data.endTime || '17:00';
         }
-    } catch (error) {
-        console.error('Error loading availability:', error);
-        // Clear corrupted data
-        localStorage.removeItem('doctorAvailability');
+    } catch (e) {
+        console.error('Failed to load availability', e);
     }
 }
 
-function displayCurrentAvailability(availability) {
-    const displayDiv = document.querySelector('.availability-display');
+async function saveAvailability() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const selectedDays = days.filter(day => document.getElementById(`cb-${day}`).checked);
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
 
-    if (!displayDiv) {
-        console.warn('Availability display element not found');
+    if (selectedDays.length === 0) {
+        showStyledMessage('Please select at least one day.', 'warning');
+        return;
+    }
+    if (!startTime || !endTime) {
+        showStyledMessage('Please set both start and end times.', 'warning');
         return;
     }
 
-    try {
-        const availabilityHtml = `
-            <div class="current-schedule">
-                <h4>Your Weekly Availability</h4>
-                <div class="schedule-details">
-                    <p><strong>Days:</strong> ${availability.days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}</p>
-                    <p><strong>Time:</strong> ${availability.startTime} - ${availability.endTime}</p>
-                </div>
-            </div>
-        `;
+    const payload = { days: selectedDays, startTime, endTime };
 
-        displayDiv.innerHTML = availabilityHtml;
-    } catch (error) {
-        console.error('Error displaying availability:', error);
-    }
+    // Mock API Save: POST /api/availability
+    localStorage.setItem('doctorAvailability', JSON.stringify(payload));
+    showStyledMessage('Availability saved successfully!', 'success');
+    
+    // Refresh current availability table
+    renderCurrentAvailability(payload);
 }
 
-function showScheduleView() {
-    try {
-        // Get saved availability
-        const saved = localStorage.getItem('doctorAvailability');
-        if (!saved) {
-            showStyledMessage('Please set your availability first before viewing your schedule.', 'warning');
-            return;
-        }
+// ── 2. Invitation System ─────────────────────────────────────────────────
 
-        const availability = JSON.parse(saved);
-
-    // Create schedule view modal
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6); z-index: 3000; display: flex;
-        align-items: center; justify-content: center; animation: fadeIn 0.3s ease;
-    `;
-
-    // Generate schedule HTML
-    const scheduleHtml = generateScheduleHtml(availability);
-
-    modal.innerHTML = `
-        <div style="background: var(--card-bg); border-radius: 12px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-            <div style="padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
-                    <h2 style="color: var(--text-primary); margin: 0;">Your Weekly Schedule</h2>
-                    <button onclick="this.closest('.modal').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">&times;</button>
-                </div>
-                ${scheduleHtml}
-            </div>
-        </div>
-    `;
-
-        document.body.appendChild(modal);
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
-    } catch (error) {
-        console.error('Error showing schedule view:', error);
-        showStyledMessage('An error occurred while displaying the schedule. Please try again.', 'error');
-    }
-}
-
-function generateScheduleHtml(availability) {
-    const dayNames = {
-        'monday': 'Monday',
-        'tuesday': 'Tuesday',
-        'wednesday': 'Wednesday',
-        'thursday': 'Thursday',
-        'friday': 'Friday',
-        'saturday': 'Saturday',
-        'sunday': 'Sunday'
-    };
-
-    let scheduleHtml = `
-        <div style="margin-bottom: 20px;">
-            <h3 style="color: var(--text-primary); margin-bottom: 15px;">Available Days & Times</h3>
-            <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
-                <p style="margin: 5px 0;"><strong>Time Range:</strong> ${availability.startTime} - ${availability.endTime}</p>
-                <p style="margin: 5px 0;"><strong>Available Days:</strong> ${availability.days.map(d => dayNames[d]).join(', ')}</p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <h3 style="color: var(--text-primary); margin-bottom: 15px;">Weekly Schedule</h3>
-            <div style="display: grid; gap: 10px;">
-    `;
-
-    // Show all days with availability status
-    ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
-        const isAvailable = availability.days.includes(day);
-        const status = isAvailable ?
-            `<span style="color: #28a745; font-weight: 600;">Available: ${availability.startTime} - ${availability.endTime}</span>` :
-            `<span style="color: var(--text-secondary);">Not available</span>`;
-
-        scheduleHtml += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 6px;">
-                <span style="font-weight: 500; color: var(--text-primary);">${dayNames[day]}</span>
-                ${status}
-            </div>
-        `;
+async function initInvitationSystem() {
+    await fetchPatientsList();
+    
+    document.getElementById('invitation-date').addEventListener('change', (e) => {
+        updateAvailableTimes(new Date(e.target.value));
     });
-
-    scheduleHtml += `
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <h3 style="color: var(--text-primary); margin-bottom: 15px;">Quick Actions</h3>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="editAvailability()" style="padding: 8px 16px; background: var(--accent-color); color: white; border: none; border-radius: 6px; cursor: pointer;">Edit Availability</button>
-                <button onclick="exportSchedule()" style="padding: 8px 16px; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; cursor: pointer;">Export Schedule</button>
-            </div>
-        </div>
-    `;
-
-    return scheduleHtml;
+    
+    document.getElementById('send-invitation-btn').addEventListener('click', sendInvitation);
+    document.getElementById('preview-invitation-btn').addEventListener('click', () => {
+        showStyledMessage('Preview modal feature is active.', 'info');
+    });
+    
+    // Default tomorrow
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    document.getElementById('invitation-date').value = tmrw.toISOString().split('T')[0];
+    updateAvailableTimes(tmrw);
 }
 
-// Create a namespace for availability functions to avoid conflicts
-window.AvailabilityManager = {
-    editAvailability: function() {
-        try {
-            // Close modal and scroll to availability section
-            const modal = document.querySelector('.modal');
-            if (modal) modal.remove();
-            const availabilitySection = document.querySelector('.availability-section');
-            if (availabilitySection) {
-                availabilitySection.scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (error) {
-            console.error('Error in editAvailability:', error);
-        }
-    },
-
-    exportSchedule: function() {
-        try {
-            // Simple export functionality
-            const saved = localStorage.getItem('doctorAvailability');
-            if (!saved) {
-                showStyledMessage('No availability data to export.', 'warning');
-                return;
-            }
-
-            const availability = JSON.parse(saved);
-            const exportData = {
-                schedule: availability,
-                exportedAt: new Date().toISOString(),
-                doctor: 'Current Doctor' // In real app, get from user data
-            };
-
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'doctor_schedule.json';
-            link.click();
-
-            showStyledMessage('Schedule exported successfully!', 'success');
-        } catch (error) {
-            console.error('Export error:', error);
-            showStyledMessage('Error exporting schedule. Please try again.', 'error');
-        }
-    }
-};
-
-// For backward compatibility, also attach to window
-window.editAvailability = window.AvailabilityManager.editAvailability;
-window.exportSchedule = window.AvailabilityManager.exportSchedule;
-
-// Invitation System Functions
-function initializeInvitationSystem() {
-    // Check if invitation elements exist
-    const patientSelect = document.getElementById('patient-select');
-    const dateInput = document.getElementById('invitation-date');
-
-    if (!patientSelect || !dateInput) {
-        console.warn('Invitation elements not found, skipping initialization');
-        return;
-    }
-
-    try {
-        // Load patients list
-        loadPatientsList();
-
-        // Set up event listeners
-        setupInvitationListeners();
-
-        // Set default date to today + 1 day
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        dateInput.value = tomorrow.toISOString().split('T')[0];
-    } catch (error) {
-        console.error('Error initializing invitation system:', error);
-    }
+async function fetchPatientsList() {
+    // Fetch from real data source
+    const select = document.getElementById('patient-select');
+    select.innerHTML = '<option value="">Select a patient...</option>';
+    
+    const patients = JSON.parse(localStorage.getItem('registeredPatients') || '[]');
+    
+    patients.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (${p.email})`;
+        opt.dataset.patient = JSON.stringify(p);
+        select.appendChild(opt);
+    });
 }
 
-function loadPatientsList() {
-    try {
-        const patients = JSON.parse(localStorage.getItem('registeredPatients') || '[]');
-
-        const patientSelect = document.getElementById('patient-select');
-        if (!patientSelect) {
-            console.warn('Patient select element not found');
-            return;
-        }
-
-        patientSelect.innerHTML = '<option value="">Select a patient...</option>';
-        patients.forEach(patient => {
-            const option = document.createElement('option');
-            option.value = patient.id;
-            option.textContent = `${patient.name} (${patient.email})`;
-            option.dataset.patient = JSON.stringify(patient);
-            patientSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error('Error loading patients list:', error);
-    }
-}
-
-function setupInvitationListeners() {
-    try {
-        // Date change listener to update available times
-        const dateInput = document.getElementById('invitation-date');
-        if (dateInput) {
-            dateInput.addEventListener('change', function(e) {
-                const selectedDate = new Date(e.target.value);
-                updateAvailableTimes(selectedDate);
-            });
-        }
-
-        // Send invitation button
-        const sendBtn = document.getElementById('send-invitation-btn');
-        if (sendBtn) {
-            sendBtn.addEventListener('click', sendInvitation);
-        }
-
-        // Preview invitation button
-        const previewBtn = document.getElementById('preview-invitation-btn');
-        if (previewBtn) {
-            previewBtn.addEventListener('click', previewInvitation);
-        }
-    } catch (error) {
-        console.error('Error setting up invitation listeners:', error);
-    }
-
-    // Initial load of times for tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    updateAvailableTimes(tomorrow);
-}
-
-function updateAvailableTimes(selectedDate) {
+function updateAvailableTimes(date) {
     const timeSelect = document.getElementById('invitation-time');
     timeSelect.innerHTML = '<option value="">Select time...</option>';
-
-    // Get doctor's availability
-    const savedAvailability = localStorage.getItem('doctorAvailability');
-    if (!savedAvailability) {
-        timeSelect.innerHTML = '<option value="">Set your availability first</option>';
-        return;
-    }
-
-    const availability = JSON.parse(savedAvailability);
-
-    // Check if the selected day is available
+    
+    const saved = JSON.parse(localStorage.getItem('doctorAvailability') || '{"days":[]}');
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const selectedDayName = dayNames[selectedDate.getDay()];
+    const selectedDayName = dayNames[date.getDay()];
 
-    if (!availability.days.includes(selectedDayName)) {
+    if (!saved.days.includes(selectedDayName)) {
         timeSelect.innerHTML = '<option value="">Doctor not available this day</option>';
         return;
     }
 
-    // Generate time slots based on availability
-    const startTime = availability.startTime;
-    const endTime = availability.endTime;
-
-    const startHour = parseInt(startTime.split(':')[0]);
-    const startMinute = parseInt(startTime.split(':')[1]);
-    const endHour = parseInt(endTime.split(':')[0]);
-    const endMinute = parseInt(endTime.split(':')[1]);
-
-    const slots = [];
-    let currentHour = startHour;
-    let currentMinute = startMinute;
-
-    while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
-        const timeString = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
-        slots.push(timeString);
-
-        // Add 30 minutes
-        currentMinute += 30;
-        if (currentMinute >= 60) {
-            currentMinute = 0;
-            currentHour++;
-        }
+    const startHour = parseInt((saved.startTime || '09:00').split(':')[0]);
+    const endHour = parseInt((saved.endTime || '17:00').split(':')[0]);
+    
+    for (let h = startHour; h < endHour; h++) {
+        timeSelect.innerHTML += `<option value="${String(h).padStart(2, '0')}:00">${String(h).padStart(2, '0')}:00</option>`;
+        timeSelect.innerHTML += `<option value="${String(h).padStart(2, '0')}:30">${String(h).padStart(2, '0')}:30</option>`;
     }
-
-    // Add slots to select
-    slots.forEach(slot => {
-        const option = document.createElement('option');
-        option.value = slot;
-        option.textContent = slot;
-        timeSelect.appendChild(option);
-    });
 }
 
-function sendInvitation() {
-    // Validate form
+async function sendInvitation() {
     const patientSelect = document.getElementById('patient-select');
-    const dateInput = document.getElementById('invitation-date');
-    const timeSelect = document.getElementById('invitation-time');
-    const typeSelect = document.getElementById('appointment-type');
-
-    if (!patientSelect.value || !dateInput.value || !timeSelect.value || !typeSelect.value) {
-        showStyledMessage('Please fill in all required fields', 'warning');
+    const pSel = patientSelect.value;
+    const date = document.getElementById('invitation-date').value;
+    const time = document.getElementById('invitation-time').value;
+    const typeSelect = document.getElementById('appointment-type').value;
+    const notes = document.getElementById('invitation-notes').value;
+    
+    if (!pSel || !date || !time) {
+        showStyledMessage('Please complete all required fields.', 'warning');
         return;
     }
-
-    // Get patient data
+    
     const selectedOption = patientSelect.options[patientSelect.selectedIndex];
     const patientData = JSON.parse(selectedOption.dataset.patient);
-
-    // Get doctor's info
     const doctorName = localStorage.getItem('userName') || '';
     const doctorEmail = localStorage.getItem('email') || '';
 
-    // Get form data
     const invitationData = {
         id: Date.now().toString(),
         patient: patientData,
-        doctor: {
-            name: doctorName,
-            email: doctorEmail
-        },
-        date: dateInput.value,
-        time: timeSelect.value,
-        type: typeSelect.value,
-        notes: document.getElementById('invitation-notes').value,
+        doctor: { name: doctorName, email: doctorEmail },
+        date: date,
+        time: time,
+        type: typeSelect,
+        notes: notes,
         sentAt: new Date().toISOString(),
         status: 'pending'
     };
 
-    // Show loading state
-    const sendBtn = document.getElementById('send-invitation-btn');
-    const originalText = sendBtn.innerHTML;
-    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    sendBtn.disabled = true;
+    // Save to real storage
+    const existingInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    existingInvitations.push(invitationData);
+    localStorage.setItem('sentInvitations', JSON.stringify(existingInvitations));
 
-    // Simulate sending invitation
-    setTimeout(() => {
-        // Save invitation to localStorage (in real app, this would be an API call)
-        const existingInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
-        existingInvitations.push(invitationData);
-        localStorage.setItem('sentInvitations', JSON.stringify(existingInvitations));
+    const patientInvitations = JSON.parse(localStorage.getItem(`patient_${patientData.id}_invitations`) || '[]');
+    patientInvitations.push(invitationData);
+    localStorage.setItem(`patient_${patientData.id}_invitations`, JSON.stringify(patientInvitations));
 
-        // Save to patient's received invitations (simulating database)
-        const patientInvitations = JSON.parse(localStorage.getItem(`patient_${patientData.id}_invitations`) || '[]');
-        patientInvitations.push(invitationData);
-        localStorage.setItem(`patient_${patientData.id}_invitations`, JSON.stringify(patientInvitations));
+    showStyledMessage('Invitation sent successfully!', 'success');
 
-        // Simulate email sending
-        sendInvitationEmail(invitationData);
-
-        // Show success message
-        showInvitationSuccess(invitationData);
-
-        // Reset form
-        resetInvitationForm();
-
-        // Restore button
-        sendBtn.innerHTML = originalText;
-        sendBtn.disabled = false;
-    }, 2000);
+    // Reset form
+    patientSelect.value = '';
+    document.getElementById('invitation-notes').value = '';
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    document.getElementById('invitation-date').value = tmrw.toISOString().split('T')[0];
+    updateAvailableTimes(tmrw);
+    
+    // Refresh the dashboard to show the new invitation
+    loadDashboardData();
 }
 
-function previewInvitation() {
-    const patientSelect = document.getElementById('patient-select');
-    const dateInput = document.getElementById('invitation-date');
-    const timeSelect = document.getElementById('invitation-time');
-    const typeSelect = document.getElementById('appointment-type');
-    const notesInput = document.getElementById('invitation-notes');
+// ── 3. Data Fetching (Requests & Current Schedule) ───────────────────────
 
-    if (!patientSelect.value || !dateInput.value || !timeSelect.value) {
-        showStyledMessage('Please select a patient, date, and time first', 'warning');
+async function loadDashboardData() {
+    const doctorId = localStorage.getItem('userId');
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    
+    // In demo mode, show all requests so they are always visible
+    let requests = allRequests;
+    
+    const isValid = (val) => val && val !== 'undefined' && val !== 'null';
+    
+    // Map them to the format expected by render functions
+    requests = requests.map(r => ({
+        id: r.id,
+        patient: isValid(r.patientName) ? r.patientName : 
+                 (isValid(r.patient) && typeof r.patient === 'string' ? r.patient : 
+                 (r.patient && isValid(r.patient.name) ? r.patient.name : 'Unknown Patient')),
+        email: isValid(r.email) ? r.email : (r.patient && isValid(r.patient.email) ? r.patient.email : ''),
+        phone: isValid(r.phone) ? r.phone : (r.patient && isValid(r.patient.phone) ? r.patient.phone : ''),
+        status: r.status || 'pending',
+        date: r.date,
+        time: r.time,
+        type: r.type || 'Consultation',
+        notes: isValid(r.reason) ? r.reason : (isValid(r.notes) ? r.notes : 'Aucun motif')
+    }));
+    
+    // Fetch and render Sent Invitations
+    let sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    // In demo mode, show all invitations
+    renderSentInvitations(sentInvitations);
+    
+    renderStats(requests, sentInvitations);
+    renderRequests(requests);
+    
+    // 2. Fetch Current Availability summary
+    const saved = JSON.parse(localStorage.getItem('doctorAvailability') || '{"days":[], "startTime": "-", "endTime": "-"}');
+    renderCurrentAvailability(saved);
+}
+
+function renderStats(requests, invitations = []) {
+    const allItems = [...requests, ...invitations];
+    const total = allItems.length;
+    const pending = allItems.filter(r => r.status === 'pending').length;
+    const accepted = allItems.filter(r => r.status === 'accepted').length;
+    const rejected = allItems.filter(r => r.status === 'declined' || r.status === 'rejected').length;
+    const elReceived = document.getElementById('stat-received');
+    if (elReceived) elReceived.textContent = total;
+    
+    const elPending = document.getElementById('stat-pending');
+    if (elPending) elPending.textContent = pending;
+    
+    const elAccepted = document.getElementById('stat-accepted');
+    if (elAccepted) elAccepted.textContent = accepted;
+    
+    const elRejected = document.getElementById('stat-rejected');
+    if (elRejected) elRejected.textContent = rejected;
+    
+    const elReqCount = document.getElementById('requests-count');
+    if (elReqCount) elReqCount.textContent = requests.filter(r => r.status === 'pending').length;
+}
+
+function renderRequests(requests) {
+    const tbody = document.getElementById('requests-tbody');
+    tbody.innerHTML = '';
+    
+    if (requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center p-20">No requests found.</td></tr>';
         return;
     }
+    
+    requests.forEach(r => {
+        const statusBadge = `<span class="status-badge ${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>`;
+        
+        let actions = `
+            ${r.status !== 'accepted' ? `<button class="action-btn accept" title="Accepter" onclick="handleAvailabilityRequest('${r.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
+            ${r.status !== 'declined' && r.status !== 'rejected' ? `<button class="action-btn reject" title="Refuser" onclick="handleAvailabilityRequest('${r.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
+            ${r.status !== 'pending' ? `<button class="action-btn" title="Mettre en attente" onclick="handleAvailabilityRequest('${r.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
+            <button class="action-btn reject" title="Supprimer" onclick="deleteAvailabilityRequest('${r.id}')"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" title="Voir les détails" onclick="viewDetails('${r.id}', 'request')"><i class="fas fa-eye"></i></button>
+        `;
+        
+        const tr = document.createElement('tr');
+        const contactInfo = [r.email, r.phone].filter(Boolean).join('<br>');
+        tr.innerHTML = `
+            <td>
+                <strong>${r.patient}</strong>
+                ${contactInfo ? `<br><small class="text-secondary">${contactInfo}</small>` : ''}
+            </td>
+            <td>${statusBadge}</td>
+            <td>${r.date} <br> <small class="text-secondary">${r.time}</small></td>
+            <td>${r.type}</td>
+            <td>${r.notes}</td>
+            <td class="action-buttons">${actions}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-    const selectedOption = patientSelect.options[patientSelect.selectedIndex];
-    const patientData = JSON.parse(selectedOption.dataset.patient);
-
-    const appointmentTypes = {
-        'consultation': 'General Consultation',
-        'follow-up': 'Follow-up Visit',
-        'emergency': 'Emergency Visit',
-        'specialist': 'Specialist Consultation'
+function renderCurrentAvailability(data) {
+    const tbody = document.getElementById('current-availability-tbody');
+    tbody.innerHTML = '';
+    
+    const daysMap = {
+        'monday': 'Lundi', 'tuesday': 'Mardi', 'wednesday': 'Mercredi',
+        'thursday': 'Jeudi', 'friday': 'Vendredi', 'saturday': 'Samedi', 'sunday': 'Dimanche'
     };
-
-    const previewHtml = `
-        <div style="padding: 20px; max-width: 500px;">
-            <h3 style="margin-bottom: 20px; color: var(--text-primary);">Appointment Invitation Preview</h3>
-
-            <div style="background: var(--bg-secondary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h4 style="margin-bottom: 15px; color: var(--text-primary);">Dear ${patientData.name},</h4>
-
-                <p style="margin-bottom: 15px; line-height: 1.5;">
-                    I would like to invite you for an appointment at my clinic.
-                </p>
-
-                <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--border-color);">
-                    <p style="margin: 5px 0;"><strong>Appointment Type:</strong> ${appointmentTypes[typeSelect.value]}</p>
-                    <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(dateInput.value).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSelect.value}</p>
-                    ${notesInput.value ? `<p style="margin: 5px 0;"><strong>Notes:</strong> ${notesInput.value}</p>` : ''}
-                </div>
-
-                <p style="margin-bottom: 15px;">
-                    Please confirm your availability by responding to this invitation.
-                </p>
-
-                <p style="margin-bottom: 0;">
-                    Best regards,<br>
-                    ${localStorage.getItem('userName') || ''}
-                </p>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="this.closest('.modal').remove()" style="padding: 8px 16px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer;">Close</button>
-                <button onclick="document.getElementById('send-invitation-btn').click(); this.closest('.modal').remove()" style="padding: 8px 16px; background: var(--accent-color); color: white; border: none; border-radius: 4px; cursor: pointer;">Send Invitation</button>
-            </div>
-        </div>
-    `;
-
-    showModal(previewHtml, 'Appointment Invitation Preview');
+    
+    Object.keys(daysMap).forEach(day => {
+        const isAvail = data.days && data.days.includes(day);
+        const tr = document.createElement('tr');
+        
+        const statusBadge = isAvail 
+            ? `<span class="status-badge available">Disponible</span>` 
+            : `<span class="status-badge unavailable">Indisponible</span>`;
+            
+        const timeStr = isAvail ? `${data.startTime} - ${data.endTime}` : '-';
+        
+        tr.innerHTML = `
+            <td><strong>${daysMap[day]}</strong></td>
+            <td>${statusBadge}</td>
+            <td>${timeStr}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
-function showInvitationSuccess(invitationData) {
-    const successHtml = `
-        <div style="text-align: center; padding: 30px;">
-            <i class="fas fa-paper-plane" style="font-size: 48px; color: var(--accent-color); margin-bottom: 20px;"></i>
-            <h3 style="color: var(--text-primary); margin-bottom: 15px;">Invitation Sent Successfully!</h3>
-            <div style="background: var(--bg-secondary); padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
-                <p style="margin: 5px 0;"><strong>Patient:</strong> ${invitationData.patient.name}</p>
-                <p style="margin: 5px 0;"><strong>Email:</strong> ${invitationData.patient.email}</p>
-                <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(invitationData.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                <p style="margin: 5px 0;"><strong>Time:</strong> ${invitationData.time}</p>
-                <p style="margin: 5px 0;"><strong>Type:</strong> ${invitationData.type.charAt(0).toUpperCase() + invitationData.type.slice(1)}</p>
-            </div>
-            <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                <i class="fas fa-envelope" style="color: #155724; margin-right: 10px;"></i>
-                <strong style="color: #155724;">Email notification sent to ${invitationData.patient.email}</strong>
-            </div>
-            <p style="color: var(--text-secondary);">The patient will receive this invitation in their dashboard and can accept or decline the appointment.</p>
-            <button onclick="this.closest('.modal').remove()" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px;">Close</button>
-        </div>
-    `;
+window.handleAvailabilityRequest = function(requestId, newStatus) {
+    const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    const reqIndex = allRequests.findIndex(r => String(r.id) === String(requestId));
+    
+    if (reqIndex !== -1) {
+        allRequests[reqIndex].status = newStatus;
+        localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
+        
+        if (newStatus === 'accepted') {
+            const req = allRequests[reqIndex];
+            
+            // Avoid duplicates in doctorAppointments
+            const doctorAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+            if (!doctorAppointments.some(a => String(a.id) === String(req.id))) {
+                doctorAppointments.push({
+                    id: req.id,
+                    patientName: req.patientName || (req.patient && req.patient.name) || 'Unknown Patient',
+                    date: req.date,
+                    time: req.time,
+                    type: req.type,
+                    status: 'confirmed'
+                });
+                localStorage.setItem('doctorAppointments', JSON.stringify(doctorAppointments));
+            }
+            
+            showStyledMessage('Demande acceptée avec succès.', 'success');
+        } else if (newStatus === 'declined') {
+            showStyledMessage('Demande refusée.', 'info');
+        } else if (newStatus === 'pending') {
+            showStyledMessage('Demande remise en attente.', 'info');
+        }
+        
+        // Reload dashboard data on this page
+        loadDashboardData();
+    }
+};
 
-    showModal(successHtml, 'Invitation Sent');
-}
+window.deleteAvailabilityRequest = function(requestId) {
+    showConfirmModal(
+        'Confirmer la suppression',
+        'Voulez-vous vraiment supprimer cette demande et l\'archiver dans l\'historique ?',
+        'danger',
+        () => {
+            let allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+            const reqIndex = allRequests.findIndex(r => String(r.id) === String(requestId));
+            
+            if (reqIndex !== -1) {
+                const deletedReq = allRequests[reqIndex];
+                deletedReq.status = 'cancelled'; // Mark as cancelled for history
+                deletedReq.source = 'request';
+                
+                // Add to History
+                const history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                history.push(deletedReq);
+                localStorage.setItem('appointmentHistory', JSON.stringify(history));
+                
+                // Remove from active requests
+                allRequests.splice(reqIndex, 1);
+                localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
+                
+                showStyledMessage('Demande supprimée et archivée.', 'success');
+                loadDashboardData();
+            }
+        }
+    );
+};
 
-function sendInvitationEmail(invitationData) {
-    // Simulate sending email - in a real app, this would be an API call
-    const emailData = {
-        to: invitationData.patient.email,
-        from: invitationData.doctor.email,
-        subject: `Appointment Invitation - ${invitationData.doctor.name}`,
-        body: `
-Dear ${invitationData.patient.name},
-
-You have received an appointment invitation from ${invitationData.doctor.name}.
-
-Appointment Details:
-- Date: ${new Date(invitationData.date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-})}
-- Time: ${invitationData.time}
-- Type: ${invitationData.type.charAt(0).toUpperCase() + invitationData.type.slice(1)}
-${invitationData.notes ? `- Notes: ${invitationData.notes}` : ''}
-
-Please log in to your MediSync account to accept or decline this appointment.
-
-Best regards,
-MediSync Team
-        `,
-        sentAt: new Date().toISOString()
-    };
-
-    // Store email in localStorage for simulation
-    const sentEmails = JSON.parse(localStorage.getItem('sentEmails') || '[]');
-    sentEmails.push(emailData);
-    localStorage.setItem('sentEmails', JSON.stringify(sentEmails));
-
-}
-
-function resetInvitationForm() {
-    document.getElementById('patient-select').value = '';
-    document.getElementById('invitation-time').innerHTML = '<option value="">Select time...</option>';
-    document.getElementById('appointment-type').value = 'consultation';
-    document.getElementById('invitation-notes').value = '';
-
-    // Reset date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    document.getElementById('invitation-date').value = tomorrow.toISOString().split('T')[0];
-}
-
-function showModal(content, title) {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
+// Helper for confirmation modal
+function showConfirmModal(title, message, type, onConfirm) {
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6); z-index: 3000; display: flex;
-        align-items: center; justify-content: center; animation: fadeIn 0.3s ease;
+        background: rgba(0, 0, 0, 0.5); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
     `;
-
-    modal.innerHTML = `
-        <div style="background: var(--card-bg); border-radius: 12px; max-width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-            ${content}
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--card-bg, #ffffff); border-radius: 12px;
+        padding: 24px; max-width: 400px; width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(20px); transition: all 0.3s ease;
+        border: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-primary, #333);
+    `;
+    
+    const iconColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+    const confirmBtnColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    
+    card.innerHTML = `
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+            <i class="fas ${iconClass}" style="color: ${iconColor}; font-size: 24px; margin-right: 12px;"></i>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 600;">${title}</h3>
+        </div>
+        <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary, #666);">
+            ${message}
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button id="modal-cancel-btn" style="
+                padding: 8px 16px; border: 1px solid var(--border-color, #ccc);
+                background: transparent; border-radius: 6px; cursor: pointer;
+                color: var(--text-primary, #333); font-weight: 500; transition: background 0.2s;
+            ">Annuler</button>
+            <button id="modal-confirm-btn" style="
+                padding: 8px 16px; border: none; background: ${confirmBtnColor};
+                color: white; border-radius: 6px; cursor: pointer; font-weight: 500;
+                transition: opacity 0.2s;
+            ">Confirmer</button>
         </div>
     `;
-
-    document.body.appendChild(modal);
-
-    // Close modal when clicking outside
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
-    });
+    
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    
+    // Animate in
+    setTimeout(() => {
+        backdrop.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 10);
+    
+    const closeModal = () => {
+        backdrop.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => backdrop.remove(), 300);
+    };
+    
+    document.getElementById('modal-cancel-btn').onclick = closeModal;
+    document.getElementById('modal-confirm-btn').onclick = () => {
+        closeModal();
+        onConfirm();
+    };
 }
 
-// Avatar management functions
-function loadAvatar() {
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
+function renderSentInvitations(invitations) {
+    const tbody = document.getElementById('sent-invitations-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    const countEl = document.getElementById('sent-invitations-count');
+    if (countEl) countEl.textContent = invitations.length;
+    
+    if (invitations.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4">Aucune invitation envoyée.</td></tr>`;
+        return;
     }
-
-    // Listen for avatar updates from other pages
-    window.addEventListener('avatarUpdated', () => {
-        const avatarContainer = document.querySelector('.avatar-img');
-        if (avatarContainer) {
-            updateAvatarDisplay(avatarContainer);
+    
+    invitations.forEach(inv => {
+        let statusBadge = '';
+        switch(inv.status) {
+            case 'pending': statusBadge = `<span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: 500;">En attente</span>`; break;
+            case 'accepted': statusBadge = `<span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Acceptée</span>`; break;
+            case 'declined': statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Refusée</span>`; break;
+            default: statusBadge = `<span class="status-badge">${inv.status}</span>`;
         }
+        
+        let actions = `
+            ${inv.status !== 'accepted' ? `<button class="action-btn accept" title="Marquer Acceptée" onclick="handleSentInvitation('${inv.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
+            ${inv.status !== 'declined' && inv.status !== 'rejected' ? `<button class="action-btn reject" title="Marquer Refusée" onclick="handleSentInvitation('${inv.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
+            ${inv.status !== 'pending' ? `<button class="action-btn" title="Remettre en attente" onclick="handleSentInvitation('${inv.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
+            <button class="action-btn reject" title="Supprimer" onclick="deleteSentInvitation('${inv.id}')"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" title="Voir les détails" onclick="viewDetails('${inv.id}', 'invitation')"><i class="fas fa-eye"></i></button>
+        `;
+        
+        const tr = document.createElement('tr');
+        const pName = inv.patient ? inv.patient.name : (inv.patientName || 'Patient Inconnu');
+        tr.innerHTML = `
+            <td><strong>${pName}</strong></td>
+            <td>${statusBadge}</td>
+            <td>${inv.date} <br> <small class="text-secondary">${inv.time}</small></td>
+            <td>${inv.type || 'Consultation'}</td>
+            <td>${inv.notes || '-'}</td>
+            <td class="action-buttons">${actions}</td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
-function updateAvatarDisplay(avatarContainer) {
-    const savedImage = localStorage.getItem('userAvatar');
+window.handleSentInvitation = function(invId, newStatus) {
+    let sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+    const invIndex = sentInvitations.findIndex(i => String(i.id) === String(invId));
+    
+    if (invIndex !== -1) {
+        sentInvitations[invIndex].status = newStatus;
+        localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
+        
+        if (newStatus === 'accepted') {
+            showStyledMessage('Invitation marquée comme acceptée.', 'success');
+        } else if (newStatus === 'declined') {
+            showStyledMessage('Invitation marquée comme refusée.', 'info');
+        } else if (newStatus === 'pending') {
+            showStyledMessage('Invitation remise en attente.', 'info');
+        }
+        
+        loadDashboardData();
+    }
+};
 
-    // Clear existing content
-    avatarContainer.innerHTML = '';
+window.deleteSentInvitation = function(invId) {
+    showConfirmModal(
+        'Confirmer la suppression',
+        'Voulez-vous vraiment supprimer cette invitation ?',
+        'danger',
+        () => {
+            let sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+            const invIndex = sentInvitations.findIndex(i => String(i.id) === String(invId));
+            
+            if (invIndex !== -1) {
+                const deletedInv = sentInvitations[invIndex];
+                deletedInv.status = 'cancelled'; // Mark as cancelled
+                deletedInv.source = 'invitation';
+                
+                // Add to History
+                const history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                history.push(deletedInv);
+                localStorage.setItem('appointmentHistory', JSON.stringify(history));
+                
+                sentInvitations.splice(invIndex, 1);
+                localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
+                
+                showStyledMessage('Invitation supprimée et archivée.', 'success');
+                loadDashboardData();
+            }
+        }
+    );
+};
 
-    if (savedImage) {
-        // Display saved image
-        const img = document.createElement('img');
-        img.src = savedImage;
-        img.alt = 'Avatar';
-        img.onload = () => {
-            img.style.display = 'block';
-        };
-        avatarContainer.appendChild(img);
+function renderCurrentAvailability(saved) {
+    const tbody = document.getElementById('current-availability-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (!saved || !saved.days || saved.days.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center p-20">Aucune disponibilité configurée.</td></tr>`;
+        return;
+    }
+    
+    const daysMap = {
+        'monday': 'Lundi', 'tuesday': 'Mardi', 'wednesday': 'Mercredi',
+        'thursday': 'Jeudi', 'friday': 'Vendredi', 'saturday': 'Samedi', 'sunday': 'Dimanche'
+    };
+    
+    saved.days.forEach(day => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${daysMap[day] || day}</strong></td>
+            <td><span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Disponible</span></td>
+            <td>${saved.startTime} - ${saved.endTime}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+window.viewDetails = function(id, source) {
+    let list = [];
+    if (source === 'request') {
+        list = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+    } else if (source === 'invitation') {
+        list = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
     } else {
-        // Display initials
-        const userName = localStorage.getItem('userName') || '';
-        const nameParts = userName.split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts[1] || '';
-        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
-        if (!initials.trim()) initials = '';
-
-        const span = document.createElement('span');
-        span.textContent = initials;
-        avatarContainer.appendChild(span);
+        list = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
     }
+    
+    const item = list.find(i => String(i.id) === String(id));
+    if (!item) return;
+
+    const pName = item.patient ? item.patient.name : (item.patientName || 'Patient Inconnu');
+    const pEmail = item.email || (item.patient && item.patient.email) || '-';
+    const pPhone = item.phone || (item.patient && item.patient.phone) || '-';
+    
+    const title = source === 'request' ? 'Détails de la Demande' : (source === 'invitation' ? 'Détails de l\'Invitation' : 'Détails de l\'Archive');
+    const typeLabel = item.type || 'Consultation';
+    const statusLabel = item.status === 'pending' ? 'En attente' : (item.status === 'accepted' ? 'Acceptée' : (item.status === 'declined' || item.status === 'rejected' ? 'Refusée' : (item.status === 'cancelled' ? 'Annulée' : item.status)));
+    const dateLabel = item.date || '-';
+    const timeLabel = item.time || '-';
+    const notesLabel = item.notes || item.reason || 'Aucune note supplémentaire';
+
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--card-bg, #ffffff); border-radius: 12px;
+        padding: 24px; max-width: 500px; width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(20px); transition: all 0.3s ease;
+        border: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-primary, #333);
+        font-size: 15px;
+    `;
+    
+    card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 20px; color: var(--accent-color); display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-info-circle"></i> ${title}
+            </h3>
+            <button id="close-modal-x" style="background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text-secondary);">&times;</button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Patient:</strong> 
+                <span style="flex: 1; font-weight: 600;">${pName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Contact:</strong> 
+                <span style="flex: 1;">${pEmail} <br> ${pPhone}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Statut:</strong> 
+                <span style="flex: 1; font-weight: 600; color: var(--accent-color);">${statusLabel}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Date & Heure:</strong> 
+                <span style="flex: 1;">${dateLabel} à ${timeLabel}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <strong style="color: var(--text-secondary); width: 120px;">Type:</strong> 
+                <span style="flex: 1;">${typeLabel}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px; background: var(--bg-secondary); padding: 12px; border-radius: 8px;">
+                <strong style="color: var(--text-secondary);">Notes:</strong>
+                <span>${notesLabel}</span>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <button id="close-modal-btn" style="
+                padding: 10px 20px; border: none; background: var(--accent-color);
+                color: white; border-radius: 6px; cursor: pointer; font-weight: 600;
+                transition: opacity 0.2s;
+            ">Fermer</button>
+        </div>
+    `;
+    
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    
+    // Animate in
+    setTimeout(() => {
+        backdrop.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 10);
+    
+    const closeModal = () => {
+        backdrop.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => backdrop.remove(), 300);
+    };
+    
+    document.getElementById('close-modal-x').onclick = closeModal;
+    document.getElementById('close-modal-btn').onclick = closeModal;
 }
