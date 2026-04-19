@@ -504,23 +504,23 @@ function initializeCharts() {
 
     if (appointmentTrendsCtx) {
         new Chart(appointmentTrendsCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: monthLabels,
                 datasets: [{
                     label: 'Appointments',
                     data: getAppointmentTrendsData(monthBuckets),
-                    borderColor: '#28a745',
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    tension: 0.4,
-                    fill: true
+                    backgroundColor: 'rgba(45, 160, 168, 0.8)',
+                    borderColor: '#2da0a8',
+                    borderWidth: 1,
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
             }
         });
     }

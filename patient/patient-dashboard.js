@@ -909,7 +909,8 @@ function createSpecialtiesChart() {
         'Gynecology': '#e84393',
         'Psychiatry': '#8e44ad',
         'Radiology': '#34495e',
-        'Surgery': '#c0392b'
+        'Surgery': '#c0392b',
+        'Emergency': '#dc3545'
     };
 
     const backgroundColors = labels.map(label => specialtyColors[label] || '#95a5a6');
@@ -947,6 +948,7 @@ function createSpecialtiesChart() {
                         label: function(context) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = Math.round((context.parsed / total) * 100);
+
                             return `${context.label}: ${context.parsed} appointment${context.parsed !== 1 ? 's' : ''} (${percentage}%)`;
                         }
                     }
@@ -995,6 +997,8 @@ function normalizeSpecialtyName(specialty) {
         'imaging': 'Radiology',
         'surgery': 'Surgery',
         'chirurgie': 'Surgery',
+        'emergency': 'Emergency',
+        'urgence': 'Emergency',
         'consultation': 'General Medicine',
         'check-up': 'General Medicine',
         'follow-up': 'General Medicine'

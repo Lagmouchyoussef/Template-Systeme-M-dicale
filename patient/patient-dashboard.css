@@ -2144,6 +2144,47 @@ body {
     background: linear-gradient(135deg, #28a745, #1e7e34);
 }
 
+/* Specialty count colors */
+.specialty-icon.cardiology ~ .specialty-info .specialty-count {
+    color: #dc3545;
+}
+
+.specialty-icon.dentistry ~ .specialty-info .specialty-count {
+    color: #6c757d;
+}
+
+.specialty-icon.neurology ~ .specialty-info .specialty-count {
+    color: #6f42c1;
+}
+
+.specialty-icon.ophthalmology ~ .specialty-info .specialty-count {
+    color: #007bff;
+}
+
+.specialty-icon.general-medicine ~ .specialty-info .specialty-count {
+    color: #28a745;
+}
+
+.specialty-icon.cardiology ~ .specialty-info .specialty-percentage {
+    color: #dc3545;
+}
+
+.specialty-icon.dentistry ~ .specialty-info .specialty-percentage {
+    color: #6c757d;
+}
+
+.specialty-icon.neurology ~ .specialty-info .specialty-percentage {
+    color: #6f42c1;
+}
+
+.specialty-icon.ophthalmology ~ .specialty-info .specialty-percentage {
+    color: #007bff;
+}
+
+.specialty-icon.general-medicine ~ .specialty-info .specialty-percentage {
+    color: #28a745;
+}
+
 .specialty-info {
     flex: 1;
     display: flex;
