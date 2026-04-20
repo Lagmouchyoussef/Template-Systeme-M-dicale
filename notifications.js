@@ -156,7 +156,12 @@ function renderNotificationsDropdown() {
         item.onclick = (e) => {
             e.stopPropagation();
             markNotificationRead(notification.id);
-            if (notification.link) window.location.href = notification.link;
+            if (notification.link) {
+                window.location.href = notification.link;
+            } else if (notification.type === 'Appointment' || notification.message.toLowerCase().includes('rendez-vous')) {
+                // Redirection intelligente vers l'historique si c'est un rdv
+                window.location.href = CURRENT_ROLE === 'doctor' ? 'doctor-history.html' : 'history.html';
+            }
         };
 
         // Archive logic on delete click
@@ -193,7 +198,9 @@ function archiveNotification(id) {
         
         renderNotificationsDropdown();
         if (typeof showStyledMessage === 'function') {
-            showStyledMessage('Notification moved to archives', 'info');
+            showStyledMessage('Notification moved to archives', 'success');
+        } else if (typeof showToast === 'function') {
+            showToast('Notification moved to archives', 'fa-archive');
         }
         // Refresh UI if on history page
         if (typeof loadDashboardData === 'function') {
@@ -294,12 +301,12 @@ function initNotificationUI() {
     if (!notificationsWrapper.dataset.listenerAttached) {
         notificationsWrapper.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isVisible = dropdown.style.display === 'block';
+            const isVisible = dropdown.style.display === 'flex' || dropdown.style.display === 'block';
             
-            // Close all other dropdowns if any
+            // Close all other dropdowns
             document.querySelectorAll('.notifications-dropdown-menu, .notifications-dropdown').forEach(d => d.style.display = 'none');
             
-            dropdown.style.display = isVisible ? 'none' : 'block';
+            dropdown.style.display = isVisible ? 'none' : 'flex';
         });
 
         document.addEventListener('click', () => {
