@@ -384,6 +384,19 @@ window.handleAvailabilityRequest = function(requestId, newStatus) {
         allRequests[reqIndex].status = newStatus;
         localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
         
+        // Architect Sync: Notify Patient in real-time
+        if (window.MediSyncNotifications) {
+            const req = allRequests[reqIndex];
+            const doctorName = localStorage.getItem('userName') || 'Dr. Specialist';
+            const statusLabel = newStatus === 'accepted' ? 'confirmed' : 'declined';
+            
+            window.MediSyncNotifications.push(
+                `${doctorName} has ${statusLabel} your appointment for ${req.date}`,
+                newStatus === 'accepted' ? 'fa-check-circle' : 'fa-times-circle',
+                'patient'
+            );
+        }
+        
         if (newStatus === 'accepted') {
             const req = allRequests[reqIndex];
             

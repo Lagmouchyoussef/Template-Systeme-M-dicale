@@ -74,6 +74,16 @@ function initializeDashboard() {
 function setupEventListeners() {
     setActiveSidebarItem();
     initSidebarNavigation();
+    
+    // Add listeners for Schedule Appointment buttons in main content
+    document.querySelectorAll('.btn-primary, .welcome-card button').forEach(btn => {
+        if (btn.textContent.includes('Schedule Appointment')) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'appointments.html';
+            });
+        }
+    });
 }
 
 // ── Data Loading Functions ──────────────────────────────────────────────────
@@ -118,14 +128,29 @@ function loadDashboardData() {
 }
 
 function filterPatientData(data, patientId, patientName, patientEmail) {
-    return data.filter(item => {
-        const itemId = item.patientId || item.userId || (item.patient && (item.patient.id || item.patient.userId)) || '';
-        const itemName = (item.patientName || item.name || (item.patient && item.patient.name) || '').toLowerCase();
-        const itemEmail = (item.patientEmail || item.email || (item.patient && item.patient.email) || '').toLowerCase();
+    if (!data || !Array.isArray(data)) return [];
+    
+    const pId = String(patientId || '').toLowerCase();
+    const pName = String(patientName || '').toLowerCase();
+    const pEmail = String(patientEmail || '').toLowerCase();
 
-        return (itemId && String(itemId) === String(patientId)) ||
-               (itemName && itemName.includes(patientName.toLowerCase())) ||
-               (itemEmail && itemEmail === patientEmail.toLowerCase());
+    return data.filter(item => {
+        if (!item) return false;
+        
+        const itemId = String(item.patientId || item.userId || (item.patient && (item.patient.id || item.patient.userId)) || '').toLowerCase();
+        const itemName = String(item.patientName || item.name || (item.patient && item.patient.name) || '').toLowerCase();
+        const itemEmail = String(item.patientEmail || item.email || (item.patient && item.patient.email) || '').toLowerCase();
+
+        // Match by ID
+        if (pId && itemId === pId) return true;
+        
+        // Match by Email (very reliable)
+        if (pEmail && itemEmail === pEmail) return true;
+        
+        // Match by Name (fallback)
+        if (pName && itemName && (itemName.includes(pName) || pName.includes(itemName))) return true;
+
+        return false;
     });
 }
 
@@ -148,11 +173,12 @@ function updateKeyMetrics(appointments, history, requests, invitations) {
         return aptDate >= today && aptDate < new Date(today.getTime() + 24 * 60 * 60 * 1000);
     });
 
-    // Upcoming appointments (next 30 days)
+    // Upcoming appointments (next 30 days) - include everything from start of today
     const upcomingAppointments = [...appointments, ...requests].filter(item => {
         const itemDate = new Date(item.date);
-        const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-        return itemDate >= now && itemDate <= thirtyDaysFromNow;
+        itemDate.setHours(0, 0, 0, 0);
+        const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+        return itemDate >= today && itemDate <= thirtyDaysFromNow;
     });
 
     // Calculate metrics
@@ -241,10 +267,14 @@ function updateAppointmentStatistics(appointments) {
     updateElement('total-appointments-count', appointments.length);
 
     // Upcoming appointments (next 30 days)
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const thirtyDaysFromNow = new Date(startOfToday.getTime() + 30 * 24 * 60 * 60 * 1000);
+    
     const upcomingCount = appointments.filter(apt => {
         const aptDate = new Date(apt.date);
-        return aptDate >= now && aptDate <= thirtyDaysFromNow;
+        aptDate.setHours(0, 0, 0, 0);
+        return aptDate >= startOfToday && aptDate <= thirtyDaysFromNow;
     }).length;
     updateElement('upcoming-appointments-count', upcomingCount);
 
@@ -326,9 +356,15 @@ function updateUpcomingAppointments(appointments, requests) {
     const container = document.getElementById('upcoming-appointments-list');
     if (!container) return;
 
-    const now = new Date();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
     const upcoming = [...appointments, ...requests]
-        .filter(item => new Date(item.date) >= now)
+        .filter(item => {
+            const aptDate = new Date(item.date);
+            aptDate.setHours(0, 0, 0, 0);
+            return aptDate >= startOfToday;
+        })
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(0, 5); // Show next 5
 
@@ -637,6 +673,20 @@ function updateInvitationStatus(invitationId, newStatus) {
     });
 
     localStorage.setItem(key, JSON.stringify(invitations));
+
+    // Architect Sync: Notify Doctor about patient's response
+    if (window.MediSyncNotifications) {
+        const invitation = invitations.find(inv => inv.id === invitationId);
+        const patientName = localStorage.getItem('userName') || 'Patient';
+        const actionLabel = newStatus === 'accepted' ? 'accepted' : 'declined';
+        const icon = newStatus === 'accepted' ? 'fa-check-circle' : 'fa-times-circle';
+        
+        window.MediSyncNotifications.push(
+            `${patientName} has ${actionLabel} your consultation invitation`,
+            icon,
+            'doctor'
+        );
+    }
 
     // If accepted, add to appointments
     if (newStatus === 'accepted') {

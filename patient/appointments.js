@@ -531,6 +531,15 @@ class AppointmentCalendar {
             requests.push(realBooking);
             localStorage.setItem('appointmentRequests', JSON.stringify(requests));
 
+            // Architect Sync: Notify Doctor in real-time
+            if (window.MediSyncNotifications) {
+                window.MediSyncNotifications.push(
+                    `New appointment request from ${patientName}`,
+                    'fa-calendar-plus',
+                    'doctor'
+                );
+            }
+
             showStyledMessage('Appointment booked successfully! Waiting for doctor confirmation.', 'success');
             
             this.loaddoctorAppointments();
@@ -659,17 +668,8 @@ class AppointmentCalendar {
     }
 
     sendEmailReminder(bookingData) {
-        // Simulate sending email reminder
-        showStyledMessage('Email reminder sent: ' + JSON.stringify({
-            to: bookingData.email,
-            subject: 'Appointment Reminder - MediSync',
-            body: `Your appointment is scheduled for ${this.formatDateReadable(bookingData.date)} at ${bookingData.time}`
-        }), 'debug');
-
-        // In a real app, this would make an API call to send the email
-        setTimeout(() => {
-            showStyledMessage('Automated email reminder sent successfully', 'success');
-        }, 1000);
+        // Simulation silenciée - l'email serait envoyé en arrière-plan dans une version réelle
+        console.log('Email reminder processed for:', bookingData.email);
     }
 
     showPrivacyModal() {
@@ -799,30 +799,27 @@ class AppointmentCalendar {
         const patientName = (localStorage.getItem('userName') || localStorage.getItem('fullName') || '').trim().toLowerCase();
         const patientEmail = (localStorage.getItem('email') || localStorage.getItem('userEmail') || '').trim().toLowerCase();
         
+        const currentPId = String(patientId || '').toLowerCase();
+        const currentPName = String(patientName || '').toLowerCase();
+        const currentPEmail = String(patientEmail || '').toLowerCase();
+        
         const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
         const allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
         
-        const myRequests = allRequests.filter(req => {
-            const reqId = req.patientId || req.userId || '';
-            const reqName = (req.patientName || req.name || '').trim().toLowerCase();
-            const reqEmail = (req.email || req.patientEmail || '').trim().toLowerCase();
-            
-            return (patientId !== '' && (reqId === patientId)) || 
-                   (patientName !== '' && reqName.includes(patientName)) ||
-                   (patientName !== '' && patientName.includes(reqName) && reqName !== '') ||
-                   (patientEmail !== '' && reqEmail === patientEmail);
-        });
-        
-        const myConfirmed = confirmedAppointments.filter(app => {
-            const appId = app.patientId || app.userId || '';
-            const appName = (app.patientName || app.name || '').trim().toLowerCase();
-            const appEmail = (app.patientEmail || app.email || '').trim().toLowerCase();
-            
-            return (patientId !== '' && (appId === patientId)) || 
-                   (patientName !== '' && appName.includes(patientName)) ||
-                   (patientName !== '' && patientName.includes(appName) && appName !== '') ||
-                   (appEmail !== '' && appEmail === patientEmail);
-        });
+        const filterFn = (item) => {
+            if (!item) return false;
+            const itemId = String(item.patientId || item.userId || (item.patient && (item.patient.id || item.patient.userId)) || '').toLowerCase();
+            const itemName = String(item.patientName || item.name || (item.patient && item.patient.name) || '').toLowerCase();
+            const itemEmail = String(item.email || item.patientEmail || (item.patient && item.patient.email) || '').toLowerCase();
+
+            if (currentPId && itemId === currentPId) return true;
+            if (currentPEmail && itemEmail === currentPEmail) return true;
+            if (currentPName && itemName && (itemName.includes(currentPName) || currentPName.includes(itemName))) return true;
+            return false;
+        };
+
+        const myRequests = allRequests.filter(filterFn);
+        const myConfirmed = confirmedAppointments.filter(filterFn);
 
         const combined = [...myRequests, ...myConfirmed]
             .filter(a => a.status !== 'declined' && a.status !== 'cancelled')

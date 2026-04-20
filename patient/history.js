@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Cross-tab sync
     window.addEventListener('storage', (e) => {
-        if (e.key === 'appointmentRequests' || e.key === 'sentInvitations' || e.key === 'doctorAppointments') {
+        if (e.key === 'appointmentRequests' || e.key === 'sentInvitations' || e.key === 'doctorAppointments' || e.key === 'notificationHistory' || e.key === 'medisync_notifications_v1') {
             loadDashboardData();
         }
     });
@@ -168,9 +168,10 @@ function loadDashboardData() {
     
     // 2. Notification Archives
     let notificationArchives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
-    // Filter by patient ID or generic matching
-    const myNotifArchives = notificationArchives.filter(n => n.recipientId === patientId || n.target === 'patient' || !n.recipientId);
-    renderNotificationArchives(myNotifArchives);
+    // Filter by role to ensure privacy between doctor and patient archives
+    // Fallback to showing notifications without a role to support legacy data
+    const myNotificationArchives = notificationArchives.filter(n => !n.role || n.role === 'patient');
+    renderNotificationArchives(myNotificationArchives);
     
     // 3. Email Archives
     let emailArchives = JSON.parse(localStorage.getItem('emailHistory') || '[]');
@@ -249,21 +250,34 @@ function renderNotificationArchives(notifications) {
     if (countEl) countEl.textContent = notifications.length;
     
     if (notifications.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">No archived notifications.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 30px; text-align: center;">
+            <i class="fas fa-bell-slash" style="font-size: 24px; margin-bottom: 10px; opacity: 0.3; display: block;"></i>
+            No archived notifications.
+        </td></tr>`;
         return;
     }
     
     notifications.forEach(notif => {
         let actions = `
-            <button class="action-btn accept" title="Restore" onclick="restoreNotification('${notif.id}')"><i class="fas fa-undo"></i></button>
-            <button class="action-btn reject" title="Permanently Delete" onclick="permanentlyDeleteNotification('${notif.id}')"><i class="fas fa-times"></i></button>
+            <button class="action-btn accept" title="Restore to active" onclick="restoreNotification('${notif.id}')"><i class="fas fa-undo"></i></button>
+            <button class="action-btn reject" title="Permanently Delete" onclick="permanentlyDeleteNotification('${notif.id}')"><i class="fas fa-trash-alt"></i></button>
         `;
         
         const tr = document.createElement('tr');
+        const iconClass = notif.icon ? (notif.icon.startsWith('fa-') ? notif.icon : 'fa-' + notif.icon) : 'fa-bell';
+        
         tr.innerHTML = `
-            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><i class="fas ${notif.icon || 'fa-bell'}"></i> ${notif.type || 'Notification'}</td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${notif.message || '-'}</td>
-            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${notif.time || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas ${iconClass}" style="color: var(--accent-color);"></i> 
+                    ${notif.type || 'Notification'}
+                </span>
+            </td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-primary);">${notif.message || '-'}</td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">
+                ${notif.time || '-'} <br>
+                <small style="opacity: 0.7;">Archived: ${notif.archivedAt ? new Date(notif.archivedAt).toLocaleDateString() : 'Unknown'}</small>
+            </td>
             <td style="padding: 12px; border-bottom: 1px solid var(--border-color);" class="action-buttons">${actions}</td>
         `;
         tbody.appendChild(tr);
@@ -300,40 +314,7 @@ function renderEmailArchives(emails) {
     });
 }
 
-window.restoreNotification = function(id) {
-    let archives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
-    const arcIndex = archives.findIndex(a => String(a.id) === String(id));
-    
-    if (arcIndex !== -1) {
-        const itemToRestore = archives[arcIndex];
-        itemToRestore.unread = true;
-        
-        let activeNotifs = JSON.parse(localStorage.getItem('notifications') || '[]');
-        activeNotifs.push(itemToRestore);
-        localStorage.setItem('notifications', JSON.stringify(activeNotifs));
-        
-        archives.splice(arcIndex, 1);
-        localStorage.setItem('notificationHistory', JSON.stringify(archives));
-        
-        showStyledMessage('Notification restored successfully.', 'success');
-        loadDashboardData();
-    }
-};
-
-window.permanentlyDeleteNotification = function(id) {
-    showConfirmModal(
-        'Delete notification',
-        'Do you want to permanently delete this notification?',
-        'danger',
-        () => {
-            let archives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
-            archives = archives.filter(a => String(a.id) !== String(id));
-            localStorage.setItem('notificationHistory', JSON.stringify(archives));
-            showStyledMessage('Notification permanently deleted.', 'success');
-            loadDashboardData();
-        }
-    );
-};
+// Redundant notification functions removed. Using centralized logic from notifications.js
 
 window.permanentlyDeleteEmail = function(id) {
     showConfirmModal(

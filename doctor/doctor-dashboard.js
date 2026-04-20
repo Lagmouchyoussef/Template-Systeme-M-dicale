@@ -1084,6 +1084,20 @@ window.handleRequest = function(requestId, newStatus) {
         allRequests[reqIndex].status = newStatus;
         localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
         
+        // Architect Sync: Notify Patient in real-time
+        if (window.MediSyncNotifications) {
+            const req = allRequests[reqIndex];
+            const doctorName = localStorage.getItem('userName') || 'Dr. Specialist';
+            const statusLabel = newStatus === 'accepted' ? 'confirmed' : 'declined';
+            const icon = newStatus === 'accepted' ? 'fa-check-circle' : 'fa-times-circle';
+            
+            window.MediSyncNotifications.push(
+                `${doctorName} has ${statusLabel} your appointment for ${req.date}`,
+                icon,
+                'patient'
+            );
+        }
+        
         if (newStatus === 'accepted') {
             // Add to confirmed appointments list for both (simulated via addPatientAppointment which we can just adapt)
             const req = allRequests[reqIndex];
@@ -1141,9 +1155,21 @@ window.rescheduleRequest = function(requestId) {
     req.time = newTime;
     // Keep it pending but update it, or accept it right away. 
     // Let's keep it pending so patient knows, or accept it with new time. Let's just accept it with new time for simplicity.
-    req.status = 'rescheduled'; 
+    req.time = newTime;
     localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
     
+    // Architect Sync: Notify Patient about reschedule
+    if (window.MediSyncNotifications) {
+        const doctorName = localStorage.getItem('userName') || 'Dr. Specialist';
+        window.MediSyncNotifications.push(
+            `${doctorName} has rescheduled your appointment to ${newDate} at ${newTime}`,
+            'fa-calendar-day',
+            'patient'
+        );
+    }
+    
+    showStyledMessage('Appointment rescheduled successfully.', 'success');
+    loadPendingRequests();
     const isValid = (val) => val && val !== 'undefined' && val !== 'null';
     const patientName = isValid(req.patientName) ? req.patientName : 
                        (isValid(req.patient) && typeof req.patient === 'string' ? req.patient : 
