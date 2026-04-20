@@ -1,19 +1,19 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
  * MediSync — sync.js
- * Fichier de synchronisation central entre Login, Patient et Doctor
+ * Central synchronization file between Login, Patient and Doctor
  * ═══════════════════════════════════════════════════════════════════
  *
- * Ce fichier gère :
- *  1. La session utilisateur (lecture / écriture / suppression)
- *  2. Les redirections sécurisées selon le rôle
- *  3. La mise à jour temps-réel de la sidebar (nom, avatar)
- *  4. Les données partagées : rendez-vous, invitations, emails
- *  5. Les helpers communs utilisés par toutes les pages
+ * This file handles:
+ *  1. User session (read / write / delete)
+ *  2. Secure redirections based on role
+ *  3. Real-time sidebar update (name, avatar)
+ *  4. Shared data: appointments, invitations, emails
+ *  5. Common helpers used by all pages
  */
 
 // ═══════════════════════════════════════════════════════════════════
-// 1. CLÉS DE SESSION (source unique de vérité)
+// 1. SESSION KEYS (single source of truth)
 // ═══════════════════════════════════════════════════════════════════
 const SESSION_KEYS = {
     role:      'userRole',
@@ -36,10 +36,10 @@ const DATA_KEYS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// 2. GESTION DE SESSION
+// 2. SESSION MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════
 
-/** Retourne l'objet session complet depuis le localStorage */
+/** Returns the complete session object from localStorage */
 function getSession() {
     return {
         role:      localStorage.getItem(SESSION_KEYS.role)      || null,
@@ -52,7 +52,7 @@ function getSession() {
     };
 }
 
-/** Écrit une session complète dans le localStorage */
+/** Writes a complete session to localStorage */
 function setSession(account) {
     const isValid = (v) => v !== undefined && v !== null && v !== 'undefined' && v !== 'null';
     
@@ -68,57 +68,68 @@ function setSession(account) {
     if (isValid(account.email)) localStorage.setItem(SESSION_KEYS.email, account.email);
 }
 
-/** Supprime toutes les clés de session (logout) */
+/** Deletes all session keys (logout) */
 function clearSession() {
     Object.values(SESSION_KEYS).forEach(key => {
-        if (key !== SESSION_KEYS.theme) { // garder le thème
+        if (key !== SESSION_KEYS.theme) { // keep theme
             localStorage.removeItem(key);
         }
     });
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 3. AUTH GUARD — redirection automatique selon le rôle
+// 3. AUTH GUARD — automatic redirection based on role
 // ═══════════════════════════════════════════════════════════════════
 
 /**
- * Protège une page : si le rôle ne correspond pas, redirige.
- * @param {'patient'|'medecin'} expectedRole
+ * Protects a page: if the role doesn't match, redirect.
+ * @param {'patient'|'doctor'} expectedRole
  */
 function requireRole(expectedRole) {
     const role = localStorage.getItem(SESSION_KEYS.role);
-    if (!role || role !== expectedRole) {
-        window.location.replace('/login');
+    if (!role || (role !== expectedRole && !(expectedRole === 'doctor' && role === 'medecin'))) {
+        window.location.replace(getRootPath() + 'login/index.html');
         return false;
     }
     return true;
 }
 
+/** Helper to get relative path to root */
+function getRootPath() {
+    const path = window.location.pathname;
+    // If we are in a subdirectory (doctor, patient, login), we need to go up one level
+    if (path.includes('/doctor/') || path.includes('/patient/') || path.includes('/login/')) {
+        return '../';
+    }
+    return './';
+}
+
 /**
- * Redirige vers le bon dashboard selon le rôle stocké.
- * Utilisé depuis la page de login après connexion réussie.
+ * Redirects to the correct dashboard based on stored role.
+ * Used from the login page after successful connection.
  */
 function redirectToDashboard(role) {
-    if (role === 'medecin') {
-        window.location.href = '/doctor/doctor-dashboard.html';
+    const root = getRootPath();
+    if (role === 'doctor' || role === 'medecin') {
+        window.location.href = root + 'doctor/doctor-dashboard.html';
     } else if (role === 'patient') {
-        window.location.href = '/patient/patient.html';
+        window.location.href = root + 'patient/patient.html';
     } else {
-        window.location.href = '/login';
+        window.location.href = root + 'login/index.html';
     }
 }
 
-/** Déconnexion : vide la session et retourne au login */
+/** Logout: clears the session and returns to login */
 function logout() {
     clearSession();
-    window.location.href = '/login';
+    window.location.href = getRootPath() + 'login/index.html';
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 4. SIDEBAR — mise à jour du nom et de l'avatar
+// 4. SIDEBAR — name and avatar update
 // ═══════════════════════════════════════════════════════════════════
 
-/** Met à jour le nom affiché dans la sidebar */
+/** Updates the name displayed in the sidebar */
 function syncSidebarName() {
     const session = getSession();
     const nameEl = document.querySelector('.patient-info h4, .doctor-info h4, .sidebar .user-name');
@@ -127,18 +138,18 @@ function syncSidebarName() {
     }
     const roleEl = document.querySelector('.patient-info p, .doctor-info p, .sidebar .user-email');
     if (roleEl && session.role) {
-        roleEl.textContent = session.role === 'medecin' ? 'Doctor Portal' : 'Patient Portal';
+        roleEl.textContent = (session.role === 'doctor' || session.role === 'medecin') ? 'Doctor Portal' : 'Patient Portal';
     }
 }
 
-/** Génère les initiales depuis le nom complet */
+/** Generates initials from full name */
 function getInitials(fullName) {
     if (!fullName) return '';
     const parts = fullName.trim().split(' ');
     return ((parts[0] ? parts[0].charAt(0) : '') + (parts[1] ? parts[1].charAt(0) : ''));
 }
 
-/** Met à jour l'avatar dans la sidebar (image ou initiales) */
+/** Updates the avatar in the sidebar (image or initials) */
 function syncSidebarAvatar() {
     const session = getSession();
     const avatarEl = document.querySelector('.avatar-img');
@@ -158,17 +169,17 @@ function syncSidebarAvatar() {
     }
 }
 
-/** Synchronise l'ensemble de la sidebar (nom + avatar) */
+/** Synchronizes the entire sidebar (name + avatar) */
 function syncSidebar() {
     syncSidebarName();
     syncSidebarAvatar();
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 5. DONNÉES PARTAGÉES — comptes, invitations, rendez-vous
+// 5. SHARED DATA — accounts, invitations, appointments
 // ═══════════════════════════════════════════════════════════════════
 
-// --- Comptes utilisateurs ---
+// --- User accounts ---
 function getAccounts() {
     return JSON.parse(localStorage.getItem(DATA_KEYS.accounts) || '[]');
 }
@@ -192,7 +203,7 @@ function createAccount(data) {
     return account;
 }
 
-// --- Annuaires (patients/médecins) ---
+// --- Directories (patients/doctors) ---
 function addToDirectory(account) {
     const name = `${account.firstName} ${account.lastName}`.trim();
     if (account.role === 'patient') {
@@ -218,7 +229,7 @@ function saveSentInvitations(list) {
     localStorage.setItem(DATA_KEYS.sentInvitations, JSON.stringify(list));
 }
 
-/** Retourne les invitations destinées à un patient spécifique */
+/** Returns invitations for a specific patient */
 function getPatientInvitations(patientId) {
     const key = `patient_${patientId}_invitations`;
     return JSON.parse(localStorage.getItem(key) || '[]');
@@ -228,7 +239,7 @@ function savePatientInvitations(patientId, list) {
     localStorage.setItem(key, JSON.stringify(list));
 }
 
-/** Met à jour le statut d'une invitation côté patient */
+/** Updates invitation status on patient side */
 function updateInvitationStatus(patientId, invitationId, newStatus) {
     let invitations = getPatientInvitations(patientId);
     invitations = invitations.map(inv =>
@@ -236,13 +247,13 @@ function updateInvitationStatus(patientId, invitationId, newStatus) {
     );
     savePatientInvitations(patientId, invitations);
 
-    // Si acceptée → ajouter aux rendez-vous du patient
+    // If accepted → add to patient appointments
     if (newStatus === 'accepted') {
         const inv = invitations.find(i => i.id === invitationId);
         if (inv) addPatientAppointment(inv);
     }
 
-    // Mettre à jour aussi la liste du docteur
+    // Also update doctor list
     let sent = getSentInvitations();
     sent = sent.map(inv =>
         inv.id === invitationId ? { ...inv, status: newStatus } : inv
@@ -250,7 +261,7 @@ function updateInvitationStatus(patientId, invitationId, newStatus) {
     saveSentInvitations(sent);
 }
 
-// --- Rendez-vous patient ---
+// --- Patient appointments ---
 function getPatientAppointments() {
     return JSON.parse(localStorage.getItem(DATA_KEYS.patientAppts) || '[]');
 }
@@ -279,7 +290,7 @@ function getEmailsForPatient(patientEmail) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 6. THÈME — synchronisé entre toutes les pages
+// 6. THEME — synchronized across all pages
 // ═══════════════════════════════════════════════════════════════════
 
 function applyTheme() {
@@ -305,7 +316,7 @@ function initThemeToggle() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 7. NOTIFICATIONS TOAST (partagé)
+// 7. TOAST NOTIFICATIONS (shared)
 // ═══════════════════════════════════════════════════════════════════
 
 function showToast(message, type = 'info', duration = 4000) {
@@ -344,13 +355,13 @@ function showToast(message, type = 'info', duration = 4000) {
     `;
     container.appendChild(toast);
 
-    // Animer l'entrée
+    // Animate entrance
     requestAnimationFrame(() => {
         toast.style.transform = 'translateX(0)';
         toast.style.opacity   = '1';
     });
 
-    // Auto-suppression
+    // Auto-remove
     if (duration > 0) {
         setTimeout(() => {
             toast.style.transform = 'translateX(120%)';
@@ -361,7 +372,7 @@ function showToast(message, type = 'info', duration = 4000) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 8. LOGOUT BUTTON — initialisation sur toutes les pages
+// 8. LOGOUT BUTTON — initialization on all pages
 // ═══════════════════════════════════════════════════════════════════
 
 function initLogoutButtons() {
@@ -374,7 +385,7 @@ function initLogoutButtons() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 9. AUTO-INIT — s'exécute sur toutes les pages qui chargent sync.js
+// 9. AUTO-INIT — runs on all pages that load sync.js
 // ═══════════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -383,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initLogoutButtons();
 
-    // Écouter les changements localStorage des autres onglets
+    // Listen for localStorage changes from other tabs
     window.addEventListener('storage', (e) => {
         if ([SESSION_KEYS.userName, SESSION_KEYS.firstName, SESSION_KEYS.lastName, SESSION_KEYS.avatar].includes(e.key)) {
             syncSidebar();

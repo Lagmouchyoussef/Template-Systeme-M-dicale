@@ -1,8 +1,8 @@
 // ── Auth Guard ─────────────────────────────────────────────────────────────
 (function() {
     const role = localStorage.getItem('userRole');
-    if (!role || role !== 'medecin') {
-        window.location.replace('/login');
+    if (!role || (role !== 'doctor' && role !== 'medecin')) {
+        window.location.replace('../login/index.html');
     }
 })();
 
@@ -889,7 +889,7 @@ function initConsultationModal() {
             emergencyBtn.classList.add('active');
             
             if (typeof showToast === 'function') {
-                showToast('Urgence activée', 'warning');
+                showToast('Emergency mode activated', 'warning');
             }
         });
     }

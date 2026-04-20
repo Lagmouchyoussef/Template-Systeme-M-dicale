@@ -68,7 +68,7 @@
         <main class="main-content">
              <header class="header">
                  <div>
-                     <h1>Archives & Historique</h1>
+                     <h1>Archives & History</h1>
                      <p class="user-info"></p>
                  </div>
                  <div class="header-actions">
@@ -90,19 +90,19 @@
              </header>
 
             <div class="history-content">
-                <!-- Archives - Mes Demandes de Consultation Section -->
+                <!-- Archives - My Consultation Requests Section -->
                 <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
                     <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2><i class="fas fa-calendar-times" style="color: #6c757d; margin-right: 10px;"></i> Archives - Mes Demandes <span class="pending-count" id="archives-requests-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                        <h2><i class="fas fa-calendar-times" style="color: #6c757d; margin-right: 10px;"></i> Archives - My Requests <span class="pending-count" id="archives-requests-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
                     </div>
                     
                     <div class="requests-table-container" style="overflow-x: auto;">
                         <table class="data-table" style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background: var(--bg-secondary); text-align: left;">
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Médecin</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Statut d'origine</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Doctor</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Original Status</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
@@ -110,26 +110,26 @@
                             </thead>
                             <tbody id="archives-requests-tbody">
                                 <tr>
-                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </section>
 
-                <!-- Archives - Invitations Reçues Section -->
+                <!-- Archives - Received Invitations Section -->
                 <section class="full-width-section" style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: var(--shadow); opacity: 0.9;">
                     <div class="section-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2><i class="fas fa-paper-plane" style="color: #6c757d; margin-right: 10px;"></i> Archives - Invitations Reçues <span class="pending-count" id="archives-invitations-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
+                        <h2><i class="fas fa-paper-plane" style="color: #6c757d; margin-right: 10px;"></i> Archives - Received Invitations <span class="pending-count" id="archives-invitations-count" style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 12px; font-size: 14px; margin-left: 10px;">0</span></h2>
                     </div>
                     
                     <div class="requests-table-container" style="overflow-x: auto;">
                         <table class="data-table" style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background: var(--bg-secondary); text-align: left;">
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Médecin</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Statut</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Doctor</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Status</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Notes</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
@@ -137,7 +137,7 @@
                             </thead>
                             <tbody id="archives-invitations-tbody">
                                 <tr>
-                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                    <td colspan="6" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -156,15 +156,15 @@
                         <table class="data-table" style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background: var(--bg-secondary); text-align: left;">
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type / Sujet</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Type / Subject</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Message</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="archives-notifications-tbody">
                                 <tr>
-                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -183,15 +183,15 @@
                         <table class="data-table" style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background: var(--bg-secondary); text-align: left;">
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Expéditeur</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Objet</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Heure</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Sender</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Subject</th>
+                                    <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Date & Time</th>
                                     <th style="padding: 12px; border-bottom: 2px solid var(--border-color);">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="archives-emails-tbody">
                                 <tr>
-                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Chargement des archives...</td>
+                                    <td colspan="4" class="text-center p-20" style="padding: 20px; text-align: center;">Loading archives...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -204,7 +204,7 @@
     <!-- Success Toast -->
     <div id="success-toast" class="toast success-toast" style="display: none;">
         <i class="fas fa-check-circle"></i>
-        <span>Changements enregistrés</span>
+        <span>Changes saved</span>
     </div>
 
     <script src="patient-dashboard.js"></script>

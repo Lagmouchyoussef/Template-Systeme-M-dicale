@@ -2,7 +2,7 @@
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        window.location.replace('/login');
+        window.location.replace('../login/index.html');
     }
 })();
 
@@ -111,6 +111,79 @@ function showStyledMessage(message, type = 'info', duration = 5000) {
         }, duration);
     }
 
+}
+
+/**
+ * Shows a custom confirmation modal
+ * @param {string} title Modal title
+ * @param {string} message Modal message
+ * @param {string} type 'danger' or 'info'
+ * @param {function} onConfirm Callback on confirm
+ */
+function showConfirmModal(title, message, type, onConfirm) {
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: var(--card-bg, #ffffff); border-radius: 12px;
+        padding: 24px; max-width: 400px; width: 90%;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transform: translateY(20px); transition: all 0.3s ease;
+        border: 1px solid var(--border-color, #e0e0e0);
+        color: var(--text-primary, #333);
+    `;
+    
+    const iconColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    const iconClass = type === 'danger' ? 'fa-exclamation-triangle' : 'fa-question-circle';
+    const confirmBtnColor = type === 'danger' ? '#dc3545' : 'var(--accent-color, #2da0a8)';
+    
+    card.innerHTML = `
+        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+            <i class="fas ${iconClass}" style="color: ${iconColor}; font-size: 24px; margin-right: 12px;"></i>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 600;">${title}</h3>
+        </div>
+        <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary, #666);">
+            ${message}
+        </p>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button id="modal-cancel-btn" style="
+                padding: 8px 16px; border: 1px solid var(--border-color, #ccc);
+                background: transparent; border-radius: 6px; cursor: pointer;
+                color: var(--text-primary, #333); font-weight: 500; transition: background 0.2s;
+            ">Cancel</button>
+            <button id="modal-confirm-btn" style="
+                padding: 8px 16px; border: none; background: ${confirmBtnColor};
+                color: white; border-radius: 6px; cursor: pointer; font-weight: 500;
+                transition: opacity 0.2s;
+            ">Confirm</button>
+        </div>
+    `;
+    
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+    
+    setTimeout(() => {
+        backdrop.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 10);
+    
+    const closeModal = () => {
+        backdrop.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => backdrop.remove(), 300);
+    };
+    
+    document.getElementById('modal-cancel-btn').onclick = closeModal;
+    document.getElementById('modal-confirm-btn').onclick = () => {
+        closeModal();
+        onConfirm();
+    };
 }
 
 
@@ -658,7 +731,7 @@ class AppointmentCalendar {
         if (countBadge) countBadge.textContent = activeInvitations.length;
 
         if (activeInvitations.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">Aucune invitation reçue pour le moment.</p>';
+            container.innerHTML = '<p style="color: var(--text-secondary); grid-column: 1/-1; text-align: center; padding: 20px;">No invitations received at the moment.</p>';
             return;
         }
 
@@ -677,12 +750,14 @@ class AppointmentCalendar {
                 const status = String(inv.status || 'pending').toLowerCase();
                 const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
                 const actionsHtml = status === 'pending' ? `
-                    <button onclick="window.calendarApp.acceptInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Accept</button>
-                    <button onclick="window.calendarApp.declineInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Decline</button>
+                    <button onclick="window.calendarApp.acceptInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #22c55e; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Accept</button>
+                    <button onclick="window.calendarApp.declineInvitation('${inv.id}')" style="flex: 1; padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Decline</button>
+                    <button onclick="window.calendarApp.deleteInvitation('${inv.id}')" style="padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete"><i class="fas fa-trash"></i></button>
                 ` : `
                     <div style="flex: 1; padding: 10px 12px; background: #f3f4f6; color: var(--text-secondary); border-radius: 4px; font-size: 13px; text-align: center;">
-                        Statut : ${statusLabel}
+                        Status: ${statusLabel}
                     </div>
+                    <button onclick="window.calendarApp.deleteInvitation('${inv.id}')" style="padding: 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;" title="Delete"><i class="fas fa-trash"></i></button>
                 `;
 
                 const card = document.createElement('div');
@@ -835,6 +910,38 @@ class AppointmentCalendar {
         }
     }
 
+    deleteInvitation(invitationId) {
+        showConfirmModal(
+            'Delete Invitation',
+            'Are you sure you want to delete this invitation? It will be moved to history.',
+            'danger',
+            () => {
+                const patientId = this.getCurrentPatientId();
+                const invitationsKey = `patient_${patientId}_invitations`;
+                let invitations = JSON.parse(localStorage.getItem(invitationsKey) || '[]');
+                const invIndex = invitations.findIndex(inv => inv.id === invitationId);
+                
+                if (invIndex !== -1) {
+                    const invitation = invitations[invIndex];
+                    invitation.status = invitation.status || 'cancelled';
+                    invitation.source = 'invitation';
+                    
+                    // Move to history
+                    let history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                    history.push(invitation);
+                    localStorage.setItem('appointmentHistory', JSON.stringify(history));
+                    
+                    // Remove from active
+                    invitations.splice(invIndex, 1);
+                    localStorage.setItem(invitationsKey, JSON.stringify(invitations));
+                    
+                    showStyledMessage('Invitation deleted and moved to history.', 'success');
+                    this.loadAppointmentInvitations();
+                }
+            }
+        );
+    }
+
     updateInvitationStatus(invitationId, newStatus) {
         const patientId = this.getCurrentPatientId();
         const invitationsKey = `patient_${patientId}_invitations`;
@@ -844,31 +951,36 @@ class AppointmentCalendar {
     }
 
     deleteAppointment(id) {
-        if (!confirm('Are you sure you want to delete this appointment? It will be moved to history.')) return;
+        showConfirmModal(
+            'Confirm Deletion',
+            'Are you sure you want to delete this appointment? It will be moved to history.',
+            'danger',
+            () => {
+                const requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
+                const confirmed = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
+                
+                let itemToArchive = requests.find(r => r.id === id) || confirmed.find(c => c.id === id);
+                
+                if (itemToArchive) {
+                    itemToArchive.status = 'cancelled';
+                    itemToArchive.source = itemToArchive.source || 'request';
+                    
+                    // Move to history
+                    let history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                    history.push(itemToArchive);
+                    localStorage.setItem('appointmentHistory', JSON.stringify(history));
+                    
+                    // Remove from active
+                    const newRequests = requests.filter(r => r.id !== id);
+                    const newConfirmed = confirmed.filter(c => c.id !== id);
+                    localStorage.setItem('appointmentRequests', JSON.stringify(newRequests));
+                    localStorage.setItem('doctorAppointments', JSON.stringify(newConfirmed));
 
-        const requests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
-        const confirmed = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
-        
-        let itemToArchive = requests.find(r => r.id === id) || confirmed.find(c => c.id === id);
-        
-        if (itemToArchive) {
-            itemToArchive.status = 'cancelled';
-            itemToArchive.source = itemToArchive.source || 'request';
-            
-            // Move to history
-            let history = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
-            history.push(itemToArchive);
-            localStorage.setItem('appointmentHistory', JSON.stringify(history));
-            
-            // Remove from active
-            const newRequests = requests.filter(r => r.id !== id);
-            const newConfirmed = confirmed.filter(c => c.id !== id);
-            localStorage.setItem('appointmentRequests', JSON.stringify(newRequests));
-            localStorage.setItem('doctorAppointments', JSON.stringify(newConfirmed));
-
-            showStyledMessage('Appointment moved to history.', 'success');
-            this.loaddoctorAppointments();
-        }
+                    showStyledMessage('Appointment moved to history.', 'success');
+                    this.loaddoctorAppointments();
+                }
+            }
+        );
     }
 }
 

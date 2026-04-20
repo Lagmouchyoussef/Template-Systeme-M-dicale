@@ -1,8 +1,8 @@
 // ── Auth Guard ─────────────────────────────────────────────────────────────
 (function() {
     const role = localStorage.getItem('userRole');
-    if (!role || role !== 'medecin') {
-        window.location.replace('/login');
+    if (!role || (role !== 'doctor' && role !== 'medecin')) {
+        window.location.replace('../login/index.html');
     }
 })();
 
@@ -273,7 +273,7 @@ async function loadDashboardData() {
         date: r.date,
         time: r.time,
         type: r.type || 'Consultation',
-        notes: isValid(r.reason) ? r.reason : (isValid(r.notes) ? r.notes : 'Aucun motif')
+        notes: isValid(r.reason) ? r.reason : (isValid(r.notes) ? r.notes : 'No reason provided')
     }));
     
     // Fetch and render Sent Invitations
@@ -324,11 +324,11 @@ function renderRequests(requests) {
         const statusBadge = `<span class="status-badge ${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span>`;
         
         let actions = `
-            ${r.status !== 'accepted' ? `<button class="action-btn accept" title="Accepter" onclick="handleAvailabilityRequest('${r.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
-            ${r.status !== 'declined' && r.status !== 'rejected' ? `<button class="action-btn reject" title="Refuser" onclick="handleAvailabilityRequest('${r.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
-            ${r.status !== 'pending' ? `<button class="action-btn" title="Mettre en attente" onclick="handleAvailabilityRequest('${r.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
-            <button class="action-btn reject" title="Supprimer" onclick="deleteAvailabilityRequest('${r.id}')"><i class="fas fa-trash"></i></button>
-            <button class="action-btn" title="Voir les détails" onclick="viewDetails('${r.id}', 'request')"><i class="fas fa-eye"></i></button>
+            ${r.status !== 'accepted' ? `<button class="action-btn accept" title="Accept" onclick="handleAvailabilityRequest('${r.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
+            ${r.status !== 'declined' && r.status !== 'rejected' ? `<button class="action-btn reject" title="Reject" onclick="handleAvailabilityRequest('${r.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
+            ${r.status !== 'pending' ? `<button class="action-btn" title="Set Pending" onclick="handleAvailabilityRequest('${r.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
+            <button class="action-btn reject" title="Delete" onclick="deleteAvailabilityRequest('${r.id}')"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" title="View Details" onclick="viewDetails('${r.id}', 'request')"><i class="fas fa-eye"></i></button>
         `;
         
         const tr = document.createElement('tr');
@@ -353,8 +353,8 @@ function renderCurrentAvailability(data) {
     tbody.innerHTML = '';
     
     const daysMap = {
-        'monday': 'Lundi', 'tuesday': 'Mardi', 'wednesday': 'Mercredi',
-        'thursday': 'Jeudi', 'friday': 'Vendredi', 'saturday': 'Samedi', 'sunday': 'Dimanche'
+        'monday': 'Monday', 'tuesday': 'Tuesday', 'wednesday': 'Wednesday',
+        'thursday': 'Thursday', 'friday': 'Friday', 'saturday': 'Saturday', 'sunday': 'Sunday'
     };
     
     Object.keys(daysMap).forEach(day => {
@@ -362,8 +362,8 @@ function renderCurrentAvailability(data) {
         const tr = document.createElement('tr');
         
         const statusBadge = isAvail 
-            ? `<span class="status-badge available">Disponible</span>` 
-            : `<span class="status-badge unavailable">Indisponible</span>`;
+            ? `<span class="status-badge available">Available</span>` 
+            : `<span class="status-badge unavailable">Unavailable</span>`;
             
         const timeStr = isAvail ? `${data.startTime} - ${data.endTime}` : '-';
         
@@ -401,11 +401,11 @@ window.handleAvailabilityRequest = function(requestId, newStatus) {
                 localStorage.setItem('doctorAppointments', JSON.stringify(doctorAppointments));
             }
             
-            showStyledMessage('Demande acceptée avec succès.', 'success');
+            showStyledMessage('Request successfully accepted.', 'success');
         } else if (newStatus === 'declined') {
-            showStyledMessage('Demande refusée.', 'info');
+            showStyledMessage('Request rejected.', 'info');
         } else if (newStatus === 'pending') {
-            showStyledMessage('Demande remise en attente.', 'info');
+            showStyledMessage('Request set back to pending.', 'info');
         }
         
         // Reload dashboard data on this page
@@ -415,8 +415,8 @@ window.handleAvailabilityRequest = function(requestId, newStatus) {
 
 window.deleteAvailabilityRequest = function(requestId) {
     showConfirmModal(
-        'Confirmer la suppression',
-        'Voulez-vous vraiment supprimer cette demande et l\'archiver dans l\'historique ?',
+        'Confirm Deletion',
+        'Are you sure you want to delete this appointment? It will be moved to history.',
         'danger',
         () => {
             let allRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
@@ -436,7 +436,7 @@ window.deleteAvailabilityRequest = function(requestId) {
                 allRequests.splice(reqIndex, 1);
                 localStorage.setItem('appointmentRequests', JSON.stringify(allRequests));
                 
-                showStyledMessage('Demande supprimée et archivée.', 'success');
+                showStyledMessage('Request deleted and archived.', 'success');
                 loadDashboardData();
             }
         }
@@ -480,12 +480,12 @@ function showConfirmModal(title, message, type, onConfirm) {
                 padding: 8px 16px; border: 1px solid var(--border-color, #ccc);
                 background: transparent; border-radius: 6px; cursor: pointer;
                 color: var(--text-primary, #333); font-weight: 500; transition: background 0.2s;
-            ">Annuler</button>
+            ">Cancel</button>
             <button id="modal-confirm-btn" style="
                 padding: 8px 16px; border: none; background: ${confirmBtnColor};
                 color: white; border-radius: 6px; cursor: pointer; font-weight: 500;
                 transition: opacity 0.2s;
-            ">Confirmer</button>
+            ">Confirm</button>
         </div>
     `;
     
@@ -521,29 +521,29 @@ function renderSentInvitations(invitations) {
     if (countEl) countEl.textContent = invitations.length;
     
     if (invitations.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4">Aucune invitation envoyée.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4">No invitations sent.</td></tr>`;
         return;
     }
     
     invitations.forEach(inv => {
         let statusBadge = '';
         switch(inv.status) {
-            case 'pending': statusBadge = `<span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: 500;">En attente</span>`; break;
-            case 'accepted': statusBadge = `<span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Acceptée</span>`; break;
-            case 'declined': statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Refusée</span>`; break;
+            case 'pending': statusBadge = `<span class="status-badge" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Pending</span>`; break;
+            case 'accepted': statusBadge = `<span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Accepted</span>`; break;
+            case 'declined': statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Declined</span>`; break;
             default: statusBadge = `<span class="status-badge">${inv.status}</span>`;
         }
         
         let actions = `
-            ${inv.status !== 'accepted' ? `<button class="action-btn accept" title="Marquer Acceptée" onclick="handleSentInvitation('${inv.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
-            ${inv.status !== 'declined' && inv.status !== 'rejected' ? `<button class="action-btn reject" title="Marquer Refusée" onclick="handleSentInvitation('${inv.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
-            ${inv.status !== 'pending' ? `<button class="action-btn" title="Remettre en attente" onclick="handleSentInvitation('${inv.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
-            <button class="action-btn reject" title="Supprimer" onclick="deleteSentInvitation('${inv.id}')"><i class="fas fa-trash"></i></button>
-            <button class="action-btn" title="Voir les détails" onclick="viewDetails('${inv.id}', 'invitation')"><i class="fas fa-eye"></i></button>
+            ${inv.status !== 'accepted' ? `<button class="action-btn accept" title="Mark Accepted" onclick="handleSentInvitation('${inv.id}', 'accepted')"><i class="fas fa-check"></i></button>` : ''}
+            ${inv.status !== 'declined' && inv.status !== 'rejected' ? `<button class="action-btn reject" title="Mark Declined" onclick="handleSentInvitation('${inv.id}', 'declined')"><i class="fas fa-times"></i></button>` : ''}
+            ${inv.status !== 'pending' ? `<button class="action-btn" title="Set Back to Pending" onclick="handleSentInvitation('${inv.id}', 'pending')"><i class="fas fa-clock"></i></button>` : ''}
+            <button class="action-btn reject" title="Delete" onclick="deleteSentInvitation('${inv.id}')"><i class="fas fa-trash"></i></button>
+            <button class="action-btn" title="View Details" onclick="viewDetails('${inv.id}', 'invitation')"><i class="fas fa-eye"></i></button>
         `;
         
         const tr = document.createElement('tr');
-        const pName = inv.patient ? inv.patient.name : (inv.patientName || 'Patient Inconnu');
+        const pName = inv.patient ? inv.patient.name : (inv.patientName || 'Unknown Patient');
         tr.innerHTML = `
             <td><strong>${pName}</strong></td>
             <td>${statusBadge}</td>
@@ -565,11 +565,11 @@ window.handleSentInvitation = function(invId, newStatus) {
         localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
         
         if (newStatus === 'accepted') {
-            showStyledMessage('Invitation marquée comme acceptée.', 'success');
+            showStyledMessage('Invitation marked as accepted.', 'success');
         } else if (newStatus === 'declined') {
-            showStyledMessage('Invitation marquée comme refusée.', 'info');
+            showStyledMessage('Invitation marked as declined.', 'info');
         } else if (newStatus === 'pending') {
-            showStyledMessage('Invitation remise en attente.', 'info');
+            showStyledMessage('Invitation set back to pending.', 'info');
         }
         
         loadDashboardData();
@@ -578,8 +578,8 @@ window.handleSentInvitation = function(invId, newStatus) {
 
 window.deleteSentInvitation = function(invId) {
     showConfirmModal(
-        'Confirmer la suppression',
-        'Voulez-vous vraiment supprimer cette invitation ?',
+        'Confirm Deletion',
+        'Are you sure you want to delete this appointment? It will be moved to history.',
         'danger',
         () => {
             let sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
@@ -598,7 +598,7 @@ window.deleteSentInvitation = function(invId) {
                 sentInvitations.splice(invIndex, 1);
                 localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
                 
-                showStyledMessage('Invitation supprimée et archivée.', 'success');
+                showStyledMessage('Invitation deleted and archived.', 'success');
                 loadDashboardData();
             }
         }
@@ -612,20 +612,20 @@ function renderCurrentAvailability(saved) {
     tbody.innerHTML = '';
     
     if (!saved || !saved.days || saved.days.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center p-20">Aucune disponibilité configurée.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center p-20">No availability configured.</td></tr>`;
         return;
     }
     
     const daysMap = {
-        'monday': 'Lundi', 'tuesday': 'Mardi', 'wednesday': 'Mercredi',
-        'thursday': 'Jeudi', 'friday': 'Vendredi', 'saturday': 'Samedi', 'sunday': 'Dimanche'
+        'monday': 'Monday', 'tuesday': 'Tuesday', 'wednesday': 'Wednesday',
+        'thursday': 'Thursday', 'friday': 'Friday', 'saturday': 'Saturday', 'sunday': 'Sunday'
     };
     
     saved.days.forEach(day => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${daysMap[day] || day}</strong></td>
-            <td><span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Disponible</span></td>
+            <td><span class="status-badge" style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Available</span></td>
             <td>${saved.startTime} - ${saved.endTime}</td>
         `;
         tbody.appendChild(tr);
@@ -645,16 +645,16 @@ window.viewDetails = function(id, source) {
     const item = list.find(i => String(i.id) === String(id));
     if (!item) return;
 
-    const pName = item.patient ? item.patient.name : (item.patientName || 'Patient Inconnu');
+    const pName = item.patient ? item.patient.name : (item.patientName || 'Unknown Patient');
     const pEmail = item.email || (item.patient && item.patient.email) || '-';
     const pPhone = item.phone || (item.patient && item.patient.phone) || '-';
     
-    const title = source === 'request' ? 'Détails de la Demande' : (source === 'invitation' ? 'Détails de l\'Invitation' : 'Détails de l\'Archive');
+    const title = source === 'request' ? 'Request Details' : (source === 'invitation' ? 'Invitation Details' : 'Archive Details');
     const typeLabel = item.type || 'Consultation';
-    const statusLabel = item.status === 'pending' ? 'En attente' : (item.status === 'accepted' ? 'Acceptée' : (item.status === 'declined' || item.status === 'rejected' ? 'Refusée' : (item.status === 'cancelled' ? 'Annulée' : item.status)));
+    const statusLabel = item.status === 'pending' ? 'Pending' : (item.status === 'accepted' ? 'Accepted' : (item.status === 'declined' || item.status === 'rejected' ? 'Declined' : (item.status === 'cancelled' ? 'Cancelled' : item.status)));
     const dateLabel = item.date || '-';
     const timeLabel = item.time || '-';
-    const notesLabel = item.notes || item.reason || 'Aucune note supplémentaire';
+    const notesLabel = item.notes || item.reason || 'No additional notes';
 
     const backdrop = document.createElement('div');
     backdrop.style.cssText = `
@@ -693,12 +693,12 @@ window.viewDetails = function(id, source) {
                 <span style="flex: 1;">${pEmail} <br> ${pPhone}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-                <strong style="color: var(--text-secondary); width: 120px;">Statut:</strong> 
+                <strong style="color: var(--text-secondary); width: 120px;">Status:</strong> 
                 <span style="flex: 1; font-weight: 600; color: var(--accent-color);">${statusLabel}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-                <strong style="color: var(--text-secondary); width: 120px;">Date & Heure:</strong> 
-                <span style="flex: 1;">${dateLabel} à ${timeLabel}</span>
+                <strong style="color: var(--text-secondary); width: 120px;">Date & Time:</strong> 
+                <span style="flex: 1;">${dateLabel} at ${timeLabel}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <strong style="color: var(--text-secondary); width: 120px;">Type:</strong> 
@@ -715,7 +715,7 @@ window.viewDetails = function(id, source) {
                 padding: 10px 20px; border: none; background: var(--accent-color);
                 color: white; border-radius: 6px; cursor: pointer; font-weight: 600;
                 transition: opacity 0.2s;
-            ">Fermer</button>
+            ">Close</button>
         </div>
     `;
     

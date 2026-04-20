@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h1>📜 Javascript</h1>
-        <p class="subtitle">📊 Dashboard Inteligente: 14 funciones detectadas</p>
+        <p class="subtitle">📊 Smart Dashboard: 14 functions detected</p>
         <div class="grid">
             <div class="card">
                 <div class="card-header">
@@ -17,7 +17,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>to()</h3>
-                <button onclick="demo_to()">▶️ Ejecutar</button>
+                <button onclick="demo_to()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -25,7 +25,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>showStyledMessage()</h3>
-                <button onclick="demo_showStyledMessage()">▶️ Ejecutar</button>
+                <button onclick="demo_showStyledMessage()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -33,7 +33,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>buildSlotsFromStoredAvailability()</h3>
-                <button onclick="demo_buildSlotsFromStoredAvailability()">▶️ Ejecutar</button>
+                <button onclick="demo_buildSlotsFromStoredAvailability()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -41,7 +41,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>slots()</h3>
-                <button onclick="demo_slots()">▶️ Ejecutar</button>
+                <button onclick="demo_slots()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -49,7 +49,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>getDoctorName()</h3>
-                <button onclick="demo_getDoctorName()">▶️ Ejecutar</button>
+                <button onclick="demo_getDoctorName()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -57,7 +57,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>patientName()</h3>
-                <button onclick="demo_patientName()">▶️ Ejecutar</button>
+                <button onclick="demo_patientName()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -65,7 +65,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>patientEmail()</h3>
-                <button onclick="demo_patientEmail()">▶️ Ejecutar</button>
+                <button onclick="demo_patientEmail()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -73,7 +73,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>reqName()</h3>
-                <button onclick="demo_reqName()">▶️ Ejecutar</button>
+                <button onclick="demo_reqName()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -81,7 +81,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>reqEmail()</h3>
-                <button onclick="demo_reqEmail()">▶️ Ejecutar</button>
+                <button onclick="demo_reqEmail()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -89,7 +89,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>appName()</h3>
-                <button onclick="demo_appName()">▶️ Ejecutar</button>
+                <button onclick="demo_appName()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -97,7 +97,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>appEmail()</h3>
-                <button onclick="demo_appEmail()">▶️ Ejecutar</button>
+                <button onclick="demo_appEmail()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -105,7 +105,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>getDoctorName()</h3>
-                <button onclick="demo_getDoctorName()">▶️ Ejecutar</button>
+                <button onclick="demo_getDoctorName()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -113,7 +113,7 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>loadAvatar()</h3>
-                <button onclick="demo_loadAvatar()">▶️ Ejecutar</button>
+                <button onclick="demo_loadAvatar()">▶️ Execute</button>
             </div>
             <div class="card">
                 <div class="card-header">
@@ -121,21 +121,21 @@
                     <span class="icon">📜</span>
                 </div>
                 <h3>updateAvatarDisplay()</h3>
-                <button onclick="demo_updateAvatarDisplay()">▶️ Ejecutar</button>
+                <button onclick="demo_updateAvatarDisplay()">▶️ Execute</button>
             </div>
         </div>
 
         <div id="order-history-section" class="card" style="margin-top: 40px; width: 100%; max-width: 1000px;">
-            <h2>📜 Historial de Pedidos Recientes</h2>
+            <h2>📜 Recent Order History</h2>
             <div id="order-history-list">
-                <p>No hay pedidos registrados aún.</p>
+                <p>No orders recorded yet.</p>
             </div>
-            <button onclick="MockServer.clear('orders')" style="background: #ef4444; margin-top: 20px;">🗑️ Borrar Historial</button>
+            <button onclick="MockServer.clear('orders')" style="background: #ef4444; margin-top: 20px;">🗑️ Clear History</button>
         </div>
     </div>
     <script src="script.js"></script>
     <script>
-        console.log('📜 Javascript: 14 funciones cargadas');
+        console.log('📜 Javascript: 14 functions loaded');
     </script>
 </body>
 </html>

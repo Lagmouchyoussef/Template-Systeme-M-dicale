@@ -2,12 +2,15 @@
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        globalThis.location.replace('/login');
+        globalThis.location.replace('../login/index.html');
     }
 })();
 
 // ── Global Variables ────────────────────────────────────────────────────────
 let currentPatientData = null;
+let trendsChart = null;
+let overviewChart = null;
+let specialtiesChart = null;
 
 // ── Theme Management ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,9 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize dashboard
     initializeDashboard();
-    loadAvatar();
-    updateSidebar();
-
+    syncSidebar();
+    
     // Listen for data changes
     globalThis.addEventListener('storage', handleStorageChange);
 });
@@ -57,6 +59,7 @@ function handleStorageChange(e) {
         // Refresh dashboard data
         setTimeout(() => {
             loadDashboardData();
+            initializeCharts();
         }, 100);
     }
 }
@@ -69,7 +72,8 @@ function initializeDashboard() {
 }
 
 function setupEventListeners() {
-    // Add any additional event listeners here
+    setActiveSidebarItem();
+    initSidebarNavigation();
 }
 
 // ── Data Loading Functions ──────────────────────────────────────────────────
@@ -84,39 +88,44 @@ function loadDashboardData() {
     const confirmedAppointments = JSON.parse(localStorage.getItem('doctorAppointments') || '[]');
     const appointmentRequests = JSON.parse(localStorage.getItem('appointmentRequests') || '[]');
     const patientInvitations = JSON.parse(localStorage.getItem(`patient_${patientId}_invitations`) || '[]');
+    const appointmentHistory = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
 
     // Filter data for current patient
     const patientAppointments = filterPatientData(confirmedAppointments, patientId, patientName, patientEmail);
     const patientRequests = filterPatientData(appointmentRequests, patientId, patientName, patientEmail);
+    const patientHistory = filterPatientData(appointmentHistory, patientId, patientName, patientEmail);
     const activeInvitations = patientInvitations.filter(inv => !['declined', 'cancelled'].includes(inv.status));
+
+    const allPatientAppointments = [...patientAppointments, ...patientHistory, ...patientRequests];
 
     // Update dashboard
     updateWelcomeSection(patientName);
-    updateKeyMetrics(patientAppointments, patientRequests, activeInvitations);
-    updateAppointmentStatistics(patientAppointments);
-    updateSpecialtyBreakdown(patientAppointments);
+    updateKeyMetrics(patientAppointments, patientHistory, patientRequests, activeInvitations);
+    updateAppointmentStatistics(allPatientAppointments);
+    updateSpecialtyBreakdown(allPatientAppointments);
     updateUpcomingAppointments(patientAppointments, patientRequests);
-    updateRecentActivity(patientAppointments, patientRequests);
-    updateDoctorsList(patientAppointments);
+    updateRecentActivity(allPatientAppointments, []); // allPatientAppointments already contains requests
+    updateDoctorsList(allPatientAppointments);
     updatePendingInvitations(activeInvitations);
 
     // Store for charts
     currentPatientData = {
-        appointments: patientAppointments,
+        appointments: allPatientAppointments,
         requests: patientRequests,
-        invitations: activeInvitations
+        invitations: activeInvitations,
+        history: patientHistory
     };
 }
 
 function filterPatientData(data, patientId, patientName, patientEmail) {
     return data.filter(item => {
-        const itemId = item.patientId || item.userId || '';
-        const itemName = (item.patientName || item.name || '').toLowerCase();
-        const itemEmail = (item.patientEmail || item.email || '').toLowerCase();
+        const itemId = item.patientId || item.userId || (item.patient && (item.patient.id || item.patient.userId)) || '';
+        const itemName = (item.patientName || item.name || (item.patient && item.patient.name) || '').toLowerCase();
+        const itemEmail = (item.patientEmail || item.email || (item.patient && item.patient.email) || '').toLowerCase();
 
-        return itemId === patientId ||
-               itemName.includes(patientName.toLowerCase()) ||
-               itemEmail === patientEmail.toLowerCase();
+        return (itemId && String(itemId) === String(patientId)) ||
+               (itemName && itemName.includes(patientName.toLowerCase())) ||
+               (itemEmail && itemEmail === patientEmail.toLowerCase());
     });
 }
 
@@ -128,7 +137,8 @@ function updateWelcomeSection(patientName) {
     }
 }
 
-function updateKeyMetrics(appointments, requests, invitations) {
+function updateKeyMetrics(appointments, history, requests, invitations) {
+    const allAppointments = [...appointments, ...history];
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -146,12 +156,12 @@ function updateKeyMetrics(appointments, requests, invitations) {
     });
 
     // Calculate metrics
-    const totalAppointments = appointments.length;
-    const doctorsCount = new Set(appointments.map(apt => apt.doctorName || apt.doctor)).size;
+    const totalAppointments = allAppointments.length;
+    const doctorsCount = new Set(allAppointments.map(apt => apt.doctorName || apt.doctor)).size;
     const pendingInvitations = invitations.filter(inv => inv.status === 'pending').length;
 
     // Calculate health score (simple algorithm based on appointment regularity)
-    const healthScore = calculateHealthScore(appointments, requests);
+    const healthScore = calculateHealthScore(allAppointments, requests);
 
     // Update DOM
     updateElement('today-appointments', todayAppointments.length);
@@ -218,7 +228,7 @@ function updateTrends(appointments) {
     const appointmentsTrend = document.getElementById('appointments-trend');
 
     if (appointmentsTrend) {
-        appointmentsTrend.innerHTML = `<i class="fas fa-arrow-${appointmentsChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(appointmentsChange)} ce mois`;
+        appointmentsTrend.innerHTML = `<i class="fas fa-arrow-${appointmentsChange >= 0 ? 'up' : 'down'}"></i> ${Math.abs(appointmentsChange)} this month`;
         appointmentsTrend.className = `metric-trend ${appointmentsChange >= 0 ? 'positive' : 'negative'}`;
     }
 }
@@ -326,10 +336,10 @@ function updateUpcomingAppointments(appointments, requests) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-calendar-plus"></i>
-                <h3>Aucun rendez-vous à venir</h3>
-                <p>Prenez rendez-vous avec un médecin pour commencer votre suivi médical.</p>
+                <h3>No upcoming appointments</h3>
+                <p>Schedule an appointment with a doctor to start your medical follow-up.</p>
                 <button class="btn-primary" onclick="window.location.href='appointments.html'">
-                    Prendre rendez-vous
+                    Schedule Appointment
                 </button>
             </div>
         `;
@@ -341,15 +351,15 @@ function updateUpcomingAppointments(appointments, requests) {
 
 function createAppointmentCard(item) {
     const isConfirmed = item.status === 'confirmed' || item.status === 'completed';
-    const doctorName = item.doctorName || item.doctor || 'Médecin non spécifié';
+    const doctorName = item.doctorName || item.doctor || 'Doctor not specified';
     const appointmentDate = new Date(item.date);
-    const formattedDate = appointmentDate.toLocaleDateString('fr-FR', {
+    const formattedDate = appointmentDate.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
-    const time = item.time || 'Heure non spécifiée';
+    const time = item.time || 'Time not specified';
     const type = item.type || item.specialty || 'Consultation';
 
     return `
@@ -365,7 +375,7 @@ function createAppointmentCard(item) {
                     </div>
                 </div>
                 <div class="appointment-status ${isConfirmed ? 'confirmed' : 'pending'}">
-                    ${isConfirmed ? 'Confirmé' : 'En attente'}
+                    ${isConfirmed ? 'Confirmed' : 'Pending'}
                 </div>
             </div>
             <div class="appointment-details">
@@ -394,8 +404,8 @@ function updateRecentActivity(appointments, requests) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-history"></i>
-                <h3>Aucune activité récente</h3>
-                <p>Vos activités médicales apparaîtront ici une fois que vous commencerez à utiliser la plateforme.</p>
+                <h3>No recent activity</h3>
+                <p>Your medical activities will appear here once you start using the platform.</p>
             </div>
         `;
         return;
@@ -406,13 +416,13 @@ function updateRecentActivity(appointments, requests) {
 
 function createActivityItem(item) {
     const date = new Date(item.date || item.requestDate);
-    const formattedDate = date.toLocaleDateString('fr-FR', {
+    const formattedDate = date.toLocaleDateString('en-US', {
         day: 'numeric',
         month: 'short'
     });
 
     const isAppointment = item.status && ['confirmed', 'completed', 'cancelled'].includes(item.status);
-    const doctorName = item.doctorName || item.doctor || 'Médecin';
+    const doctorName = item.doctorName || item.doctor || 'Doctor';
     const type = item.type || 'Consultation';
 
     let icon, title, description;
@@ -420,20 +430,20 @@ function createActivityItem(item) {
     if (isAppointment) {
         if (item.status === 'completed') {
             icon = 'fas fa-check-circle';
-            title = `Rendez-vous terminé avec ${doctorName}`;
+            title = `Appointment completed with ${doctorName}`;
             description = `${type} - ${formattedDate}`;
         } else if (item.status === 'confirmed') {
             icon = 'fas fa-calendar-check';
-            title = `Rendez-vous confirmé avec ${doctorName}`;
+            title = `Appointment confirmed with ${doctorName}`;
             description = `${type} - ${formattedDate}`;
         } else {
             icon = 'fas fa-times-circle';
-            title = `Rendez-vous annulé avec ${doctorName}`;
+            title = `Appointment cancelled with ${doctorName}`;
             description = `${type} - ${formattedDate}`;
         }
     } else {
         icon = 'fas fa-envelope';
-        title = `Demande de rendez-vous envoyée à ${doctorName}`;
+        title = `Appointment request sent to ${doctorName}`;
         description = `${type} - ${formattedDate}`;
     }
 
@@ -459,11 +469,11 @@ function updateDoctorsList(appointments) {
 
     appointments.forEach(apt => {
         const doctorName = apt.doctorName || apt.doctor;
-        if (doctorName && doctorName !== 'Médecin non spécifié') {
+        if (doctorName && doctorName !== 'Doctor not specified') {
             if (!doctorsMap.has(doctorName)) {
                 doctorsMap.set(doctorName, {
                     name: doctorName,
-                    specialty: apt.specialty || apt.type || 'Médecin généraliste',
+                    specialty: apt.specialty || apt.type || 'General Medicine',
                     appointmentsCount: 0,
                     lastAppointment: null
                 });
@@ -485,8 +495,8 @@ function updateDoctorsList(appointments) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-user-md"></i>
-                <h3>Aucun médecin consulté</h3>
-                <p>Commencez par prendre rendez-vous avec un médecin pour établir votre réseau médical.</p>
+                <h3>No doctors consulted</h3>
+                <p>Start by scheduling an appointment with a doctor to establish your medical network.</p>
             </div>
         `;
         return;
@@ -497,23 +507,23 @@ function updateDoctorsList(appointments) {
 
 function createDoctorCard(doctor) {
     const lastAppointment = doctor.lastAppointment ?
-        new Date(doctor.lastAppointment).toLocaleDateString('fr-FR', {
+        new Date(doctor.lastAppointment).toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'
-        }) : 'Jamais';
+        }) : 'Never';
 
     return `
-        <div class="doctor-card">
-            <div class="doctor-avatar">
+        <div class="premium-doctor-card">
+            <div class="premium-doctor-avatar">
                 ${doctor.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </div>
-            <div class="doctor-info">
+            <div class="premium-doctor-info">
                 <h4>${doctor.name}</h4>
-                <p class="doctor-specialty">${doctor.specialty}</p>
-                <div class="doctor-stats">
-                    <span><i class="fas fa-calendar"></i> ${doctor.appointmentsCount} rendez-vous</span>
-                    <span><i class="fas fa-clock"></i> Dernier: ${lastAppointment}</span>
+                <p class="premium-doctor-specialty">${doctor.specialty}</p>
+                <div class="premium-doctor-stats">
+                    <span><i class="fas fa-calendar-alt"></i> ${doctor.appointmentsCount} appointment${doctor.appointmentsCount !== 1 ? 's' : ''}</span>
+                    <span><i class="fas fa-clock"></i> Last: ${lastAppointment}</span>
                 </div>
             </div>
         </div>
@@ -552,9 +562,9 @@ function updatePendingInvitations(invitations) {
 }
 
 function createInvitationCard(invitation) {
-    const doctorName = invitation.doctor?.name || 'Médecin';
+    const doctorName = invitation.doctor?.name || 'Doctor';
     const appointmentDate = new Date(invitation.date);
-    const formattedDate = appointmentDate.toLocaleDateString('fr-FR', {
+    const formattedDate = appointmentDate.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -574,7 +584,7 @@ function createInvitationCard(invitation) {
                     </div>
                 </div>
                 <div class="invitation-status pending">
-                    En attente
+                    Pending
                 </div>
             </div>
             <div class="invitation-details">
@@ -584,15 +594,15 @@ function createInvitationCard(invitation) {
                 </div>
                 <div class="detail-item">
                     <i class="fas fa-clock"></i>
-                    <span>${invitation.time || 'Heure à confirmer'}</span>
+                    <span>${invitation.time || 'Time to confirm'}</span>
                 </div>
             </div>
             <div class="invitation-actions">
                 <button class="btn-accept" onclick="acceptInvitation('${invitation.id}')">
-                    <i class="fas fa-check"></i> Accepter
+                    <i class="fas fa-check"></i> Accept
                 </button>
                 <button class="btn-decline" onclick="declineInvitation('${invitation.id}')">
-                    <i class="fas fa-times"></i> Refuser
+                    <i class="fas fa-times"></i> Decline
                 </button>
             </div>
         </div>
@@ -602,13 +612,13 @@ function createInvitationCard(invitation) {
 // ── Invitation Management ───────────────────────────────────────────────────
 function acceptInvitation(invitationId) {
     updateInvitationStatus(invitationId, 'accepted');
-    showNotification('Invitation acceptée avec succès !', 'success');
+    showNotification('Invitation accepted successfully!', 'success');
     loadDashboardData();
 }
 
 function declineInvitation(invitationId) {
     updateInvitationStatus(invitationId, 'declined');
-    showNotification('Invitation refusée.', 'info');
+    showNotification('Invitation declined.', 'info');
     loadDashboardData();
 }
 
@@ -662,7 +672,6 @@ function initializeCharts() {
     setTimeout(() => {
         if (currentPatientData) {
             createAppointmentsChart();
-            createHealthOverviewChart();
             createSpecialtiesChart();
         }
     }, 500);
@@ -722,7 +731,11 @@ function createAppointmentsChart() {
         });
     }
 
-    new Chart(ctx, {
+    if (trendsChart) {
+        trendsChart.destroy();
+    }
+
+    trendsChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -758,126 +771,12 @@ function createAppointmentsChart() {
     });
 }
 
-function createHealthOverviewChart() {
-    const ctx = document.getElementById('healthOverviewChart');
-    if (!ctx || !currentPatientData) return;
 
-    const appointments = currentPatientData.appointments;
-    const now = new Date();
 
-    // Calculate health scores for the last 12 months
-    const healthScores = [];
-    const months = [];
 
-    for (let i = 11; i >= 0; i--) {
-        const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthName = targetDate.toLocaleDateString('en-US', { month: 'short' });
-        months.push(monthName);
 
-        // Calculate health score for this month
-        const monthScore = calculateMonthlyHealthScore(appointments, targetDate);
-        healthScores.push(monthScore);
-    }
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [{
-                label: 'Health Score',
-                data: healthScores,
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#28a745',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `Health Score: ${context.parsed.y}%`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    min: 0,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
 
-function calculateMonthlyHealthScore(appointments, targetMonth) {
-    const monthStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
-    const monthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
-
-    // Get appointments for this month
-    const monthAppointments = appointments.filter(apt => {
-        const aptDate = new Date(apt.date);
-        return aptDate >= monthStart && aptDate <= monthEnd;
-    });
-
-    // Base score
-    let score = 50;
-
-    // Factor 1: Number of appointments (regular check-ups are good)
-    if (monthAppointments.length > 0) {
-        score += Math.min(monthAppointments.length * 8, 25); // Max 25 points for appointments
-    }
-
-    // Factor 2: Diversity of specialties (seeing different specialists shows comprehensive care)
-    const specialties = new Set(monthAppointments.map(apt => apt.specialty || apt.type));
-    score += Math.min(specialties.size * 5, 15); // Max 15 points for specialty diversity
-
-    // Factor 3: Different doctors (building relationships with healthcare providers)
-    const doctors = new Set(monthAppointments.map(apt => apt.doctorName || apt.doctor));
-    score += Math.min(doctors.size * 3, 10); // Max 10 points for doctor diversity
-
-    // Factor 4: Preventive care (regular check-ups vs emergency visits)
-    const preventiveTypes = ['check-up', 'consultation', 'follow-up', 'general'];
-    const preventiveAppointments = monthAppointments.filter(apt =>
-        preventiveTypes.some(type => (apt.type || '').toLowerCase().includes(type))
-    );
-    if (monthAppointments.length > 0) {
-        const preventiveRatio = preventiveAppointments.length / monthAppointments.length;
-        score += preventiveRatio * 10; // Max 10 points for preventive care
-    }
-
-    // Factor 5: Consistency with previous months (trend analysis)
-    const previousMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() - 1, 1);
-    const prevMonthAppointments = appointments.filter(apt => {
-        const aptDate = new Date(apt.date);
-        return aptDate >= previousMonth && aptDate < monthStart;
-    });
-
-    if (prevMonthAppointments.length > 0 && monthAppointments.length > prevMonthAppointments.length) {
-        score += 5; // Bonus for increasing healthcare engagement
-    }
-
-    // Ensure score is within bounds
-    return Math.max(0, Math.min(100, Math.round(score)));
-}
 
 function createSpecialtiesChart() {
     const ctx = document.getElementById('specialtyChart');
@@ -916,7 +815,11 @@ function createSpecialtiesChart() {
     const backgroundColors = labels.map(label => specialtyColors[label] || '#95a5a6');
     const borderColors = backgroundColors.map(color => color);
 
-    new Chart(ctx, {
+    if (specialtiesChart) {
+        specialtiesChart.destroy();
+    }
+
+    specialtiesChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
@@ -1017,7 +920,12 @@ function updateElement(id, value) {
 }
 
 function showNotification(message, type = 'info') {
-    // Create notification element
+    // Check if sync.js showToast is available
+    if (typeof showToast === 'function') {
+        showToast(message, type);
+        return;
+    }
+    // Fallback to internal notification
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
 
@@ -1071,50 +979,64 @@ function showNotification(message, type = 'info') {
 }
 
 // ── Sidebar Management ──────────────────────────────────────────────────────
+function setActiveSidebarItem() {
+    const path = window.location.pathname;
+    let activePage = 'dashboard';
+
+    if (path.includes('appointments.html')) {
+        activePage = 'appointments';
+    } else if (path.includes('history.html')) {
+        activePage = 'history';
+    } else if (path.includes('settings.html')) {
+        activePage = 'settings';
+    }
+
+    const items = document.querySelectorAll('.sidebar-menu .nav-item');
+    items.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === activePage) {
+            item.classList.add('active');
+        }
+    });
+}
+
+function initSidebarNavigation() {
+    const menuItems = document.querySelectorAll('.sidebar-menu .nav-item');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const targetPage = this.getAttribute('data-page');
+            if (!targetPage) return;
+
+            switch (targetPage) {
+                case 'dashboard':
+                    window.location.href = 'patient.html';
+                    break;
+                case 'appointments':
+                    window.location.href = 'appointments.html';
+                    break;
+                case 'history':
+                    window.location.href = 'history.html';
+                    break;
+                case 'settings':
+                    window.location.href = 'settings.html';
+                    break;
+                default:
+                    console.warn('Unknown page:', targetPage);
+            }
+        });
+    });
+}
+
+// ── Avatar Management (Legacy support, though sync.js is preferred) ──────────
 function loadAvatar() {
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
+    if (typeof syncSidebarAvatar === 'function') {
+        syncSidebarAvatar();
     }
 }
 
 function updateSidebar() {
-    const userName = localStorage.getItem('userName') || '';
-    const sidebarName = document.querySelector('.patient-info h4');
-    if (sidebarName) {
-        sidebarName.textContent = userName;
-    }
-
-    const avatarContainer = document.querySelector('.avatar-img');
-    if (avatarContainer) {
-        updateAvatarDisplay(avatarContainer);
-    }
-}
-
-function updateAvatarDisplay(avatarContainer) {
-    const savedImage = localStorage.getItem('userAvatar');
-
-    avatarContainer.innerHTML = '';
-
-    if (savedImage) {
-        const img = document.createElement('img');
-        img.src = savedImage;
-        img.alt = 'Avatar';
-        img.onload = () => {
-            img.style.display = 'block';
-        };
-        avatarContainer.appendChild(img);
-    } else {
-        const userName = localStorage.getItem('userName') || '';
-        const nameParts = userName.split(' ');
-        const firstName = nameParts[0] || '';
-        const lastName = nameParts[1] || '';
-        let initials = firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
-        if (!initials.trim()) initials = '';
-
-        const span = document.createElement('span');
-        span.textContent = initials;
-        avatarContainer.appendChild(span);
+    if (typeof syncSidebar === 'function') {
+        syncSidebar();
     }
 }
 
@@ -1122,13 +1044,17 @@ function updateAvatarDisplay(avatarContainer) {
 const logoutBtn = document.querySelector('.logout-btn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', function() {
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('firstName');
-        localStorage.removeItem('lastName');
-        localStorage.removeItem('email');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userAvatar');
-        globalThis.location.replace('/login');
+        if (typeof logout === 'function') {
+            logout();
+        } else {
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('firstName');
+            localStorage.removeItem('lastName');
+            localStorage.removeItem('email');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userAvatar');
+            globalThis.location.replace('../login/index.html');
+        }
     });
 }

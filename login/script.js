@@ -119,11 +119,11 @@ loginBtn.addEventListener("click", () => {
   container.classList.remove("active");
 });
 
-// Les fonctions getAccounts, saveAccounts, applySession et addToDirectory 
-// ont été déplacées vers le fichier de synchronisation central (sync.js)
+// The getAccounts, saveAccounts, applySession and addToDirectory 
+// functions have been moved to the central synchronization file (sync.js)
 
 
-// ── Inscription (Sign Up) ───────────────────────────────────────────────────
+// ── Sign Up ───────────────────────────────────────────────────
 document.querySelector('.sign-up form').addEventListener('submit', (e) => {
   e.preventDefault();
   const firstName = document.getElementById('signup-firstname').value.trim();
@@ -160,7 +160,7 @@ document.querySelector('.sign-up form').addEventListener('submit', (e) => {
   }, 600);
 });
 
-// ── Connexion (Sign In) ──────────────────────────────────────────────────────
+// ── Sign In ──────────────────────────────────────────────────────
 document.querySelector('.sign-in form').addEventListener('submit', (e) => {
   e.preventDefault();
   const email    = document.getElementById('signin-email').value.trim().toLowerCase();

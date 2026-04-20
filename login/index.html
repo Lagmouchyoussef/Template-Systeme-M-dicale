@@ -14,17 +14,17 @@
   </head>
 
   <body>
-    <!-- Conteneur principal (Sign In affiché par défaut, pas de classe 'active') -->
+    <!-- Main Container (Sign In displayed by default, no 'active' class) -->
 
     <div class="container" id="container">
 
-      <!-- ── Formulaire Sign Up ─────────────────────── -->
+      <!-- ── Sign Up Form ─────────────────────── -->
       <div class="form-container sign-up">
         <form id="signup-form">
           <img src="Logo_Medisync.png" alt="MediSync Logo" class="logo-responsive">
           <h1>Create Account</h1>
 
-          <!-- Icônes sociales (une seule occurrence) -->
+          <!-- Social Icons (one occurrence) -->
           <div class="social-icons">
             <a href="#" class="icon">
               <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google">
@@ -39,7 +39,7 @@
 
           <span>or use your email for registration</span>
 
-          <!-- Prénom / Nom côte à côte -->
+          <!-- First Name / Last Name side by side -->
           <div class="name-fields">
             <input type="text" id="signup-firstname" placeholder="First Name" required />
             <input type="text" id="signup-lastname" placeholder="Last Name" required />
@@ -48,25 +48,24 @@
           <input type="email"    id="signup-email"    placeholder="Email"    required />
           <input type="password" id="signup-password" placeholder="Password" required />
 
-          <!-- Sélecteur de rôle (unique) -->
           <div class="role-selection">
             <input type="radio" id="role-patient"  name="role" value="patient">
             <label for="role-patient"><i class="fas fa-user"></i> Patient</label>
-            <input type="radio" id="role-medecin"  name="role" value="medecin">
-            <label for="role-medecin"><i class="fas fa-user-md"></i> Doctor</label>
+            <input type="radio" id="role-doctor"  name="role" value="doctor">
+            <label for="role-doctor"><i class="fas fa-user-md"></i> Doctor</label>
           </div>
 
           <button type="submit" class="btn-signup">Sign Up</button>
         </form>
       </div>
 
-      <!-- ── Formulaire Sign In ─────────────────────── -->
+      <!-- ── Sign In Form ─────────────────────── -->
       <div class="form-container sign-in">
         <form id="signin-form">
           <img src="Logo_Medisync.png" alt="MediSync Logo" class="logo-responsive">
           <h1>Sign In</h1>
 
-          <!-- Icônes sociales (unique) -->
+          <!-- Social Icons (unique) -->
           <div class="social-icons">
             <a href="#" class="icon">
               <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAA7VBMVEVHcEz/RkL/R0D+SEr/RUD/RkOwjlb/SD7/SE3/SUj/Vzb/VDf9TFb8TVeHoFb/YTD/byn8TVn/jRr/fSL/mxL/SEj+yQn/ohH/tQv+VUb/vQn/wwn+zgj9wQm3xQ39zgT6zQYwhv/7zgowhv8uhv0ek+Avhv7yzAPjywIvhv0whv7PyQHUygIth/y3yAEnivSlxwGSxgUak94fj+h5xAlgwxMLqp8NnsQVlte6xwBNwh45wC0xwDMLt28IrJgJpa0kjPCaxQEpvzsevkkWvVANumQQu18JtXkIsIgTvVYOvGALuWtJwh4OvF8OvF9ccfxCAAAAT3RSTlMAUZvT7P8T//+wiv//kAv6/mD//+V2jv//JKf//0EmxOr/rP7+MEX//x10/6eu//3+/9v///7I//+K//+KS/3/YeX//7dsnv7/////5s3tMAqBMAAAAXFJREFUeAF0jUUCwCAMwDp3d/f9/4krnVt6goQCFzheECVJFHgOPpB5RZHYIKqqyU+vGwpCXkVM07pp2zEQ8hSYiCBf1rsuFrQCvaSahHe+9wMqWHJuOD2E/lYoWsRxkUbBxcdJshY6bEQ3L6fpWmTnXXbxkBcpJTb8UBZFgUX156uyLLHI4Y+YgqL+DZqS0R7n7o4NLQX9GQwbI5tugpKI7wF5Rjd/BiNCCQZfX5BfCwyWrsnagGEYiKKpMkLqgJmZmXn/caKTzGoM7+v4IEiWPQdJ4fMhFujHCzjH7Wny6xFwMB9UKBa4KN3Tl4kh9AZYVJRbpXhVVRGX0asEXNP1a7MM0wQJA+0WFcQtyz7bcFzPAwn+8AkPwmjDcZK6WJGR75zwsCirOo7rpu0SojC2oQUeIF72/TCMY4sUKSj2wX9iXgAHwYgEoKBPizOBgx4EhwnCtxOtDnYTzn1Gnw3wzYQT3zDJrpmXYVjmpj7d/gPknlJE6eZSewAAAABJRU5ErkJggg==" alt="Google">
@@ -84,22 +83,22 @@
           <input type="email"    id="signin-email"    placeholder="Email"    required />
           <input type="password" id="signin-password" placeholder="Password" required />
 
-          <!-- Mot de passe oublié (unique) -->
+          <!-- Forgot Password (unique) -->
           <button type="button" onclick="showResetModal()">Forget Your Password?</button>
           <button type="submit">Sign In</button>
         </form>
       </div>
 
-      <!-- ── Panneau de bascule animé ───────────────── -->
+      <!-- ── Animated Toggle Panel ───────────────── -->
       <div class="toggle-container">
         <div class="toggle">
-          <!-- Panneau gauche : visible quand on est en mode Sign Up (container.active) -->
+          <!-- Left Panel: visible when in Sign Up mode (container.active) -->
           <div class="toggle-panel toggle-left">
             <h1>Access MediSync</h1>
             <p>Sign in to your healthcare professional account to manage patient care and medical records</p>
             <button class="hidden" id="login">Sign In</button>
           </div>
-          <!-- Panneau droit : visible par défaut (mode Sign In) -->
+          <!-- Right Panel: visible by default (Sign In mode) -->
           <div class="toggle-panel toggle-right">
             <h1>Join MediSync</h1>
             <p>Create your professional healthcare account to access comprehensive medical management tools and patient care features</p>
@@ -110,7 +109,7 @@
 
     </div><!-- /container -->
 
-    <!-- ── Modal Réinitialisation du mot de passe ──── -->
+    <!-- ── Password Reset Modal ──── -->
     <div id="reset-modal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeResetModal()">&times;</span>
@@ -124,16 +123,16 @@
       </div>
     </div>
 
-    <!-- Vidéo de fond -->
+    <!-- Background Video -->
     <video autoplay muted loop id="background-video">
       <source src="Backgrond.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
 
-    <!-- Script principal (contient showStyledMessage, gestion formulaires, etc.) -->
+    <!-- Main Script (contains showStyledMessage, form handling, etc.) -->
     <script src="script.js"></script>
 
-    <!-- Scripts propres à cette page uniquement -->
+    <!-- Page specific scripts -->
     <script>
       // ── Modal Reset Password ──────────────────────
       function showResetModal() {
@@ -143,13 +142,13 @@
         document.getElementById('reset-modal').style.display = 'none';
       }
 
-      // Fermer le modal en cliquant en dehors
+      // Close modal when clicking outside
       window.addEventListener('click', function(event) {
         const modal = document.getElementById('reset-modal');
         if (event.target === modal) modal.style.display = 'none';
       });
 
-      // ── Soumission du formulaire Reset ───────────
+      // ── Reset Form Submission ───────────
       document.getElementById('reset-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const email = document.getElementById('reset-email').value;

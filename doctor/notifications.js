@@ -150,8 +150,8 @@ class NotificationsManager {
                     <small>${notification.time}</small>
                 </div>
                 <div class="notification-actions">
-                    ${notification.unread ? `<button class="mark-read-btn" data-id="${notification.id}">Marquer comme lue</button>` : ''}
-                    <button class="delete-btn" data-id="${notification.id}">Supprimer</button>
+                    ${notification.unread ? `<button class="mark-read-btn" data-id="${notification.id}">Mark as read</button>` : ''}
+                    <button class="delete-btn" data-id="${notification.id}">Delete</button>
                 </div>
             `;
 

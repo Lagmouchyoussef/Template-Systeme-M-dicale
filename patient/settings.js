@@ -2,7 +2,7 @@
 (function() {
     const role = localStorage.getItem('userRole');
     if (!role || role !== 'patient') {
-        window.location.replace('/login');
+        window.location.replace('../login/index.html');
     }
 })();
 
@@ -1160,7 +1160,7 @@ Version: ${data.version}
             img.onload = () => {
                 let { naturalWidth: width, naturalHeight: height } = img;
 
-                // Redimensionner si trop grand
+                // Resize if too large
                 const maxSize = 512;
                 if (Math.max(width, height) > maxSize) {
                     const ratio = maxSize / Math.max(width, height);
@@ -1206,7 +1206,7 @@ Version: ${data.version}
                 img.alt = 'Avatar';
                 img.onload = () => {
                     img.style.display = 'block';
-                    // Force le re-render pour appliquer les styles CSS
+                    // Force re-render to apply CSS styles
                     img.style.transform = 'translateZ(0)';
                 };
                 avatarContainer.appendChild(img);

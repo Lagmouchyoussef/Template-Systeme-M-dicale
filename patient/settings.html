@@ -137,11 +137,11 @@
                                    <div class="profile-picture-actions">
                                        <button type="button" id="upload-avatar-btn" class="btn-outline" onclick="handleAvatarUpload()">
                                            <i class="fas fa-camera"></i>
-                                           Changer
+                                           Change
                                        </button>
                                        <button type="button" id="delete-avatar-btn" class="btn-danger" onclick="handleAvatarDelete()">
                                            <i class="fas fa-trash"></i>
-                                           Supprimer
+                                           Delete
                                        </button>
                                    </div>
                                   <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
@@ -463,9 +463,7 @@
                                 <div class="preference-item">
                                     <label for="language">Language</label>
                                     <select id="language" class="form-input">
-                                        <option value="fr">French</option>
-                                        <option value="en">English</option>
-                                        <option value="es">Español</option>
+                                        <option value="en" selected>English</option>
                                     </select>
                                 </div>
                                 <div class="preference-item">
@@ -651,7 +649,7 @@
         }
 
         function handleAvatarDelete() {
-            if (confirm('Supprimer la photo de profil ?')) {
+            if (confirm('Delete profile picture?')) {
                 const img = document.getElementById('profile-avatar');
                 const placeholder = document.querySelector('.avatar-placeholder');
 

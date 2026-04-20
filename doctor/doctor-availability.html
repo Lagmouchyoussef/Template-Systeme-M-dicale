@@ -196,10 +196,10 @@
                     </div>
                     <div class="stats-row" id="dynamic-stats">
                         <!-- Loaded dynamically -->
-                        <div class="stat-item"><span class="stat-val" id="stat-received">0</span><span class="stat-label">Total Géré</span></div>
-                        <div class="stat-item"><span class="stat-val" id="stat-accepted">0</span><span class="stat-label">Acceptées</span></div>
-                        <div class="stat-item"><span class="stat-val" id="stat-rejected">0</span><span class="stat-label">Refusées</span></div>
-                        <div class="stat-item"><span class="stat-val" id="stat-pending">0</span><span class="stat-label">En attente</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-received">0</span><span class="stat-label">Total Managed</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-accepted">0</span><span class="stat-label">Accepted</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-rejected">0</span><span class="stat-label">Declined</span></div>
+                        <div class="stat-item"><span class="stat-val" id="stat-pending">0</span><span class="stat-label">Pending</span></div>
                     </div>
                 </section>
 
@@ -208,7 +208,7 @@
                 <!-- Appointment Requests Section -->
                 <section class="full-width-section">
                     <div class="section-header-flex">
-                        <h2><i class="fas fa-calendar-check"></i> Demandes de Consultation <span class="pending-count" id="requests-count">0</span></h2>
+                        <h2><i class="fas fa-calendar-check"></i> Consultation Requests <span class="pending-count" id="requests-count">0</span></h2>
                     </div>
                     
                     <div class="requests-table-container">
@@ -237,7 +237,7 @@
                 <!-- Sent Invitations Section -->
                 <section class="full-width-section">
                     <div class="section-header-flex">
-                        <h2>Invitations Envoyées</h2>
+                        <h2>Sent Invitations</h2>
                         <span class="pending-count" id="sent-invitations-count">0</span>
                     </div>
                     <div class="requests-table-container">
@@ -266,16 +266,16 @@
                 <!-- Current Availability Display -->
                 <section class="full-width-section">
                     <div class="section-header-flex">
-                        <h2><i class="fas fa-clock"></i> Disponibilité Actuelle</h2>
+                        <h2><i class="fas fa-clock"></i> Current Availability</h2>
                     </div>
                     
                     <div class="availability-table-container">
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Jour</th>
-                                    <th>Statut</th>
-                                    <th>Horaires</th>
+                                    <th>Day</th>
+                                    <th>Status</th>
+                                    <th>Hours</th>
                                 </tr>
                             </thead>
                             <tbody id="current-availability-tbody">

@@ -1,8 +1,8 @@
 // ── Auth Guard ─────────────────────────────────────────────────────────────
 (function() {
     const role = localStorage.getItem('userRole');
-    if (!role || role !== 'medecin') {
-        window.location.replace('/login');
+    if (!role || (role !== 'doctor' && role !== 'medecin')) {
+        window.location.replace('../login/index.html');
     }
 })();
 
@@ -102,12 +102,12 @@ function showConfirmModal(title, message, type, onConfirm) {
                 padding: 8px 16px; border: 1px solid var(--border-color, #ccc);
                 background: transparent; border-radius: 6px; cursor: pointer;
                 color: var(--text-primary, #333); font-weight: 500; transition: background 0.2s;
-            ">Annuler</button>
+            ">Cancel</button>
             <button id="modal-confirm-btn" style="
                 padding: 8px 16px; border: none; background: ${confirmBtnColor};
                 color: white; border-radius: 6px; cursor: pointer; font-weight: 500;
                 transition: opacity 0.2s;
-            ">Confirmer</button>
+            ">Confirm</button>
         </div>
     `;
     
@@ -184,29 +184,29 @@ function renderArchives(archives) {
     if (invCountEl) invCountEl.textContent = archivedInvitations.length;
     
     if (archivedRequests.length === 0) {
-        requestsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune demande archivée.</td></tr>`;
+        requestsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">No archived requests.</td></tr>`;
     } else {
         archivedRequests.forEach(arc => renderArchiveRow(requestsTbody, arc));
     }
     
     if (archivedInvitations.length === 0) {
-        invitationsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune invitation archivée.</td></tr>`;
+        invitationsTbody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">No archived invitations.</td></tr>`;
     } else {
         archivedInvitations.forEach(arc => renderArchiveRow(invitationsTbody, arc));
     }
 }
 
 function renderArchiveRow(tbody, arc) {
-    let statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Annulé / Archivé</span>`;
+    let statusBadge = `<span class="status-badge" style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-weight: 500;">Cancelled / Archived</span>`;
     
     let actions = `
-        <button class="action-btn accept" title="Restaurer l'historique" onclick="restoreFromHistory('${arc.id}')"><i class="fas fa-undo"></i> Restaurer</button>
-        <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteHistory('${arc.id}')"><i class="fas fa-times"></i></button>
-        <button class="action-btn" title="Voir les détails" onclick="viewDetails('${arc.id}')"><i class="fas fa-eye"></i></button>
+        <button class="action-btn accept" title="Restore from History" onclick="restoreFromHistory('${arc.id}')"><i class="fas fa-undo"></i> Restore</button>
+        <button class="action-btn reject" title="Permanently Delete" onclick="permanentlyDeleteHistory('${arc.id}')"><i class="fas fa-times"></i></button>
+        <button class="action-btn" title="View Details" onclick="viewDetails('${arc.id}')"><i class="fas fa-eye"></i></button>
     `;
     
     const tr = document.createElement('tr');
-    const pName = arc.patient ? arc.patient.name : (arc.patientName || 'Patient Inconnu');
+    const pName = arc.patient ? arc.patient.name : (arc.patientName || 'Unknown Patient');
     tr.innerHTML = `
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><strong>${pName}</strong></td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">${statusBadge}</td>
@@ -228,14 +228,14 @@ function renderNotificationArchives(notifications) {
     if (countEl) countEl.textContent = notifications.length;
     
     if (notifications.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucune notification archivée.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">No archived notifications.</td></tr>`;
         return;
     }
     
     notifications.forEach(notif => {
         let actions = `
-            <button class="action-btn accept" title="Restaurer" onclick="restoreNotification('${notif.id}')"><i class="fas fa-undo"></i> Restaurer</button>
-            <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteNotification('${notif.id}')"><i class="fas fa-times"></i></button>
+            <button class="action-btn accept" title="Restore" onclick="restoreNotification('${notif.id}')"><i class="fas fa-undo"></i> Restore</button>
+            <button class="action-btn reject" title="Permanently Delete" onclick="permanentlyDeleteNotification('${notif.id}')"><i class="fas fa-times"></i></button>
         `;
         
         const tr = document.createElement('tr');
@@ -259,18 +259,18 @@ function renderEmailArchives(emails) {
     if (countEl) countEl.textContent = emails.length;
     
     if (emails.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">Aucun email archivé.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-secondary py-4" style="padding: 20px; text-align: center;">No archived emails.</td></tr>`;
         return;
     }
     
     emails.forEach(email => {
         let actions = `
-            <button class="action-btn reject" title="Supprimer définitivement" onclick="permanentlyDeleteEmail('${email.id}')"><i class="fas fa-times"></i></button>
+            <button class="action-btn reject" title="Permanently Delete" onclick="permanentlyDeleteEmail('${email.id}')"><i class="fas fa-times"></i></button>
         `;
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><strong>${email.recipient || 'Inconnu'}</strong></td>
+            <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;"><strong>${email.recipient || 'Unknown'}</strong></td>
             <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${email.subject || '-'}</td>
             <td style="padding: 12px; border-bottom: 1px solid var(--border-color); color: #6c757d;">${email.date || '-'}</td>
             <td style="padding: 12px; border-bottom: 1px solid var(--border-color);" class="action-buttons">${actions}</td>
@@ -295,21 +295,21 @@ window.restoreNotification = function(id) {
         archives.splice(arcIndex, 1);
         localStorage.setItem('notificationHistory', JSON.stringify(archives));
         
-        showStyledMessage('Notification restaurée avec succès.', 'success');
+        showStyledMessage('Notification successfully restored.', 'success');
         loadDashboardData();
     }
 };
 
 window.permanentlyDeleteNotification = function(id) {
     showConfirmModal(
-        'Supprimer la notification',
-        'Voulez-vous supprimer définitivement cette notification ? Cette action est irréversible.',
+        'Delete notification',
+        'Do you want to permanently delete this notification? This action is irreversible.',
         'danger',
         () => {
             let archives = JSON.parse(localStorage.getItem('notificationHistory') || '[]');
             archives = archives.filter(a => String(a.id) !== String(id));
             localStorage.setItem('notificationHistory', JSON.stringify(archives));
-            showStyledMessage('Notification supprimée définitivement.', 'success');
+            showStyledMessage('Notification permanently deleted.', 'success');
             loadDashboardData();
         }
     );
@@ -317,14 +317,14 @@ window.permanentlyDeleteNotification = function(id) {
 
 window.permanentlyDeleteEmail = function(id) {
     showConfirmModal(
-        'Supprimer l\'email',
-        'Voulez-vous supprimer définitivement cet email ? Cette action est irréversible.',
+        'Delete email',
+        'Do you want to permanently delete this email? This action is irreversible.',
         'danger',
         () => {
             let archives = JSON.parse(localStorage.getItem('emailHistory') || '[]');
             archives = archives.filter(a => String(a.id) !== String(id));
             localStorage.setItem('emailHistory', JSON.stringify(archives));
-            showStyledMessage('Email supprimé définitivement.', 'success');
+            showStyledMessage('Email permanently deleted.', 'success');
             loadDashboardData();
         }
     );
@@ -332,8 +332,8 @@ window.permanentlyDeleteEmail = function(id) {
 
 window.restoreFromHistory = function(id) {
     showConfirmModal(
-        'Restaurer un élément', 
-        'Voulez-vous restaurer cet élément pour le remettre dans votre tableau principal ?', 
+        'Restore an item', 
+        'Do you want to restore this item to put it back in your main dashboard?', 
         'info', 
         () => {
             let archives = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
@@ -357,7 +357,7 @@ window.restoreFromHistory = function(id) {
                 archives.splice(arcIndex, 1);
                 localStorage.setItem('appointmentHistory', JSON.stringify(archives));
                 
-                showStyledMessage('Élément restauré avec succès.', 'success');
+                showStyledMessage('Item successfully restored.', 'success');
                 loadDashboardData();
             }
         }
@@ -366,8 +366,8 @@ window.restoreFromHistory = function(id) {
 
 window.permanentlyDeleteHistory = function(id) {
     showConfirmModal(
-        'Suppression définitive', 
-        'Voulez-vous supprimer définitivement cet élément ? Cette action est irréversible et il ne pourra plus être récupéré.', 
+        'Permanent Deletion', 
+        'Do you want to permanently delete this item? This action is irreversible and it can no longer be recovered.', 
         'danger', 
         () => {
             let archives = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
@@ -377,7 +377,7 @@ window.permanentlyDeleteHistory = function(id) {
                 archives.splice(arcIndex, 1);
                 localStorage.setItem('appointmentHistory', JSON.stringify(archives));
                 
-                showStyledMessage('Élément supprimé définitivement.', 'success');
+                showStyledMessage('Item permanently deleted.', 'success');
                 loadDashboardData();
             }
         }
@@ -389,16 +389,16 @@ window.viewDetails = function(id) {
     const item = list.find(i => String(i.id) === String(id));
     if (!item) return;
 
-    const pName = item.patient ? item.patient.name : (item.patientName || 'Patient Inconnu');
+    const pName = item.patient ? item.patient.name : (item.patientName || 'Unknown Patient');
     const pEmail = item.email || (item.patient && item.patient.email) || '-';
     const pPhone = item.phone || (item.patient && item.patient.phone) || '-';
     
-    const title = 'Détails de l\'Archive';
+    const title = 'Archive Details';
     const typeLabel = item.type || 'Consultation';
-    const statusLabel = item.status === 'pending' ? 'En attente' : (item.status === 'accepted' ? 'Acceptée' : (item.status === 'declined' || item.status === 'rejected' ? 'Refusée' : (item.status === 'cancelled' ? 'Annulée' : item.status)));
+    const statusLabel = item.status === 'pending' ? 'Pending' : (item.status === 'accepted' ? 'Accepted' : (item.status === 'declined' || item.status === 'rejected' ? 'Declined' : (item.status === 'cancelled' ? 'Cancelled' : item.status)));
     const dateLabel = item.date || '-';
     const timeLabel = item.time || '-';
-    const notesLabel = item.notes || item.reason || 'Aucune note supplémentaire';
+    const notesLabel = item.notes || item.reason || 'No additional notes';
 
     const backdrop = document.createElement('div');
     backdrop.style.cssText = `
@@ -437,12 +437,12 @@ window.viewDetails = function(id) {
                 <span style="flex: 1;">${pEmail} <br> ${pPhone}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-                <strong style="color: var(--text-secondary); width: 120px;">Statut:</strong> 
+                <strong style="color: var(--text-secondary); width: 120px;">Status:</strong> 
                 <span style="flex: 1; font-weight: 600; color: var(--accent-color);">${statusLabel}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
-                <strong style="color: var(--text-secondary); width: 120px;">Date & Heure:</strong> 
-                <span style="flex: 1;">${dateLabel} à ${timeLabel}</span>
+                <strong style="color: var(--text-secondary); width: 120px;">Date & Time:</strong> 
+                <span style="flex: 1;">${dateLabel} at ${timeLabel}</span>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <strong style="color: var(--text-secondary); width: 120px;">Type:</strong> 
@@ -459,7 +459,7 @@ window.viewDetails = function(id) {
                 padding: 10px 20px; border: none; background: var(--accent-color);
                 color: white; border-radius: 6px; cursor: pointer; font-weight: 600;
                 transition: opacity 0.2s;
-            ">Fermer</button>
+            ">Close</button>
         </div>
     `;
     

@@ -1,5 +1,5 @@
 /* BLUEPRINT-JS-START */
-/* 🚀 Auto-generado Smart JS: 4/19/2026, 11:22:26 PM */
+/* 🚀 Auto-generated Smart JS: 4/19/2026, 11:22:26 PM */
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ AI Code Activated - 145 elements connected');
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn_1 = document.getElementById('btn_1');
     if (btn_1) {
         btn_1.onclick = () => {
-            console.log('Acción ejecutada en: btn_1');
+            console.log('Action executed on: btn_1');
         };
     }
 
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn_2 = document.getElementById('btn_2');
     if (btn_2) {
         btn_2.onclick = () => {
-            console.log('Acción ejecutada en: btn_2');
+            console.log('Action executed on: btn_2');
         };
     }
 
@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (send_consultation_form) {
         send_consultation_form.onsubmit = (e) => {
             e.preventDefault();
-            console.log('📤 Formulario send-consultation-form enviado');
-            alert('¡Gracias! Hemos recibido tu información.');
+            console.log('📤 Form send-consultation-form submitted');
+            alert('Thank you! We have received your information.');
         };
     }
 
@@ -775,19 +775,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (heading_25) {
     }
 
-    console.log('🎉 Automatización completada');
+    console.log('🎉 Automation completed');
 });
 
 // 📊 Lógica de Dashboard Automática
 function simulateData() {
-    console.log('📈 Actualizando métricas en tiempo real...');
+    console.log('📈 Updating real-time metrics...');
     document.querySelectorAll('.stat-value').forEach(el => {
         el.innerText = Math.floor(Math.random() * 1000);
     });
 }
 
 setInterval(simulateData, 3000);
-console.log('📈 Dashboard Analítico cargado.');
+console.log('📈 Analytical Dashboard loaded.');
 
 // 🧬 Servidor Universal de Datos (Multi-Use)
 window.MockServer = {
@@ -795,7 +795,7 @@ window.MockServer = {
         const items = JSON.parse(localStorage.getItem(collection) || '[]');
         items.push({ ...data, id_uuid: Math.random().toString(36).substr(2, 9) });
         localStorage.setItem(collection, JSON.stringify(items));
-        console.log('📁 Guardado en ['+collection+']:', data);
+        console.log('📁 Saved in ['+collection+']:', data);
         if (window.AdminConsole) AdminConsole.refresh();
     },
     get(collection) {

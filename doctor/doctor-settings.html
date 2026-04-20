@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="settings.css">
     <title>MediSync - Doctor Settings</title>
     <script src="../sync.js"></script>
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="dashboard">
@@ -136,11 +138,11 @@
                                     <div class="profile-picture-actions">
                                         <button type="button" id="upload-avatar-btn" class="btn-outline" onclick="handleAvatarUpload()">
                                             <i class="fas fa-camera"></i>
-                                            Changer
+                                            Change
                                         </button>
                                         <button type="button" id="delete-avatar-btn" class="btn-danger" onclick="handleAvatarDelete()">
                                             <i class="fas fa-trash"></i>
-                                            Supprimer
+                                            Delete
                                         </button>
                                     </div>
                                   <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
@@ -560,25 +562,43 @@
                                     <div class="stat-value">0 MB</div>
                                     <div class="stat-label">Storage</div>
                                 </div>
+                                <div class="stat-item" style="border-color: var(--danger); background: rgba(239, 68, 68, 0.03);">
+                                    <div class="stat-value" style="color: var(--danger);">0</div>
+                                    <div class="stat-label">Trash</div>
+                                </div>
+                            </div>
+
+                            <!-- Trash / Activity Log -->
+                            <div class="trash-log" style="margin-top: 30px;">
+                                <div class="section-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+                                    <h3 style="font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-trash-alt" style="color: var(--danger);"></i> 
+                                        Recently Deleted & Activity
+                                    </h3>
+                                </div>
+                                <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
+                                    <table class="data-table" id="trash-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Type</th>
+                                                <th>Date Deleted</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="trash-tbody">
+                                            <tr>
+                                                <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                                                    No items in trash.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <div class="data-actions">
-                                <div class="action-card">
-                                    <i class="fas fa-file-export"></i>
-                                    <h4>Export Data</h4>
-                                    <p>Download all your medical data</p>
-                                    <div class="export-options">
-                                        <button class="btn-outline export-btn" data-format="csv">
-                                            <i class="fas fa-file-csv"></i>
-                                            CSV
-                                        </button>
-                                        <button class="btn-outline export-btn" data-format="pdf">
-                                            <i class="fas fa-file-pdf"></i>
-                                            PDF
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <div class="action-card">
                                     <i class="fas fa-broom"></i>
                                     <h4>Clean History</h4>
@@ -649,7 +669,7 @@
         }
 
         function handleAvatarDelete() {
-            if (confirm('Supprimer la photo de profil ?')) {
+            if (confirm('Delete profile picture?')) {
                 const img = document.getElementById('profile-avatar');
                 const placeholder = document.querySelector('.avatar-placeholder');
 
@@ -711,7 +731,258 @@
                     }
                 });
             }
+
+            // Load data stats
+            updateDataManagementStats();
+            initDataManagementActions();
         });
+
+        function initDataManagementActions() {
+            // Export buttons
+            document.querySelectorAll('.export-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const format = this.dataset.format;
+                    const doctorId = localStorage.getItem('userId');
+                    const userName = localStorage.getItem('userName');
+                    const sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+                    const doctorData = sentInvitations.filter(inv => 
+                        inv.doctorId === doctorId || 
+                        inv.doctorName === userName
+                    );
+
+                    if (doctorData.length === 0) {
+                        showStyledMessage('No data available to export.', 'info');
+                        return;
+                    }
+
+                    if (format === 'pdf') {
+                        generatePDFReport(doctorData);
+                    } else {
+                        // Export as CSV (Simple version)
+                        const csvContent = "data:text/csv;charset=utf-8," 
+                            + "Patient,Date,Time,Type,Status\n"
+                            + doctorData.map(e => `${e.patientName},${e.date},${e.time},${e.type},${e.status}`).join("\n");
+                        
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `medisync_export_${new Date().toISOString().split('T')[0]}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                    
+                    showStyledMessage(`Exporting data in ${format.toUpperCase()} format...`, 'success');
+                });
+            });
+
+        function generatePDFReport(data) {
+            const userName = localStorage.getItem('userName') || 'Doctor';
+            
+            // Create a temporary container for the report
+            const element = document.createElement('div');
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+            element.style.top = '0';
+            element.style.width = '800px';
+            element.style.padding = '40px';
+            element.style.backgroundColor = '#fff';
+            element.style.color = '#333';
+            element.style.fontFamily = 'Arial, sans-serif';
+
+            element.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2da0a8; padding-bottom: 20px; margin-bottom: 30px;">
+                    <img src="../login/Logo_Medisync.png" style="height: 50px;" alt="MediSync Logo">
+                    <h1 style="color: #2da0a8; margin: 0; font-size: 24px; text-transform: uppercase;">Medical Activity Report</h1>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h2 style="margin: 0; color: #2c3e50;">Dr. ${userName}</h2>
+                    <p style="margin: 5px 0; color: #6c757d;">Medical Professional Portal | MediSync System</p>
+                    <p style="margin: 5px 0; color: #6c757d;">Date Generated: ${new Date().toLocaleString()}</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="color: #2da0a8; text-align: left; padding: 12px; border: 1px solid #dee2e6;">Patient</th>
+                            <th style="color: #2da0a8; text-align: left; padding: 12px; border: 1px solid #dee2e6;">Date</th>
+                            <th style="color: #2da0a8; text-align: left; padding: 12px; border: 1px solid #dee2e6;">Type</th>
+                            <th style="color: #2da0a8; text-align: left; padding: 12px; border: 1px solid #dee2e6;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr>
+                                <td style="padding: 12px; border: 1px solid #dee2e6;"><strong>${item.patientName || 'N/A'}</strong></td>
+                                <td style="padding: 12px; border: 1px solid #dee2e6;">${item.date}</td>
+                                <td style="padding: 12px; border: 1px solid #dee2e6;">${item.type}</td>
+                                <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; color: ${item.status === 'accepted' ? '#28a745' : '#ffc107'}">${item.status.toUpperCase()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #adb5bd; border-top: 1px solid #eee; padding-top: 20px;">
+                    <p>This document was automatically generated by MediSync Management System.</p>
+                    <p>&copy; ${new Date().getFullYear()} MediSync Inc.</p>
+                </div>
+            `;
+
+            document.body.appendChild(element);
+
+            const opt = {
+                margin:       10,
+                filename:     `medisync_report_${new Date().toISOString().split('T')[0]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Run html2pdf
+            html2pdf().set(opt).from(element).save().then(() => {
+                showStyledMessage('PDF generated and downloaded successfully.', 'success');
+                document.body.removeChild(element);
+            }).catch(err => {
+                console.error('PDF Error:', err);
+                document.body.removeChild(element);
+                showStyledMessage('Error generating PDF.', 'error');
+            });
+        }
+
+            // Clean button
+            const cleanBtn = document.querySelector('.action-card i.fa-broom + h4 + p + button');
+            if (cleanBtn) {
+                cleanBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to permanently delete ALL archived history? This cannot be undone.')) {
+                        const doctorId = localStorage.getItem('userId');
+                        const userName = localStorage.getItem('userName');
+                        
+                        let appointmentHistory = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                        
+                        // Keep only items NOT belonging to this doctor (or clear all if you want total wipe)
+                        const remaining = appointmentHistory.filter(arc => 
+                            arc.doctorId !== doctorId && arc.doctorName !== userName
+                        );
+
+                        localStorage.setItem('appointmentHistory', JSON.stringify(remaining));
+                        showStyledMessage('Archived history has been permanently cleared.', 'success');
+                        updateDataManagementStats();
+                    }
+                });
+            }
+
+            // Archive button
+            const archiveBtn = document.querySelector('.action-card i.fa-archive + h4 + p + button');
+            if (archiveBtn) {
+                archiveBtn.addEventListener('click', function() {
+                    const doctorId = localStorage.getItem('userId');
+                    const userName = localStorage.getItem('userName');
+                    
+                    // 1. Get current invitations
+                    let sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+                    
+                    // 2. Identify items to archive (e.g., status 'accepted' or 'declined' and older than 1 day)
+                    const toArchive = sentInvitations.filter(inv => 
+                        (inv.doctorId === doctorId || inv.doctorName === userName) &&
+                        (inv.status === 'accepted' || inv.status === 'declined')
+                    );
+
+                    if (toArchive.length === 0) {
+                        showStyledMessage('No completed items found to archive.', 'info');
+                        return;
+                    }
+
+                    // 3. Move to appointmentHistory
+                    let appointmentHistory = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                    toArchive.forEach(item => {
+                        if (!appointmentHistory.some(h => h.id === item.id)) {
+                            appointmentHistory.push({
+                                ...item,
+                                archivedAt: new Date().toISOString(),
+                                source: 'invitation'
+                            });
+                        }
+                    });
+                    localStorage.setItem('appointmentHistory', JSON.stringify(appointmentHistory));
+
+                    // 4. Remove from sentInvitations
+                    sentInvitations = sentInvitations.filter(inv => !toArchive.some(a => a.id === inv.id));
+                    localStorage.setItem('sentInvitations', JSON.stringify(sentInvitations));
+
+                    showStyledMessage(`${toArchive.length} items moved to archive.`, 'success');
+                    updateDataManagementStats();
+                });
+            }
+        }
+
+        function updateDataManagementStats() {
+            try {
+                const doctorId = localStorage.getItem('userId');
+                if (!doctorId) return;
+
+                // 1. Appointments count (from sentInvitations)
+                const sentInvitations = JSON.parse(localStorage.getItem('sentInvitations') || '[]');
+                const doctorAppointments = sentInvitations.filter(inv => 
+                    inv.doctorId === doctorId || 
+                    (inv.doctor && inv.doctor.id === doctorId) ||
+                    inv.doctorName === localStorage.getItem('userName')
+                );
+                
+                // 2. Trash count (from appointmentHistory)
+                const appointmentHistory = JSON.parse(localStorage.getItem('appointmentHistory') || '[]');
+                const archivedItems = appointmentHistory.filter(arc => arc.source === 'invitation' || arc.doctorName === localStorage.getItem('userName'));
+
+                // 3. Documents count (Mock or based on invitations with attachments if any)
+                const docCount = Math.floor(doctorAppointments.length * 0.4); // Mock calculation
+
+                // 4. Storage Calculation (Mock)
+                const storageUsed = (doctorAppointments.length * 0.12 + docCount * 0.45 + archivedItems.length * 0.05).toFixed(2);
+
+                // Update DOM
+                const statsItems = document.querySelectorAll('#data-section .stat-value');
+                if (statsItems.length >= 4) {
+                    statsItems[0].textContent = doctorAppointments.length;
+                    statsItems[1].textContent = docCount;
+                    statsItems[2].textContent = `${storageUsed} MB`;
+                    statsItems[3].textContent = archivedItems.length;
+                }
+
+                renderTrashTable(archivedItems);
+            } catch (error) {
+                console.error('Error updating data stats:', error);
+            }
+        }
+
+        function renderTrashTable(items) {
+            const tbody = document.getElementById('trash-tbody');
+            if (!tbody) return;
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--text-secondary);">No items in trash.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            items.slice(0, 10).forEach(item => {
+                const tr = document.createElement('tr');
+                const itemName = item.patientName || (item.patient ? item.patient.name : 'Unknown');
+                const dateStr = item.deletedAt ? new Date(item.deletedAt).toLocaleDateString() : (item.date || 'Recently');
+                
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${itemName}</td>
+                    <td>${item.type || 'Consultation'}</td>
+                    <td>${dateStr}</td>
+                    <td><span class="badge badge-danger">Deleted</span></td>
+                    <td>
+                        <button class="btn-sm btn-outline" onclick="showStyledMessage('Restore feature is in history page', 'info')">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         function handleFileUpload(file) {
             // Basic validation
@@ -742,6 +1013,7 @@
                 // Save to localStorage
                 localStorage.setItem('userAvatar', e.target.result);
                 showStyledMessage('Avatar uploaded successfully', 'success');
+                updateDataManagementStats(); // Refresh stats after upload
             };
             reader.readAsDataURL(file);
         }

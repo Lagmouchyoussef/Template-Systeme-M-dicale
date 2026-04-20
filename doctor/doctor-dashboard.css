@@ -251,24 +251,22 @@ body {
 
 /* Profile Section */
 .patient-profile {
-    padding: 16px 16px;
-    margin: 0 12px;
+    padding: 16px;
+    margin: 15px 12px;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(135deg, rgba(45, 160, 168, 0.06), rgba(45, 160, 168, 0.02));
-    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(45, 160, 168, 0.08), rgba(45, 160, 168, 0.03));
+    border-radius: 16px;
+    border: 1px solid rgba(45, 160, 168, 0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    z-index: 1;
-    border: 1px solid transparent;
 }
 
 .patient-profile:hover {
-    background: linear-gradient(135deg, rgba(45, 160, 168, 0.1), rgba(45, 160, 168, 0.04));
-    border-color: rgba(45, 160, 168, 0.12);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(45, 160, 168, 0.08);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, rgba(45, 160, 168, 0.12), rgba(45, 160, 168, 0.05));
+    box-shadow: 0 4px 12px rgba(45, 160, 168, 0.1);
+    border-color: rgba(45, 160, 168, 0.2);
 }
 
 .avatar-img {
@@ -798,25 +796,97 @@ body {
 
 /* Welcome Card */
 .welcome-card {
-    background-color: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(45, 160, 168, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
     margin-bottom: 30px;
-    border-left: 4px solid var(--accent-color);
-    transition: background-color 0.3s ease;
+    border: none;
 }
 
-.welcome-card h2 {
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    font-size: 28px;
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    animation: float 8s ease-in-out infinite;
 }
 
-.welcome-card p {
-    color: var(--text-secondary);
-    margin-bottom: 20px;
+@keyframes float {
+    0%, 100% { transform: translate(-5%, -5%) rotate(0deg); }
+    50% { transform: translate(5%, 5%) rotate(10deg); }
+}
+
+.welcome-content h2 {
+    font-size: 32px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: white;
+}
+
+.welcome-content p {
     font-size: 16px;
+    opacity: 0.95;
+    max-width: 500px;
+    margin-bottom: 25px;
+    color: white;
+}
+
+.welcome-stats {
+    display: flex;
+    gap: 25px;
+    position: relative;
+    z-index: 2;
+}
+
+.quick-stat {
+    text-align: center;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 130px;
+    transition: transform 0.3s ease;
+}
+
+.quick-stat:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.quick-stat i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.quick-stat span {
+    font-size: 28px;
+    font-weight: 800;
+    display: block;
+    color: white;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.quick-stat small {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Buttons */
