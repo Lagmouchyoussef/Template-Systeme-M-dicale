@@ -663,27 +663,10 @@ function loadRecentEmails() {
     // For demo purposes, add a sample email if none exist
     if (patientEmails.length === 0 && currentPatientEmail === 'alice.dupont@email.com') {
         const sampleEmail = {
-            to: 'alice.dupont@email.com',
-            from: 'dr.smith@medisync.com',
-            subject: 'Appointment Invitation - MediSync',
-            body: `Dear Alice Dupont,
-
-You have received an appointment invitation from Dr. Smith.
-
-Appointment Details:
-- Date: ${new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-})}
-- Time: 10:00
-- Type: General Consultation
-
-Please log in to your MediSync account to accept or decline this appointment.
-
-Best regards,
-MediSync Team`,
+            to: "alice.dupont@email.com",
+            from: "dr.smith@medisync.com",
+            subject: "Appointment Invitation - MediSync",
+            body: "Dear Alice Dupont,\\n\\nYou have received an appointment invitation from Dr. Smith.\\n\\nAppointment Details:\\n- Date: Wednesday, December 18, 2024\\n- Time: 10:00\\n- Type: General Consultation\\n\\nPlease log in to your MediSync account to accept or decline this appointment.\\n\\nBest regards,\\nMediSync Team",
             sentAt: new Date(Date.now() - 30 * 60 * 1000).toISOString() // 30 minutes ago
         };
         patientEmails = [sampleEmail];

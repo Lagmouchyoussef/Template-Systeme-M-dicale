@@ -13,7 +13,7 @@
         <!-- Left Navbar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <img src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
+                <img id="img_1" src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
             </div>
 
             <ul class="sidebar-menu">
@@ -41,7 +41,7 @@
                     <span></span>
                 </div>
                 <div class="patient-info">
-                    <h4></h4>
+                    <h4 id="heading_1"></h4>
                     <p>Patient</p>
                 </div>
             </div>
@@ -66,7 +66,7 @@
         <main class="main-content">
             <header class="header">
                 <div>
-                    <h1>Appointment History</h1>
+                    <h1 id="heading_2">Appointment History</h1>
                     <p class="user-info"></p>
                 </div>
                 <div class="header-actions">
@@ -130,7 +130,7 @@
 
                 <!-- Loading State -->
                 <div id="loading-state" class="loading-state" style="display: none;">
-                    <div class="loading-spinner"></div>
+                    <div id="div_auto_1" class="loading-spinner"></div>
                     <p>Loading your history...</p>
                 </div>
 
@@ -138,7 +138,7 @@
                 <div id="error-state" class="error-state" style="display: none;">
                     <div class="error-content">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Loading Error</h3>
+                        <h3 id="heading_3">Loading Error</h3>
                         <p>Unable to load appointment history.</p>
                         <button id="retry-btn" class="btn-primary">Retry</button>
                     </div>
@@ -224,7 +224,7 @@
         <span>Changes saved</span>
     </div>
 
-    <script src="patient-dashboard.js"></script>
+    <script src="nav-script.js"></script>
     <script src="history.js"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@
         <!-- Left Navbar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <img src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
+                <img id="img_1" src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
             </div>
 
             <ul class="sidebar-menu">
@@ -41,7 +41,7 @@
                     <span></span>
                 </div>
                 <div class="patient-info">
-                    <h4></h4>
+                    <h4 id="heading_1"></h4>
                     <p>Patient</p>
                 </div>
             </div>
@@ -65,7 +65,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <h1>Patient Dashboard</h1>
+                <h1 id="heading_2">Patient Dashboard</h1>
                 <div class="header-actions">
                     <div class="notifications">
                         <i class="fas fa-bell"></i>
@@ -76,9 +76,9 @@
             <div class="dashboard-content">
                 <!-- Welcome Section -->
                 <section class="welcome-card">
-                    <h2>Welcome to MediSync</h2>
+                    <h2 id="heading_3">Welcome to MediSync</h2>
                     <p>Manage your healthcare appointments and medical records.</p>
-                    <button class="btn-primary">Schedule New Appointment</button>
+                    <button id="btn_1" class="btn-primary">Schedule New Appointment</button>
                 </section>
 
                 <!-- Appointment Invitations -->
@@ -87,7 +87,7 @@
                     <div class="invitations-container">
                         <div class="no-invitations-message">
                             <i class="fas fa-inbox"></i>
-                            <h3>No pending invitations</h3>
+                            <h3 id="heading_5">No pending invitations</h3>
                             <p>You'll receive appointment invitations from doctors here</p>
                         </div>
                     </div>
@@ -200,7 +200,7 @@
                     <h2>Appointment Statistics</h2>
                     <div class="stats-overview">
                         <div class="stat-box">
-                            <div class="stat-value">0</div>
+                            <div id="div_auto_1" class="stat-value">0</div>
                             <div class="stat-label">Total Appointments</div>
                             <div class="stat-trend neutral">
                                 <i class="fas fa-minus"></i>
@@ -315,6 +315,6 @@
         </main>
     </div>
 
-    <script src="patient-dashboard.js"></script>
+    <script src="patient-simple.js"></script>
 </body>
 </html>

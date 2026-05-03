@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+2026-05-03 01:52:35 [DEBUG] Resource server started on port 8829
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
         <!-- Left Navbar -->
         <nav class="sidebar">
             <div class="sidebar-header">
-                <img src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
+                <img id="img_1" src="../login/Logo_Medisync.png" alt="MediSync Logo" class="logo">
             </div>
 
             <ul class="sidebar-menu">
@@ -41,7 +41,7 @@
                       <span></span>
                   </div>
                   <div class="patient-info">
-                      <h4></h4>
+                      <h4 id="heading_1"></h4>
                       <p>Patient</p>
                   </div>
               </div>
@@ -65,7 +65,7 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="header">
-                <h1>Account Settings</h1>
+                <h1 id="heading_2">Account Settings</h1>
                 <div class="header-actions">
                 </div>
             </header>
@@ -104,7 +104,7 @@
                     <!-- Profile Section -->
                     <section id="profile-section" class="settings-section active">
                         <div class="section-header">
-                            <h2><i class="fas fa-user"></i> Profile Information</h2>
+                            <h2 id="heading_3"><i class="fas fa-user"></i> Profile Information</h2>
                             <p>Manage your personal and contact information</p>
                         </div>
 
@@ -189,7 +189,7 @@
                             <div class="security-card">
                                 <div class="card-header">
                                     <i class="fas fa-key"></i>
-                                    <h3>Password</h3>
+                                    <h3 id="heading_5">Password</h3>
                                 </div>
                                 <div class="card-content">
                                     <p>Last changed: 3 months ago</p>
@@ -238,7 +238,7 @@
                                             <strong>Mobile App</strong>
                                             <small>iOS • Paris, France</small>
                                         </div>
-                                        <button class="btn-outline btn-small">Revoke</button>
+                                        <button id="btn_1" class="btn-outline btn-small">Revoke</button>
                                     </div>
                                 </div>
                             </div>
@@ -533,7 +533,7 @@
                         <div class="data-management">
                             <div class="data-stats">
                                 <div class="stat-item">
-                                    <div class="stat-value">0</div>
+                                    <div id="div_auto_1" class="stat-value">0</div>
                                     <div class="stat-label">Appointments</div>
                                 </div>
                                 <div class="stat-item">
@@ -671,7 +671,7 @@
         <span>Changes saved</span>
     </div>
 
-    <script src="patient-dashboard.js"></script>
+    <script src="nav-script.js"></script>
     <script src="settings.js"></script>
     <script>
         // Simple avatar handlers
